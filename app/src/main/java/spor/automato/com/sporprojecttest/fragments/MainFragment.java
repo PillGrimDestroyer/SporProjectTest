@@ -19,8 +19,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.R;
+import spor.automato.com.sporprojecttest.models.Choice;
 import spor.automato.com.sporprojecttest.models.Dispute;
-import spor.automato.com.sporprojecttest.models.Participant;
 
 
 public class MainFragment extends Fragment {
@@ -54,8 +54,17 @@ public class MainFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot child : dataSnapshot.getChildren()){  //
-                    child.getValue(Dispute.class);
-                    Participant participant = child.child("participant").getValue(Participant.class);
+                    Dispute dispute = child.getValue(Dispute.class);
+                    //child.child("choices").getValue(Choice.class);
+                    //Participant participant = child.child("participant").getValue(Participant.class);
+                    /*for (DataSnapshot snapshotChild : child.getChildren()) {
+                        if (snapshotChild.getKey().equalsIgnoreCase("choices")) {
+                            for (DataSnapshot part : snapshotChild.getChildren()) {
+                                Choice choice = part.getValue(Choice.class);
+                                dispute.addNewChoice(choice);
+                            }
+                        }
+                    }*/
                 }
             }
 
@@ -70,14 +79,13 @@ public class MainFragment extends Fragment {
         this.firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Dispute, DisputeCell>(Dispute.class, R.layout.spor_cell_layout, DisputeCell.class, q) {
             @Override
             protected void populateViewHolder(DisputeCell viewHolder, Dispute model, int position) {
-                viewHolder.setSporName(model.subject);
                 viewHolder.setSporDate(model.date);
                 viewHolder.setSporLikeCount(model.likeCount);
                 viewHolder.setSporParticipantCount(model.participantCount);
                 viewHolder.setSporStartTime(model.time);
                 viewHolder.setSporSubject(model.subject);
 
-                viewHolder.setOnCardListener(getActivity());
+                viewHolder.setOnCardListener(getActivity(), model);
             }
         };
 

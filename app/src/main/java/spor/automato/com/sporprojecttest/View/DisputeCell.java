@@ -1,8 +1,8 @@
 package spor.automato.com.sporprojecttest.View;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.content.Intent;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,21 +10,21 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import org.w3c.dom.Text;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import java.util.Date;
-
-import spor.automato.com.sporprojecttest.Activity.DisputeDetailActivity;
 import spor.automato.com.sporprojecttest.R;
+import spor.automato.com.sporprojecttest.fragments.DisputeDetailFragment;
+import spor.automato.com.sporprojecttest.models.Choice;
+import spor.automato.com.sporprojecttest.models.Dispute;
 
 
 public class DisputeCell extends RecyclerView.ViewHolder {
 
     View view;
 
-    TextView sporName;
     TextView sporDate;
     TextView sporParticipantCount;
     TextView sporLikeCount;
@@ -38,21 +38,53 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         this.view = itemView;
     }
 
-    public void setOnCardListener(final Activity activity){
+    public void setOnCardListener(final Activity activity, final Dispute model){
 
         this.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(activity, DisputeDetailActivity.class);
-                activity.startActivity(intent);
+                DisputeDetailFragment ddf = new DisputeDetailFragment();
+                HashMap<String, Choice> choices = model.choices;
+
+                String sporDate = ((TextView)view.findViewById(R.id.spor_date)).getText().toString();
+                int sporParticipantCount = Integer.parseInt(((TextView)view.findViewById(R.id.viewers_count)).getText().toString());
+                int sporLikeCount = Integer.parseInt(((TextView)view.findViewById(R.id.like_count)).getText().toString());
+                String sporSubject = ((TextView)view.findViewById(R.id.spor_subject)).getText().toString();
+                String sporStartTime = ((TextView)view.findViewById(R.id.spor_time)).getText().toString();
+                int money = model.money;
+
+                ddf.setDate(sporDate);
+                ddf.setNumberOfParticipant(sporParticipantCount);
+                ddf.setNumberOfLikes(sporLikeCount);
+                ddf.setSubject(sporSubject);
+                ddf.setTime(sporStartTime);
+                ddf.setMoney(money);
+                ddf.setDispute(model);
+
+                int b = 0;
+                for (Choice c : choices.values()) {
+                    if(b == 0)
+                        ddf.setFerstTeam(c.choice);
+                    else
+                        ddf.setSecondTeam(c.choice);
+                    b++;
+                }
+
+                android.support.v4.app.Fragment newFragment = ddf;
+                AppCompatActivity a = (AppCompatActivity) activity;
+
+                a.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment, newFragment, "fragment")
+                        .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commit();
+
+                //TODO: убрать, но попозже (не, ну а вдруг пригодится?)
+                /*Intent intent = new Intent(activity, DisputeDetailActivity.class);
+                activity.startActivity(intent);*/
             }
         });
 
-    }
-
-    public void setSporName(String name){
-        sporName = (TextView)view.findViewById(R.id.spor_subject);
-        sporName.setText(name);
     }
 
     public void setSporDate(String date){

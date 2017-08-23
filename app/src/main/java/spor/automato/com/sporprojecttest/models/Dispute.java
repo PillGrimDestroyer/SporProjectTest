@@ -1,9 +1,10 @@
 package spor.automato.com.sporprojecttest.models;
 
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @IgnoreExtraProperties
 
@@ -23,11 +24,14 @@ public class Dispute {
     public int participantCount;
     public int viewCount;
 
-    public ArrayList<Participant> participant;
+    public ArrayList<Participant> participant; //TODO: убрать это и всё связанное с ним
+    public HashMap<String, Choice> choices;
+    public HashMap<String, Participant> participants;
 
     public Dispute(){
         this.participant = new ArrayList<Participant>();
     }
+
 
     public void addParticipant(Participant participant){
         this.participant.add(participant);

@@ -1,14 +1,14 @@
 <resources>
-    <string name="app_name">SporProjectTest</string>
+    <string name="app_name">Спор</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
 
-    <string name="menu1">Main</string>
-    <string name="menu2">Category</string>
-    <string name="menu3">Notification</string>
-    <string name="menu4">Cabinet</string>
-    <string name="log_out">Log out</string>
+    <string name="menu1">Домашняя</string>
+    <string name="menu2">Категории</string>
+    <string name="menu3">Уведомления</string>
+    <string name="menu4">Профиль</string>
+    <string name="log_out">Выйти</string>
 
     <string name="hint_email">Электронная почта</string>
     <string name="hint_password_">Пароль</string>
@@ -32,4 +32,11 @@
     <string name="required_birthday">Выберите день рождение</string>
     <string name="mismatch">Пароли не совпадают</string>
     <string name="password_length_min">Пароль должен содержать минимум 6 символов!</string>
+    <string name="rate">Ваша ставка</string>
+    <string name="rateCaption">KZT</string>
+    <string name="choose_first">Сделайте выбор!</string>
+    <string name="money_first">Выберите сумму!</string>
+    <string name="not_enough_money">Недостаточно средств на счёте!</string>
+    <string name="stali_uchastnikom">Вы стали участником, поздравляю!</string>
+    <string name="already_in">Вы уже участвуете</string>
 </resources>

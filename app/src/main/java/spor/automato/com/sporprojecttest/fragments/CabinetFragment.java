@@ -140,7 +140,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener{
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.i(TAG, "Error"+ databaseError.toException());
+
             }
         });
     }

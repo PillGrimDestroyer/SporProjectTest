@@ -11,6 +11,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import spor.automato.com.sporprojecttest.models.Choice;
 import spor.automato.com.sporprojecttest.models.Dispute;
 import spor.automato.com.sporprojecttest.models.Participant;
 
