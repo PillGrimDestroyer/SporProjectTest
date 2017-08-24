@@ -141,10 +141,10 @@ public class LoginActivity extends BaseActivity  implements View.OnClickListener
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
                                 hideProgressDialog();
-                                Toast.makeText(LoginActivity.this, "Verified success.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, "Успешный вход", Toast.LENGTH_SHORT).show();
 
                             }else{
-                                Toast.makeText(LoginActivity.this, "Verified failed.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, "Ошибка при входе", Toast.LENGTH_SHORT).show();
                             }
 
 
@@ -152,7 +152,7 @@ public class LoginActivity extends BaseActivity  implements View.OnClickListener
                         } else {
 
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Не получилось авторизоваться", Toast.LENGTH_SHORT).show();
 
                         }
                         hideProgressDialog();

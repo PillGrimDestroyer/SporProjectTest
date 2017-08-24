@@ -26,6 +26,7 @@ public class Dispute {
 
     public ArrayList<Participant> participant; //TODO: убрать это и всё связанное с ним
     public HashMap<String, Choice> choices;
+    public HashMap<String, Boolean> likes;
     public HashMap<String, Participant> participants;
 
     public Dispute(){

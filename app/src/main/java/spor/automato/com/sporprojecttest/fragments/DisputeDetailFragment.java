@@ -3,7 +3,6 @@ package spor.automato.com.sporprojecttest.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +21,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.util.HashMap;
+
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.models.Dispute;
 import spor.automato.com.sporprojecttest.models.Participant;
@@ -38,21 +39,23 @@ public class DisputeDetailFragment extends Fragment {
     private String date;
     private String subject;
     private String time;
-    private int money;
+    private String viewCount;
+    private String ferstTeam;
+    private String secondTeam;
+    private int totalDisputeMoney;
     private int numberOfParticipant;
     private int numberOfLikes;
+    private boolean isLikedByCurentUser;
     private Dispute dispute;
 
-    private String ferstTeam;
     private User client;
-    private String secondTeam;
+    private FirebaseDatabase myDatabase;
 
     private RadioButton fTeam;
     private RadioButton sTeam;
     private Button submit;
     private TextView rate;
     private String selectedChoice;
-    private FirebaseDatabase myDatabase;
 
     public String getFerstTeam() {
         return ferstTeam;
@@ -60,6 +63,22 @@ public class DisputeDetailFragment extends Fragment {
 
     public void setFerstTeam(String ferstTeam) {
         this.ferstTeam = ferstTeam;
+    }
+
+    public String getViewCount() {
+        return viewCount;
+    }
+
+    public boolean isLikedByCurentUser() {
+        return isLikedByCurentUser;
+    }
+
+    public void setLikedByCurentUser(boolean likedByCurentUser) {
+        isLikedByCurentUser = likedByCurentUser;
+    }
+
+    public void setViewCount(String viewCount) {
+        this.viewCount = viewCount;
     }
 
     public String getSecondTeam() {
@@ -113,28 +132,36 @@ public class DisputeDetailFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootview = inflater.inflate(R.layout.fragment_dispute_detail,container,false);
+        rootview = inflater.inflate(R.layout.fragment_dispute_detail, container, false);
+        if(client == null) {
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+            String userID = mAuth.getCurrentUser().getUid();
+            DatabaseReference reference = myDatabase.getReference();
+            reference.child("users").child(userID).orderByKey().addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    client = dataSnapshot.getValue(User.class);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
         setSporDate(getDate());
         setSporParticipantCount(getNumberOfParticipant());
         setSporLikeCount(getNumberOfLikes());
         setSporSubject(getSubject());
         setSporStartTime(getTime());
+        setViewsCount(getViewCount());
+        setLikeImage(isLikedByCurentUser());
 
-        myDatabase = FirebaseDatabase.getInstance();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String userID = mAuth.getCurrentUser().getUid();
-        DatabaseReference reference = myDatabase.getReference();
-        reference.child("users").child(userID).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-            }
+        dispute.viewCount += 1;
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        DatabaseReference viewCount = myDatabase.getReference("spor/" + dispute.id + "/viewCount");
+        viewCount.setValue(dispute.viewCount);
 
         submit = (Button) rootview.findViewById(R.id.submit);
         fTeam = (RadioButton) rootview.findViewById(R.id.ferstTeam);
@@ -147,7 +174,7 @@ public class DisputeDetailFragment extends Fragment {
         fTeam.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(b)
+                if (b)
                     selectedChoice = getFerstTeam();
             }
         });
@@ -155,20 +182,63 @@ public class DisputeDetailFragment extends Fragment {
         sTeam.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(b)
+                if (b)
                     selectedChoice = getSecondTeam();
+            }
+        });
+
+        rootview.findViewById(R.id.imageLike).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TextView sporLikeCount = (TextView) rootview.findViewById(R.id.like_count);
+                int likeCount;
+                if(!isLikedByCurentUser()) {
+                    likeCount = Integer.parseInt(sporLikeCount.getText().toString());
+                    likeCount++;
+
+                    if(dispute.likes != null){
+                        if(!dispute.likes.containsKey(client.id)) {
+                            dispute.likes.put(client.id, true);
+                        }
+                    }else {
+                        HashMap<String, Boolean> likes = new HashMap<>();
+                        likes.put(client.id, true);
+                        dispute.likes = likes;
+                    }
+                }else {
+                    likeCount = Integer.parseInt(sporLikeCount.getText().toString());
+                    likeCount--;
+
+                    dispute.likes.remove(client.id);
+                }
+
+                DatabaseReference sporLikeCountInDB = myDatabase.getReference("spor/" + dispute.id + "/likeCount");
+                sporLikeCountInDB.setValue(likeCount);
+
+                DatabaseReference sporLikes = myDatabase.getReference("spor/" + dispute.id + "/likes");
+                sporLikes.setValue(dispute.likes);
+
+                ImageView like = (ImageView)view.findViewById(R.id.imageLike);
+                if(!isLikedByCurentUser()) {
+                    like.setImageResource(R.drawable.like);
+                    setLikedByCurentUser(true);
+                }else {
+                    like.setImageResource(R.drawable.like_dark);
+                    setLikedByCurentUser(false);
+                }
+                sporLikeCount.setText(Integer.toString(likeCount));
             }
         });
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(selectedChoice != null) {
+                if (selectedChoice != null) {
                     if (rate.getText() != null && !rate.getText().toString().equals("")) {
                         int rateValue = Integer.parseInt(rate.getText().toString());
-                        if ( rateValue <= (int) client.money) {
+                        if (rateValue <= (int) client.money) {
                             DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
-                            if(refParticipant.child(client.id) == null) {
+                            if (refParticipant.child(client.id) == null) {
                                 Participant participant = new Participant();
                                 dispute.money += rateValue;
                                 dispute.participantCount += 1;
@@ -176,7 +246,7 @@ public class DisputeDetailFragment extends Fragment {
                                 DatabaseReference participantCount = myDatabase.getReference("spor/" + dispute.id + "/participantCount");
                                 participantCount.setValue(dispute.participantCount);
 
-                                DatabaseReference sporMoney = myDatabase.getReference("spor/" + dispute.id + "/money");
+                                DatabaseReference sporMoney = myDatabase.getReference("spor/" + dispute.id + "/totalDisputeMoney");
                                 sporMoney.setValue(dispute.money);
 
                                 participant.choice = selectedChoice;
@@ -184,20 +254,20 @@ public class DisputeDetailFragment extends Fragment {
                                 participant.spor_id = dispute.id;
                                 participant.user_id = client.id;
                                 participant.winnings = 0;
-                                
+
                                 refParticipant.child(client.id).setValue(participant);
 
                                 Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_SHORT).show();
-                            }else {
+                            } else {
                                 Toast.makeText(rootview.getContext(), R.string.already_in, Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Toast.makeText(rootview.getContext(), R.string.not_enough_money, Toast.LENGTH_SHORT).show();
                         }
-                    }else {
+                    } else {
                         Toast.makeText(rootview.getContext(), R.string.money_first, Toast.LENGTH_SHORT).show();
                     }
-                }else {
+                } else {
                     Toast.makeText(rootview.getContext(), R.string.choose_first, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -218,14 +288,27 @@ public class DisputeDetailFragment extends Fragment {
         sporDate.setText(date);
     }
 
+    private void setViewsCount(String viewsCount) {
+        TextView viewCount = (TextView) rootview.findViewById(R.id.view_count);
+        viewCount.setText(viewsCount);
+    }
+
     private void setSporParticipantCount(int numberOfParticipant){
         TextView sporParticipantCount = (TextView) rootview.findViewById(R.id.viewers_count);
         sporParticipantCount.setText(Integer.toString(numberOfParticipant));
+        if (numberOfParticipant > 0) {
+            ImageView participant = (ImageView)rootview.findViewById(R.id.imageParticCount);
+            participant.setImageResource(R.drawable.people_black);
+        }
     }
 
     private void setSporLikeCount(int numberOfLikes){
         TextView sporLikeCount = (TextView) rootview.findViewById(R.id.like_count);
         sporLikeCount.setText(Integer.toString(numberOfLikes));
+        if(numberOfLikes > 0) {
+            ImageView like = (ImageView)rootview.findViewById(R.id.imageLike);
+            like.setImageResource(R.drawable.like);
+        }
     }
 
     private void setSporSubject(String subject){
@@ -254,11 +337,29 @@ public class DisputeDetailFragment extends Fragment {
         super.onPause();
     }
 
-    public void setMoney(int money) {
-        this.money = money;
+    public void setTotalDisputeMoney(int totalDisputeMoney) {
+        this.totalDisputeMoney = totalDisputeMoney;
     }
 
     public void setDispute(Dispute dispute) {
         this.dispute = dispute;
+    }
+
+    public void setClient(User client) {
+        this.client = client;
+    }
+
+
+    public void setMyDatabase(FirebaseDatabase myDatabase) {
+        this.myDatabase = myDatabase;
+    }
+
+    public void setLikeImage(boolean likeImage) {
+        ImageView like = (ImageView)rootview.findViewById(R.id.imageLike);
+        if (likeImage){
+            like.setImageResource(R.drawable.like);
+        }else {
+            like.setImageResource(R.drawable.like_dark);
+        }
     }
 }
