@@ -3,22 +3,130 @@ package spor.automato.com.sporprojecttest.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import spor.automato.com.sporprojecttest.Adapter.CategoryAdapter;
 import spor.automato.com.sporprojecttest.R;
+import spor.automato.com.sporprojecttest.View.DisputeCell;
+import spor.automato.com.sporprojecttest.models.Dispute;
+import spor.automato.com.sporprojecttest.models.User;
 
 
 public class CategoryFragment extends Fragment {
 
+    private FirebaseDatabase database;
+    private DatabaseReference reference;
+    private HashMap<String, Integer> hashMapCategory;
+
+    RecyclerView sporList;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootview = inflater.inflate(R.layout.fragment_category,container,false);
+        final View rootview = inflater.inflate(R.layout.fragment_category,container,false);
+
+        this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
+        sporList.setHasFixedSize(true);
+
+        LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
+        sporList.setLayoutManager(llm);
+
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference("spor");
+        hashMapCategory = new HashMap<>();
+
+        ValueEventListener postListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String[] array = getResources().getStringArray(R.array.category_spor);
+                int length = array.length;
+
+                //заполняем всеми видами спорта
+                for (int i = 0; i < length; i++) {
+                    Integer catCounter = hashMapCategory.get(array[i]);
+                    if (catCounter == null)
+                        hashMapCategory.put(array[i], 0);
+                }
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    for (DataSnapshot part : ds.getChildren()) {
+                        if (part.getKey().equals("category")) {
+                            String category = part.getValue().toString();
+
+                            //считаем сколько споров в каждой категории
+                            Integer catCounter = hashMapCategory.get(category);
+                            hashMapCategory.put(category, catCounter == null ? 1 : catCounter + 1);
+
+                        }
+
+                    }
+                }
+                //сортировка
+                Map<String, Integer> sortedMapAsc = sortByComparator(hashMapCategory, false);
+
+                //ставим адаптер на RecyclerView
+                CategoryAdapter adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext());
+                sporList.setAdapter(adapter);
+
+                LinearLayoutManager layoutManager = new LinearLayoutManager(rootview.getContext());
+                sporList.setLayoutManager(layoutManager);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+        reference.addValueEventListener(postListener);
 
         return rootview;
+    }
+
+    private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order)
+    {
+        List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
+
+        // Сортируем в зависимости от значения
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>()
+        {
+            public int compare(Map.Entry<String, Integer> o1,
+                               Map.Entry<String, Integer> o2)
+            {
+                if (order) {
+                    return o1.getValue().compareTo(o2.getValue());
+                }
+                else {
+                    return o2.getValue().compareTo(o1.getValue());
+                }
+            }
+        });
+
+        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+        for (Map.Entry<String, Integer> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return sortedMap;
     }
 
     @Override

@@ -29,7 +29,7 @@ public class MainFragment extends Fragment {
 
     FirebaseDatabase database;
     DatabaseReference reference;
-    ValueEventListener spor;
+
     private User client;
     private String userID;
 
@@ -50,6 +50,7 @@ public class MainFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         reference = database.getReference("spor");
 
+        //TODO: это надо удалить (но только если это никому не нужно)
         /*reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

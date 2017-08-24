@@ -4,9 +4,11 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Category Fragment" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/spor_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </FrameLayout>
