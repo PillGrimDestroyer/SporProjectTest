@@ -11,11 +11,10 @@
     android:layout_height="200dp">
 
     <FrameLayout
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/category_shape_bg_white_rounded_rect"
-        >
+        android:background="@drawable/category_shape_bg_white_rounded_rect">
+
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/cat_image"
             android:layout_width="match_parent"

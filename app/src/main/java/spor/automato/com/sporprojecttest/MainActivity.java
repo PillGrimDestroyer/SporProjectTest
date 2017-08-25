@@ -24,6 +24,8 @@ import spor.automato.com.sporprojecttest.fragments.NotificationFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static FragmentManager m;
+
     private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mAuth = FirebaseAuth.getInstance();
+
+        m = getSupportFragmentManager();
+
         changeFragment(0);
     }
 
@@ -115,5 +120,9 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.main_fragment, newFragment, "fragment")
                 .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
+    }
+
+    public static FragmentManager getFragmetManeger(){
+        return m;
     }
 }

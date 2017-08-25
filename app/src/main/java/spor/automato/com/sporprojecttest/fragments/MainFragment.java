@@ -70,18 +70,6 @@ public class MainFragment extends Fragment {
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();
-        reference = database.getReference();
-        reference.child("users").child(userID).orderByKey().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
         this.firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Dispute, DisputeCell>(Dispute.class, R.layout.spor_cell_layout, DisputeCell.class, q) {
             @Override
@@ -98,7 +86,7 @@ public class MainFragment extends Fragment {
                     isLiked = model.likes.containsKey(userID);
                 }
                 viewHolder.setLiked(isLiked);
-                viewHolder.setOnCardListener(getActivity(), model, client, database);
+                viewHolder.setOnCardListener(getActivity(), model, database);
             }
         };
 

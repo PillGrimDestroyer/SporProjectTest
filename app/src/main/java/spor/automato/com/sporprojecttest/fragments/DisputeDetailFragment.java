@@ -133,22 +133,20 @@ public class DisputeDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_dispute_detail, container, false);
-        if(client == null) {
-            FirebaseAuth mAuth = FirebaseAuth.getInstance();
-            String userID = mAuth.getCurrentUser().getUid();
-            DatabaseReference reference = myDatabase.getReference();
-            reference.child("users").child(userID).orderByKey().addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    client = dataSnapshot.getValue(User.class);
-                }
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userID = mAuth.getCurrentUser().getUid();
+        DatabaseReference reference = myDatabase.getReference();
+        reference.child("users").child(userID).orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                client = dataSnapshot.getValue(User.class);
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
-        }
+            }
+        });
 
         setSporDate(getDate());
         setSporParticipantCount(getNumberOfParticipant());

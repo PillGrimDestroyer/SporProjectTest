@@ -39,13 +39,28 @@ public class DisputeCell extends RecyclerView.ViewHolder {
     TextView viewCount;
 
     private boolean isLiked;
+    private User client;
 
     public DisputeCell(View itemView) {
         super(itemView);
         this.view = itemView;
     }
 
-    public void setOnCardListener(final Activity activity, final Dispute model, final User client, final FirebaseDatabase myDatabase){
+    public void setOnCardListener(final Activity activity, final Dispute model, final FirebaseDatabase myDatabase){
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userID = mAuth.getCurrentUser().getUid();
+        DatabaseReference reference = myDatabase.getReference();
+        reference.child("users").child(userID).orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                client = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         this.view.findViewById(R.id.imageLike).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

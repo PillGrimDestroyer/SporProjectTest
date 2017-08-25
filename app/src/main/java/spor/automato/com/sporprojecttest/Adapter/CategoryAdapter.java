@@ -1,8 +1,10 @@
 package spor.automato.com.sporprojecttest.Adapter;
 
 import android.content.Context;
-import android.content.Intent;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,10 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Map;
 
+import spor.automato.com.sporprojecttest.MainActivity;
 import spor.automato.com.sporprojecttest.R;
+import spor.automato.com.sporprojecttest.fragments.CategoryDetailFragment;
 
 /**
  * Created by Apofis on 24.08.2017.
@@ -22,6 +27,8 @@ import spor.automato.com.sporprojecttest.R;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
     Map<String, Integer> hashMapCategory;
     Context context;
+    FragmentManager manager;
+    View rootView;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
@@ -33,9 +40,12 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         }
     }
 
-    public CategoryAdapter(Map<String, Integer> sortedMapAsc, Context context) {
+    public CategoryAdapter(Map<String, Integer> sortedMapAsc, Context context, FragmentManager manager, View rootView) {
         hashMapCategory = sortedMapAsc;
         this.context = context;
+        this.manager = manager;
+        this.rootView = rootView;
+
     }
 
     // Create new views (invoked by the layout manager)
@@ -44,7 +54,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                                                          int viewType) {
         // create a new view
         CardView cv = (CardView) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.design_category_row, parent, false);
+                .inflate(R.layout.design_category_cell, parent, false);
 
         return new ViewHolder(cv);
     }
@@ -86,6 +96,15 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             @Override
             public void onClick(View v){
                 //TODO: Событие клика на категорию
+                CategoryDetailFragment CatDF = new CategoryDetailFragment();
+                String category = ((TextView)v.findViewById(R.id.cat_name)).getText().toString();
+                CatDF.setCategory(category);
+                android.support.v4.app.Fragment newFragment = CatDF;
+
+                manager.beginTransaction()
+                        .replace(R.id.main_fragment, newFragment, "fragment")
+                        .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commit();
             }
         });
     }

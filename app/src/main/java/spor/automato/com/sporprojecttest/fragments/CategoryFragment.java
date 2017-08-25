@@ -3,6 +3,7 @@ package spor.automato.com.sporprojecttest.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import spor.automato.com.sporprojecttest.Adapter.CategoryAdapter;
+import spor.automato.com.sporprojecttest.MainActivity;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.models.Dispute;
@@ -55,6 +57,8 @@ public class CategoryFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         reference = database.getReference("spor");
         hashMapCategory = new HashMap<>();
+
+        final FragmentManager manager = MainActivity.getFragmetManeger();
 
         ValueEventListener postListener = new ValueEventListener() {
             @Override
@@ -86,7 +90,7 @@ public class CategoryFragment extends Fragment {
                 Map<String, Integer> sortedMapAsc = sortByComparator(hashMapCategory, false);
 
                 //ставим адаптер на RecyclerView
-                CategoryAdapter adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext());
+                CategoryAdapter adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext(), manager, rootview);
                 sporList.setAdapter(adapter);
 
                 LinearLayoutManager layoutManager = new LinearLayoutManager(rootview.getContext());
