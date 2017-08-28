@@ -5,16 +5,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.models.Dispute;
@@ -23,15 +21,15 @@ import spor.automato.com.sporprojecttest.models.Dispute;
  * Created by HAOR on 25.08.2017.
  */
 
-public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
+public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAdapter.ViewHolder> {
 
-    private ArrayList<String> mData = new ArrayList<>();
+    private HashMap<Integer, Dispute> mData = new HashMap<>();
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private String category;
 
     // data is passed into the constructor
-    public GridAdapter(final Context context, final String category, ArrayList<String> data) {
+    public CategoryDetailAdapter(final Context context, final String category, HashMap<Integer, Dispute> data) {
         this.mInflater = LayoutInflater.from(context);
         this.category = category;
         this.mData = data;
@@ -48,7 +46,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     // binds the data to the textview in each cell
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String animal = mData.get(position);
+        String animal = mData.get(position).subcategory;
         holder.myTextView.setText(animal);
     }
 
@@ -61,12 +59,35 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView myTextView;
+        TextView myTextView;
+        View itemView;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            this.itemView = itemView;
             myTextView = (TextView) itemView.findViewById(R.id.info_text);
             itemView.setOnClickListener(this);
+            setImage();
+        }
+
+        public void setImage(){
+            LinearLayout sporImage = (LinearLayout) itemView.findViewById(R.id.backgroundImage);
+
+            int drawable;
+            if(category.equals("Футбол"))
+                drawable = R.drawable.football_subcategory;
+            else if(category.equals("Баскетбол"))
+                drawable = R.drawable.basket_subcategory;
+            else if(category.equals("Бокс"))
+                drawable = R.drawable.box_subcategory;
+            else if(category.equals("Теннис"))
+                drawable = R.drawable.tennis_subcategory;
+            else if(category.equals("Борьба"))
+                drawable = R.drawable.cat_wrestling;
+            else
+                drawable = R.drawable.cat_volleyball;
+
+            sporImage.setBackgroundResource(drawable);
         }
 
         @Override
@@ -76,7 +97,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     }
 
     // convenience method for getting data at click position
-    public String getItem(int id) {
+    public Dispute getItem(int id) {
         return mData.get(id);
     }
 

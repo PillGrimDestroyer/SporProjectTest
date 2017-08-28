@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import spor.automato.com.sporprojecttest.R;
@@ -155,6 +159,7 @@ public class DisputeDetailFragment extends Fragment {
         setSporStartTime(getTime());
         setViewsCount(getViewCount());
         setLikeImage(isLikedByCurentUser());
+        setImage();
 
         dispute.viewCount += 1;
 
@@ -165,9 +170,36 @@ public class DisputeDetailFragment extends Fragment {
         fTeam = (RadioButton) rootview.findViewById(R.id.ferstTeam);
         sTeam = (RadioButton) rootview.findViewById(R.id.secondTeam);
         rate = (TextView) rootview.findViewById(R.id.rate);
+        ProgressBar progressBar = (ProgressBar) rootview.findViewById(R.id.progress_bar);
 
         fTeam.setText(getFerstTeam());
         sTeam.setText(getSecondTeam());
+
+        final String s = dispute.date + " " + dispute.time;
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        try {
+            Date date = format.parse(s);
+            long curUnixTime = System.currentTimeMillis();
+            long progress = date.getTime() - curUnixTime;
+            int progressInt = 0;
+            if (progress < 0){
+                TextView progressText = (TextView) rootview.findViewById(R.id.progress_text);
+                progressBar.setProgress(100);
+                progressBar.setVisibility(View.GONE);
+                progressText.setVisibility(View.VISIBLE);
+                if (dispute.result.equals(""))
+                    progressText.setText("Live");
+                else
+                    progressText.setText(dispute.result);
+            }
+            else {
+                progressInt = Integer.parseInt(Long.toString(progress / 100000000));
+                progressBar.setProgress(100 - progressInt);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
 
         fTeam.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -235,10 +267,13 @@ public class DisputeDetailFragment extends Fragment {
                     if (rate.getText() != null && !rate.getText().toString().equals("")) {
                         int rateValue = Integer.parseInt(rate.getText().toString());
                         if (rateValue <= (int) client.money) {
-                            DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
-                            if (refParticipant.child(client.id) == null) {
+                            if(dispute.participants == null){
+                                dispute.participants = new HashMap<>();
+                            }
+                            if (!dispute.participants.containsKey(client.id)) {
                                 Participant participant = new Participant();
                                 dispute.money += rateValue;
+                                client.money -= rateValue;
                                 dispute.participantCount += 1;
 
                                 DatabaseReference participantCount = myDatabase.getReference("spor/" + dispute.id + "/participantCount");
@@ -247,12 +282,16 @@ public class DisputeDetailFragment extends Fragment {
                                 DatabaseReference sporMoney = myDatabase.getReference("spor/" + dispute.id + "/totalDisputeMoney");
                                 sporMoney.setValue(dispute.money);
 
+                                DatabaseReference clientMoney = myDatabase.getReference("users/" + client.id + "/money");
+                                clientMoney.setValue(client.money);
+
                                 participant.choice = selectedChoice;
                                 participant.money = rateValue;
                                 participant.spor_id = dispute.id;
                                 participant.user_id = client.id;
                                 participant.winnings = 0;
 
+                                DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
                                 refParticipant.child(client.id).setValue(participant);
 
                                 Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_SHORT).show();
@@ -320,9 +359,23 @@ public class DisputeDetailFragment extends Fragment {
     }
 
     private void setImage(){
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseStorage.getInstance().getReference().child("Photos").child(userID);
         ImageView sporImage = (ImageView)rootview.findViewById(R.id.spor_Image);
+
+        int drawable;
+        if(dispute.category.equals("Футбол"))
+            drawable = R.drawable.cat_foot;
+        else if(dispute.category.equals("Баскетбол"))
+            drawable = R.drawable.cat_bask;
+        else if(dispute.category.equals("Бокс"))
+            drawable = R.drawable.cat_boxing;
+        else if(dispute.category.equals("Теннис"))
+            drawable = R.drawable.cat_ten;
+        else if(dispute.category.equals("Борьба"))
+            drawable = R.drawable.cat_wrestling;
+        else
+            drawable = R.drawable.cat_volleyball;
+
+        sporImage.setImageResource(drawable);
     }
 
     @Override

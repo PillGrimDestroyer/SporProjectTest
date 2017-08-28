@@ -18,28 +18,75 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import spor.automato.com.sporprojecttest.Adapter.SortedDisputeAdapter;
+import spor.automato.com.sporprojecttest.MainActivity;
+import spor.automato.com.sporprojecttest.MyTimerTask;
 import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.R;
-import spor.automato.com.sporprojecttest.models.Choice;
 import spor.automato.com.sporprojecttest.models.Dispute;
 import spor.automato.com.sporprojecttest.models.User;
 
 
 public class MainFragment extends Fragment {
 
-    FirebaseDatabase database;
-    DatabaseReference reference;
+    private FirebaseDatabase database;
+    private DatabaseReference reference;
+    private View rootView;
 
     private User client;
     private String userID;
+    private boolean isSorted = false;
+    private String category;
+    private String subCategory;
 
-    FirebaseRecyclerAdapter<Dispute, DisputeCell> firebaseRecyclerAdapter;
-    RecyclerView sporList;
+    private FirebaseRecyclerAdapter<Dispute, DisputeCell> firebaseRecyclerAdapter;
+    private SortedDisputeAdapter adapter;
+    private ArrayList<Dispute> mData = new ArrayList<>();
+    private RecyclerView sporList;
+    private Timer myTimer;
+    private MyTimerTask task;
+
+    public boolean isSorted() {
+        return isSorted;
+    }
+
+    public void setSorted(boolean sorted) {
+        isSorted = sorted;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setSubCategory(String subCategory) {
+        this.subCategory = subCategory;
+    }
 
     @Nullable
     @Override
      public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootview = inflater.inflate(R.layout.fragment_main,container,false);
+        View rootView;
+        if (!isSorted())
+            rootView = notSortedData(inflater,container,savedInstanceState);
+        else {
+            if (subCategory != null)
+                rootView = sortedBySubCategoryData(inflater,container,savedInstanceState);
+            else
+                rootView = sortedByCategoryData(inflater,container,savedInstanceState);
+        }
+        this.rootView = rootView;
+        return rootView;
+    }
+
+    public View sortedByCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        final View rootview = inflater.inflate(R.layout.fragment_main,container,false);
 
         this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
@@ -50,21 +97,80 @@ public class MainFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         reference = database.getReference("spor");
 
-        //TODO: это надо удалить (но только если это никому не нужно)
-        /*reference.addValueEventListener(new ValueEventListener() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        userID = mAuth.getCurrentUser().getUid();
+
+        reference.orderByKey().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot child : dataSnapshot.getChildren()){
-                    Dispute dispute = child.getValue(Dispute.class);
+                for (DataSnapshot ds:dataSnapshot.getChildren()) {
+                    Dispute d = ds.getValue(Dispute.class);
+                    if (category.equals(d.category)){
+                        mData.add(d);
+                    }
                 }
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database);
+                sporList.setAdapter(adapter);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });*/
+        });
+
+        return rootview;
+    }
+
+    public View sortedBySubCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        final View rootview = inflater.inflate(R.layout.fragment_main,container,false);
+
+        this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
+        sporList.setHasFixedSize(true);
+
+        LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
+        sporList.setLayoutManager(llm);
+
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference("spor");
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        userID = mAuth.getCurrentUser().getUid();
+
+        reference.orderByKey().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mData.clear();
+                for (DataSnapshot ds:dataSnapshot.getChildren()) {
+                    Dispute d = ds.getValue(Dispute.class);
+                    if (category.equals(d.category) && subCategory.equals(d.subcategory)){
+                        mData.add(d);
+                    }
+                }
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database);
+                sporList.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return rootview;
+    }
+
+    public View notSortedData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        View rootview = inflater.inflate(R.layout.fragment_main,container,false);
+
+        this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
+        sporList.setHasFixedSize(true);
+
+        LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
+        sporList.setLayoutManager(llm);
+
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference("spor");
 
         Query q = reference.orderByChild("category");
 
@@ -80,13 +186,30 @@ public class MainFragment extends Fragment {
                 viewHolder.setSporStartTime(model.time);
                 viewHolder.setSporSubject(model.subject);
                 viewHolder.setViewCount(model.viewCount);
+                viewHolder.setCategory(model.category);
+                viewHolder.setSubCategory(model.subcategory);
+                viewHolder.setImage();
 
                 boolean isLiked = false;
                 if(model.likes != null) {
                     isLiked = model.likes.containsKey(userID);
                 }
                 viewHolder.setLiked(isLiked);
-                viewHolder.setOnCardListener(getActivity(), model, database);
+                viewHolder.setOnCardListener(model, database);
+                if(myTimer == null){
+                    myTimer = new Timer();
+                    task = new MyTimerTask();
+
+                    task.disputes = new ArrayList<>();
+                    task.disputeCells = new ArrayList<>();
+
+                    task.disputeCells.add(viewHolder);
+                    task.disputes.add(model);
+                    myTimer.schedule(task, 0, task.time);
+                }else {
+                    task.disputes.add(model);
+                    task.disputeCells.add(viewHolder);
+                }
             }
         };
 
@@ -97,8 +220,6 @@ public class MainFragment extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-
-        // write logic here b'z it is called when fragment is visible to user
     }
 
     @Override

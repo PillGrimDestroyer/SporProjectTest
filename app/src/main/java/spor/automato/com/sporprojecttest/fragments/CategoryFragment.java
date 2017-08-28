@@ -63,7 +63,7 @@ public class CategoryFragment extends Fragment {
         ValueEventListener postListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String[] array = getResources().getStringArray(R.array.category_spor);
+                String[] array = rootview.getResources().getStringArray(R.array.category);
                 int length = array.length;
 
                 //заполняем всеми видами спорта

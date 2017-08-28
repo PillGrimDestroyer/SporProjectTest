@@ -5,6 +5,13 @@
     <string name="title_notifications">Notifications</string>
 
     <string-array name="category_spor">
+        <item>Все споры</item>
+        <item>Активные споры</item>
+        <item>Ожидаемые споры</item>
+        <item>Завершённые споры</item>
+    </string-array>
+
+    <string-array name="category">
         <item>Футбол</item>
         <item>Баскетбол</item>
         <item>Бокс</item>
@@ -48,4 +55,5 @@
     <string name="not_enough_money">Недостаточно средств на счёте!</string>
     <string name="stali_uchastnikom">Вы стали участником, поздравляю!</string>
     <string name="already_in">Вы уже участвуете</string>
+    <string name="category">Категории</string>
 </resources>

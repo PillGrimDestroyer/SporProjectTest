@@ -12,11 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.fragments.CabinetFragment;
 import spor.automato.com.sporprojecttest.fragments.CategoryFragment;
 import spor.automato.com.sporprojecttest.fragments.MainFragment;
@@ -25,8 +29,9 @@ import spor.automato.com.sporprojecttest.fragments.NotificationFragment;
 public class MainActivity extends AppCompatActivity {
 
     private static FragmentManager m;
-
     private FirebaseAuth mAuth;
+    private static MainActivity myActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         m = getSupportFragmentManager();
 
         changeFragment(0);
+        myActivity = this;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -47,22 +53,26 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Spinner spinner = (Spinner) findViewById(R.id.spinner);
             switch (item.getItemId()) {
                 case R.id.main:
                     changeFragment(0);
-                    Log.i("info","main");
+                    spinner.setVisibility(View.VISIBLE);
                     return true;
 
                 case R.id.category:
                     changeFragment(1);
+                    spinner.setVisibility(View.GONE);
                     return true;
 
                 case R.id.notification:
                     changeFragment(2);
+                    spinner.setVisibility(View.GONE);
                     return true;
 
                 case R.id.cabinet:
                     changeFragment(3);
+                    spinner.setVisibility(View.GONE);
                     return true;
             }
             return false;
@@ -124,5 +134,9 @@ public class MainActivity extends AppCompatActivity {
 
     public static FragmentManager getFragmetManeger(){
         return m;
+    }
+
+    public static MainActivity getActivity(){
+        return myActivity;
     }
 }

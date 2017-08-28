@@ -25,6 +25,7 @@
             app:riv_corner_radius_top_right="@dimen/card_corner_radius" />
 
         <LinearLayout
+            android:id="@+id/backgroundImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"

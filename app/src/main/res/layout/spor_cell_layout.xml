@@ -180,14 +180,19 @@
                 android:layout_height="11dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="5dp"
-
-                />
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/progress_text"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                android:visibility="gone"
+                android:text="Live"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="24sp" />
 
         </LinearLayout>
 
