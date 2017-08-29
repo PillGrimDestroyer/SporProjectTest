@@ -1,4 +1,4 @@
-package spor.automato.com.sporprojecttest;
+package spor.automato.com.sporprojecttest.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,14 +13,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import spor.automato.com.sporprojecttest.View.DisputeCell;
+import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.fragments.CabinetFragment;
 import spor.automato.com.sporprojecttest.fragments.CategoryFragment;
 import spor.automato.com.sporprojecttest.fragments.MainFragment;
@@ -39,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        findViewById(R.id.my_toolbar).setVisibility(View.GONE);
 
         mAuth = FirebaseAuth.getInstance();
 

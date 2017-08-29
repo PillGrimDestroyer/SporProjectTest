@@ -56,4 +56,13 @@
     <string name="stali_uchastnikom">Вы стали участником, поздравляю!</string>
     <string name="already_in">Вы уже участвуете</string>
     <string name="category">Категории</string>
+    <string name="Live">В прямом эфире</string>
+    <string name="end">Окончено. Выиграла команда:</string>
+    <string name="allDisputes">Все споры</string>
+    <string name="activDisputes">Активные споры</string>
+    <string name="waitDisputes">Ожидаемые споры</string>
+    <string name="finishedDisputes">Завершенные споры</string>
+    <string name="myMoney">Деньги</string>
+    <string name="age">Возраст</string>
+    <string name="myName">Имя</string>
 </resources>

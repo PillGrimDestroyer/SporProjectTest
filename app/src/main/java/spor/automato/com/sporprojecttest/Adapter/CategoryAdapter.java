@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,11 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Map;
 
-import spor.automato.com.sporprojecttest.MainActivity;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.fragments.CategoryDetailFragment;
 
@@ -77,18 +74,31 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         int drawable;
         final String text = catName.getText().toString();
 
-        if(text.equals("Футбол"))
-            drawable = R.drawable.cat_foot;
-        else if(text.equals("Баскетбол"))
-            drawable = R.drawable.cat_bask;
-        else if(text.equals("Бокс"))
-            drawable = R.drawable.cat_boxing;
-        else if(text.equals("Теннис"))
-            drawable = R.drawable.cat_ten;
-        else if(text.equals("Борьба"))
-            drawable = R.drawable.cat_wrestling;
-        else
-            drawable = R.drawable.cat_volleyball;
+        switch (text){
+            case "Футбол":
+                drawable = R.drawable.cat_foot;
+                break;
+
+            case "Баскетбол":
+                drawable = R.drawable.cat_bask;
+                break;
+
+            case "Бокс":
+                drawable = R.drawable.cat_boxing;
+                break;
+
+            case "Теннис":
+                drawable = R.drawable.cat_ten;
+                break;
+
+            case "Борьба":
+                drawable = R.drawable.cat_wrestling;
+                break;
+
+            default:
+                drawable = R.drawable.cat_volleyball;
+                break;
+        }
 
         catImage.setImageDrawable(ContextCompat.getDrawable(cv.getContext(),drawable));
 

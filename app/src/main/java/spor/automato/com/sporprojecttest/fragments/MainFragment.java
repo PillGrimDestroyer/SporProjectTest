@@ -18,18 +18,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import spor.automato.com.sporprojecttest.Adapter.SortedDisputeAdapter;
-import spor.automato.com.sporprojecttest.MainActivity;
 import spor.automato.com.sporprojecttest.MyTimerTask;
-import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.R;
+import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.models.Dispute;
 import spor.automato.com.sporprojecttest.models.User;
 
@@ -71,24 +66,24 @@ public class MainFragment extends Fragment {
 
     @Nullable
     @Override
-     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView;
         if (!isSorted())
-            rootView = notSortedData(inflater,container,savedInstanceState);
+            rootView = notSortedData(inflater, container, savedInstanceState);
         else {
             if (subCategory != null)
-                rootView = sortedBySubCategoryData(inflater,container,savedInstanceState);
+                rootView = sortedBySubCategoryData(inflater, container, savedInstanceState);
             else
-                rootView = sortedByCategoryData(inflater,container,savedInstanceState);
+                rootView = sortedByCategoryData(inflater, container, savedInstanceState);
         }
         this.rootView = rootView;
         return rootView;
     }
 
-    public View sortedByCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        final View rootview = inflater.inflate(R.layout.fragment_main,container,false);
+    public View sortedByCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View rootview = inflater.inflate(R.layout.fragment_main, container, false);
 
-        this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
+        this.sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
@@ -100,12 +95,12 @@ public class MainFragment extends Fragment {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();
 
-        reference.orderByKey().addValueEventListener(new ValueEventListener() {
+        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds:dataSnapshot.getChildren()) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Dispute d = ds.getValue(Dispute.class);
-                    if (category.equals(d.category)){
+                    if (category.equals(d.category)) {
                         mData.add(d);
                     }
                 }
@@ -122,10 +117,10 @@ public class MainFragment extends Fragment {
         return rootview;
     }
 
-    public View sortedBySubCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        final View rootview = inflater.inflate(R.layout.fragment_main,container,false);
+    public View sortedBySubCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View rootview = inflater.inflate(R.layout.fragment_main, container, false);
 
-        this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
+        this.sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
@@ -137,13 +132,13 @@ public class MainFragment extends Fragment {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();
 
-        reference.orderByKey().addValueEventListener(new ValueEventListener() {
+        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mData.clear();
-                for (DataSnapshot ds:dataSnapshot.getChildren()) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Dispute d = ds.getValue(Dispute.class);
-                    if (category.equals(d.category) && subCategory.equals(d.subcategory)){
+                    if (category.equals(d.category) && subCategory.equals(d.subcategory)) {
                         mData.add(d);
                     }
                 }
@@ -160,10 +155,10 @@ public class MainFragment extends Fragment {
         return rootview;
     }
 
-    public View notSortedData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        View rootview = inflater.inflate(R.layout.fragment_main,container,false);
+    public View notSortedData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootview = inflater.inflate(R.layout.fragment_main, container, false);
 
-        this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
+        this.sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
@@ -191,12 +186,12 @@ public class MainFragment extends Fragment {
                 viewHolder.setImage();
 
                 boolean isLiked = false;
-                if(model.likes != null) {
+                if (model.likes != null) {
                     isLiked = model.likes.containsKey(userID);
                 }
                 viewHolder.setLiked(isLiked);
                 viewHolder.setOnCardListener(model, database);
-                if(myTimer == null){
+                if (myTimer == null) {
                     myTimer = new Timer();
                     task = new MyTimerTask();
 
@@ -206,7 +201,7 @@ public class MainFragment extends Fragment {
                     task.disputeCells.add(viewHolder);
                     task.disputes.add(model);
                     myTimer.schedule(task, 0, task.time);
-                }else {
+                } else {
                     task.disputes.add(model);
                     task.disputeCells.add(viewHolder);
                 }

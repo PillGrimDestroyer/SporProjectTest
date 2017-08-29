@@ -1,14 +1,11 @@
 package spor.automato.com.sporprojecttest.View;
 
-import android.app.Activity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -16,12 +13,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 
-import java.util.Date;
 import java.util.HashMap;
 
-import spor.automato.com.sporprojecttest.MainActivity;
+import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.fragments.DisputeDetailFragment;
 import spor.automato.com.sporprojecttest.models.Choice;
@@ -217,18 +212,32 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         ImageView sporImage = (ImageView)view.findViewById(R.id.spor_Image);
 
         int drawable;
-        if(category.equals("Футбол"))
-            drawable = R.drawable.cat_foot;
-        else if(category.equals("Баскетбол"))
-            drawable = R.drawable.cat_bask;
-        else if(category.equals("Бокс"))
-            drawable = R.drawable.cat_boxing;
-        else if(category.equals("Теннис"))
-            drawable = R.drawable.cat_ten;
-        else if(category.equals("Борьба"))
-            drawable = R.drawable.cat_wrestling;
-        else
-            drawable = R.drawable.cat_volleyball;
+
+        switch (category){
+            case "Футбол":
+                drawable = R.drawable.cat_foot;
+                break;
+
+            case "Баскетбол":
+                drawable = R.drawable.cat_bask;
+                break;
+
+            case "Бокс":
+                drawable = R.drawable.cat_boxing;
+                break;
+
+            case "Теннис":
+                drawable = R.drawable.cat_ten;
+                break;
+
+            case "Борьба":
+                drawable = R.drawable.cat_wrestling;
+                break;
+
+            default:
+                drawable = R.drawable.cat_volleyball;
+                break;
+        }
 
         sporImage.setImageResource(drawable);
     }
@@ -238,11 +247,11 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         sporSubCategory.setText(subCategory);
     }
 
-    public ProgressBar getProgressBar() {
+    private ProgressBar getProgressBar() {
         return (ProgressBar) view.findViewById(R.id.progress_bar);
     }
 
-    public TextView getProgressText() {
+    private TextView getProgressText() {
         return (TextView) view.findViewById(R.id.progress_text);
     }
 
@@ -254,19 +263,18 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                 ProgressBar progressBar = getProgressBar();
                 long curUnixTime = System.currentTimeMillis();
                 long progress = unixTime - curUnixTime;
-                int progressInt = 0;
                 if (progress < 0){
                     TextView progressText = getProgressText();
                     progressBar.setProgress(100);
                     progressBar.setVisibility(View.GONE);
                     progressText.setVisibility(View.VISIBLE);
                     if (dispute.result.equals(""))
-                        progressText.setText("Live");
+                        progressText.setText(R.string.Live);
                     else
                         progressText.setText(dispute.result);
                 }
                 else {
-                    progressInt = Integer.parseInt(Long.toString(progress / 100000000));
+                    int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
                     progressBar.setProgress(100 - progressInt);
                 }
             }

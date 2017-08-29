@@ -1,4 +1,4 @@
-package spor.automato.com.sporprojecttest;
+package spor.automato.com.sporprojecttest.Activity;
 
 import android.app.ProgressDialog;
 import android.support.annotation.VisibleForTesting;

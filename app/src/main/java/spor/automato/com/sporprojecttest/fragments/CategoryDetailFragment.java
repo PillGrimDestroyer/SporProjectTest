@@ -10,22 +10,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import spor.automato.com.sporprojecttest.Adapter.CategoryDetailAdapter;
-import spor.automato.com.sporprojecttest.MainActivity;
+import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.R;
-import spor.automato.com.sporprojecttest.models.Choice;
 import spor.automato.com.sporprojecttest.models.Dispute;
 
 /**
@@ -50,18 +46,32 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
         FrameLayout sporImage = (FrameLayout)rootView.findViewById(R.id.imageLayout);
 
         int drawable;
-        if(category.equals("Футбол"))
-            drawable = R.drawable.football_header;
-        else if(category.equals("Баскетбол"))
-            drawable = R.drawable.basket_header;
-        else if(category.equals("Бокс"))
-            drawable = R.drawable.box_header;
-        else if(category.equals("Теннис"))
-            drawable = R.drawable.tennis_header;
-        else if(category.equals("Борьба"))
-            drawable = R.drawable.cat_wrestling;
-        else
-            drawable = R.drawable.cat_volleyball;
+
+        switch (category){
+            case "Футбол":
+                drawable = R.drawable.football_header;
+                break;
+
+            case "Баскетбол":
+                drawable = R.drawable.basket_header;
+                break;
+
+            case "Бокс":
+                drawable = R.drawable.box_header;
+                break;
+
+            case "Теннис":
+                drawable = R.drawable.tennis_header;
+                break;
+
+            case "Борьба":
+                drawable = R.drawable.cat_wrestling;
+                break;
+
+            default:
+                drawable = R.drawable.cat_volleyball;
+                break;
+        }
 
         sporImage.setBackgroundResource(drawable);
     }

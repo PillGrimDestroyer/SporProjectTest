@@ -1,4 +1,4 @@
-package spor.automato.com.sporprojecttest;
+package spor.automato.com.sporprojecttest.Activity;
 
 import android.app.DialogFragment;
 import android.content.Intent;
@@ -9,17 +9,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -44,11 +37,8 @@ import com.soundcloud.android.crop.Crop;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import spor.automato.com.sporprojecttest.fragments.CabinetFragment;
-import spor.automato.com.sporprojecttest.fragments.CategoryFragment;
+import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.fragments.DatePickerFragment;
-import spor.automato.com.sporprojecttest.fragments.MainFragment;
-import spor.automato.com.sporprojecttest.fragments.NotificationFragment;
 import spor.automato.com.sporprojecttest.models.User;
 
 public class RegistrationActivity extends BaseActivity  implements View.OnClickListener{

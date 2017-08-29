@@ -181,19 +181,18 @@ public class DisputeDetailFragment extends Fragment {
             Date date = format.parse(s);
             long curUnixTime = System.currentTimeMillis();
             long progress = date.getTime() - curUnixTime;
-            int progressInt = 0;
             if (progress < 0){
                 TextView progressText = (TextView) rootview.findViewById(R.id.progress_text);
                 progressBar.setProgress(100);
                 progressBar.setVisibility(View.GONE);
                 progressText.setVisibility(View.VISIBLE);
                 if (dispute.result.equals(""))
-                    progressText.setText("Live");
+                    progressText.setText(R.string.Live);
                 else
                     progressText.setText(dispute.result);
             }
             else {
-                progressInt = Integer.parseInt(Long.toString(progress / 100000000));
+                int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
                 progressBar.setProgress(100 - progressInt);
             }
         } catch (ParseException e) {
@@ -362,18 +361,32 @@ public class DisputeDetailFragment extends Fragment {
         ImageView sporImage = (ImageView)rootview.findViewById(R.id.spor_Image);
 
         int drawable;
-        if(dispute.category.equals("Футбол"))
-            drawable = R.drawable.cat_foot;
-        else if(dispute.category.equals("Баскетбол"))
-            drawable = R.drawable.cat_bask;
-        else if(dispute.category.equals("Бокс"))
-            drawable = R.drawable.cat_boxing;
-        else if(dispute.category.equals("Теннис"))
-            drawable = R.drawable.cat_ten;
-        else if(dispute.category.equals("Борьба"))
-            drawable = R.drawable.cat_wrestling;
-        else
-            drawable = R.drawable.cat_volleyball;
+
+        switch (dispute.category){
+            case "Футбол":
+                drawable = R.drawable.cat_foot;
+                break;
+
+            case "Баскетбол":
+                drawable = R.drawable.cat_bask;
+                break;
+
+            case "Бокс":
+                drawable = R.drawable.cat_boxing;
+                break;
+
+            case "Теннис":
+                drawable = R.drawable.cat_ten;
+                break;
+
+            case "Борьба":
+                drawable = R.drawable.cat_wrestling;
+                break;
+
+            default:
+                drawable = R.drawable.cat_volleyball;
+                break;
+        }
 
         sporImage.setImageResource(drawable);
     }
