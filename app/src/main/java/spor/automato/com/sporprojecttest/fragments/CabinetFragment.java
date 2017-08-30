@@ -1,6 +1,7 @@
 package spor.automato.com.sporprojecttest.fragments;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -33,7 +34,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -270,8 +270,8 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             storageReference.child("Photos").child(userID).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
-                    Drawable image = new BitmapDrawable(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                    userProfileImage.setImageDrawable(image);
+                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    userProfileImage.setImageBitmap(image);
                     progressBar.setVisibility(View.GONE);
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -365,30 +365,8 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             case GALLERY_REQUEST:
                 if (resultCode == RESULT_OK) {
                     final Uri selectedImage = imageReturnedIntent.getData();
-                    storageReference.child("Photos").child(client.id).putFile(selectedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            try {
-                                DatabaseReference participantCount = myDatabase.getReference("users/" + client.id + "/hasImage");
-                                participantCount.setValue(true);
-
-                                Toast.makeText(rootView.getContext(), "Изображение успешно обновлено", Toast.LENGTH_SHORT).show();
-                                userProfileImage.setImageURI(selectedImage);
-                            }catch (Exception e){
-                                Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
-                                Log.e("ImageUploadFailure", e.getMessage());
-                            }
-                            progressBar.setVisibility(View.GONE);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            progressBar.setVisibility(View.GONE);
-                            Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
-                            Log.e("ImageUploadFailure", e.getMessage());
-                        }
-                    });
-                }else {
+                    galleryResponse(selectedImage);
+                } else {
                     progressBar.setVisibility(View.GONE);
                 }
                 break;
@@ -396,6 +374,32 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             default:
                 break;
         }
+    }
+
+    private void galleryResponse(final Uri selectedImage) {
+        storageReference.child("Photos").child(client.id).putFile(selectedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                try {
+                    DatabaseReference participantCount = myDatabase.getReference("users/" + client.id + "/hasImage");
+                    participantCount.setValue(true);
+
+                    Toast.makeText(rootView.getContext(), "Изображение успешно обновлено", Toast.LENGTH_SHORT).show();
+                    userProfileImage.setImageURI(selectedImage);
+                } catch (Exception e) {
+                    Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
+                    Log.e("ImageUploadFailure", e.getMessage());
+                }
+                progressBar.setVisibility(View.GONE);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
+                Log.e("ImageUploadFailure", e.getMessage());
+            }
+        });
     }
 }
 

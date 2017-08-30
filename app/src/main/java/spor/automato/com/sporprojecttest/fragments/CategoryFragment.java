@@ -97,6 +97,7 @@ public class CategoryFragment extends Fragment {
         };
         reference.addValueEventListener(postListener);
 
+        MainActivity.setCurentFragment(this);
         return rootview;
     }
 

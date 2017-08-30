@@ -9,10 +9,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
@@ -21,11 +24,12 @@ import com.google.firebase.auth.FirebaseUser;
 
 import spor.automato.com.sporprojecttest.R;
 
-public class LoginActivity extends BaseActivity  implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "EmailPassword";
     private EditText mEmailField;
     private EditText mPasswordField;
+    private TextView forgotPass;
     private Button register;
     private FirebaseAuth mAuth;
     public ProgressDialog mProgressDialog;
@@ -42,6 +46,15 @@ public class LoginActivity extends BaseActivity  implements View.OnClickListener
 
         mEmailField = (EditText) findViewById(R.id.field_email);
         mPasswordField = (EditText) findViewById(R.id.field_password);
+        forgotPass = (TextView) findViewById(R.id.forgot_password);
+
+        forgotPass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LoginActivity.this, ForgotPassActivity.class);
+                startActivity(intent);
+            }
+        });
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         mAuth = FirebaseAuth.getInstance();
@@ -126,7 +139,6 @@ public class LoginActivity extends BaseActivity  implements View.OnClickListener
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             if(checkIfEmailVerified()){
-
                                 Log.d(TAG, "signInWithEmail:success");
 
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -137,9 +149,6 @@ public class LoginActivity extends BaseActivity  implements View.OnClickListener
                             }else{
                                 Toast.makeText(LoginActivity.this, "Ошибка при входе", Toast.LENGTH_SHORT).show();
                             }
-
-
-
                         } else {
 
                             Log.w(TAG, "signInWithEmail:failure", task.getException());

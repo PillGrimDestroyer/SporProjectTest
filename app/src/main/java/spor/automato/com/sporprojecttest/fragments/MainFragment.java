@@ -1,5 +1,6 @@
 package spor.automato.com.sporprojecttest.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Timer;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.Adapter.SortedDisputeAdapter;
 import spor.automato.com.sporprojecttest.MyTimerTask;
 import spor.automato.com.sporprojecttest.R;
@@ -47,6 +50,7 @@ public class MainFragment extends Fragment {
     private RecyclerView sporList;
     private Timer myTimer;
     private MyTimerTask task;
+    private SweetAlertDialog mProgressDialog;
 
     public boolean isSorted() {
         return isSorted;
@@ -58,6 +62,10 @@ public class MainFragment extends Fragment {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getCategory() {
+        return this.category;
     }
 
     public void setSubCategory(String subCategory) {
@@ -77,6 +85,14 @@ public class MainFragment extends Fragment {
                 rootView = sortedByCategoryData(inflater, container, savedInstanceState);
         }
         this.rootView = rootView;
+        MainActivity.setCurentFragment(this);
+
+        mProgressDialog = new SweetAlertDialog(rootView.getContext(), SweetAlertDialog.PROGRESS_TYPE);
+        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        mProgressDialog.setTitleText("Загрузка");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
         return rootView;
     }
 
@@ -104,8 +120,9 @@ public class MainFragment extends Fragment {
                         mData.add(d);
                     }
                 }
-                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database);
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
                 sporList.setAdapter(adapter);
+                mProgressDialog.dismiss();
             }
 
             @Override
@@ -142,8 +159,9 @@ public class MainFragment extends Fragment {
                         mData.add(d);
                     }
                 }
-                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database);
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
                 sporList.setAdapter(adapter);
+                mProgressDialog.dismiss();
             }
 
             @Override
@@ -177,12 +195,14 @@ public class MainFragment extends Fragment {
             protected void populateViewHolder(DisputeCell viewHolder, Dispute model, int position) {
                 viewHolder.setSporDate(model.date);
                 viewHolder.setSporLikeCount(model.likeCount);
-                viewHolder.setSporParticipantCount(model.participantCount);
+                viewHolder.setSporParticipantCount(model.participantCount, model, userID);
                 viewHolder.setSporStartTime(model.time);
                 viewHolder.setSporSubject(model.subject);
                 viewHolder.setViewCount(model.viewCount);
                 viewHolder.setCategory(model.category);
                 viewHolder.setSubCategory(model.subcategory);
+                viewHolder.setSorted(isSorted());
+                viewHolder.setSortedBySubCategory(subCategory != null);
                 viewHolder.setImage();
 
                 boolean isLiked = false;
@@ -204,6 +224,10 @@ public class MainFragment extends Fragment {
                 } else {
                     task.disputes.add(model);
                     task.disputeCells.add(viewHolder);
+                }
+                if (mProgressDialog != null){
+                    mProgressDialog.dismiss();
+                    mProgressDialog = null;
                 }
             }
         };

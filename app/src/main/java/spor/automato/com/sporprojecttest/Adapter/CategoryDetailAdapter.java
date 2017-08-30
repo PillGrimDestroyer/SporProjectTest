@@ -5,13 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.makeramen.roundedimageview.RoundedImageView;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import spor.automato.com.sporprojecttest.R;
@@ -38,7 +34,7 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
     // inflates the cell layout from xml when needed
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.design_category_detail_cell, parent, false);
+        View view = mInflater.inflate(R.layout.category_detail_cell, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }

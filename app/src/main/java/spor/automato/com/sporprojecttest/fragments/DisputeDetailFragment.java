@@ -20,13 +20,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.models.Dispute;
 import spor.automato.com.sporprojecttest.models.Participant;
@@ -51,6 +51,8 @@ public class DisputeDetailFragment extends Fragment {
     private int numberOfLikes;
     private boolean isLikedByCurentUser;
     private Dispute dispute;
+    private boolean isSorted = false;
+    private boolean isSortedBySubCategory = false;
 
     private User client;
     private FirebaseDatabase myDatabase;
@@ -69,8 +71,36 @@ public class DisputeDetailFragment extends Fragment {
         this.ferstTeam = ferstTeam;
     }
 
+    public boolean isSorted() {
+        return isSorted;
+    }
+
+    public void setSorted(boolean sorted) {
+        isSorted = sorted;
+    }
+
+    public boolean isSortedBySubCategory() {
+        return isSortedBySubCategory;
+    }
+
+    public void setSortedBySubCategory(boolean sortedBySubCategory) {
+        isSortedBySubCategory = sortedBySubCategory;
+    }
+
+    public String getSubCategory() {
+        return dispute.subcategory;
+    }
+
+    public String getCategory() {
+        return dispute.category;
+    }
+
     public String getViewCount() {
         return viewCount;
+    }
+
+    public void setViewCount(String viewCount) {
+        this.viewCount = viewCount;
     }
 
     public boolean isLikedByCurentUser() {
@@ -79,10 +109,6 @@ public class DisputeDetailFragment extends Fragment {
 
     public void setLikedByCurentUser(boolean likedByCurentUser) {
         isLikedByCurentUser = likedByCurentUser;
-    }
-
-    public void setViewCount(String viewCount) {
-        this.viewCount = viewCount;
     }
 
     public String getSecondTeam() {
@@ -138,7 +164,7 @@ public class DisputeDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_dispute_detail, container, false);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String userID = mAuth.getCurrentUser().getUid();
+        final String userID = mAuth.getCurrentUser().getUid();
         DatabaseReference reference = myDatabase.getReference();
         reference.child("users").child(userID).orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -153,7 +179,7 @@ public class DisputeDetailFragment extends Fragment {
         });
 
         setSporDate(getDate());
-        setSporParticipantCount(getNumberOfParticipant());
+        setSporParticipantCount(getNumberOfParticipant(), dispute, userID);
         setSporLikeCount(getNumberOfLikes());
         setSporSubject(getSubject());
         setSporStartTime(getTime());
@@ -181,7 +207,7 @@ public class DisputeDetailFragment extends Fragment {
             Date date = format.parse(s);
             long curUnixTime = System.currentTimeMillis();
             long progress = date.getTime() - curUnixTime;
-            if (progress < 0){
+            if (progress < 0) {
                 TextView progressText = (TextView) rootview.findViewById(R.id.progress_text);
                 progressBar.setProgress(100);
                 progressBar.setVisibility(View.GONE);
@@ -190,8 +216,7 @@ public class DisputeDetailFragment extends Fragment {
                     progressText.setText(R.string.Live);
                 else
                     progressText.setText(dispute.result);
-            }
-            else {
+            } else {
                 int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
                 progressBar.setProgress(100 - progressInt);
             }
@@ -221,20 +246,20 @@ public class DisputeDetailFragment extends Fragment {
             public void onClick(View view) {
                 TextView sporLikeCount = (TextView) rootview.findViewById(R.id.like_count);
                 int likeCount;
-                if(!isLikedByCurentUser()) {
+                if (!isLikedByCurentUser()) {
                     likeCount = Integer.parseInt(sporLikeCount.getText().toString());
                     likeCount++;
 
-                    if(dispute.likes != null){
-                        if(!dispute.likes.containsKey(client.id)) {
+                    if (dispute.likes != null) {
+                        if (!dispute.likes.containsKey(client.id)) {
                             dispute.likes.put(client.id, true);
                         }
-                    }else {
+                    } else {
                         HashMap<String, Boolean> likes = new HashMap<>();
                         likes.put(client.id, true);
                         dispute.likes = likes;
                     }
-                }else {
+                } else {
                     likeCount = Integer.parseInt(sporLikeCount.getText().toString());
                     likeCount--;
 
@@ -247,11 +272,11 @@ public class DisputeDetailFragment extends Fragment {
                 DatabaseReference sporLikes = myDatabase.getReference("spor/" + dispute.id + "/likes");
                 sporLikes.setValue(dispute.likes);
 
-                ImageView like = (ImageView)view.findViewById(R.id.imageLike);
-                if(!isLikedByCurentUser()) {
+                ImageView like = (ImageView) view.findViewById(R.id.imageLike);
+                if (!isLikedByCurentUser()) {
                     like.setImageResource(R.drawable.like);
                     setLikedByCurentUser(true);
-                }else {
+                } else {
                     like.setImageResource(R.drawable.like_dark);
                     setLikedByCurentUser(false);
                 }
@@ -266,7 +291,7 @@ public class DisputeDetailFragment extends Fragment {
                     if (rate.getText() != null && !rate.getText().toString().equals("")) {
                         int rateValue = Integer.parseInt(rate.getText().toString());
                         if (rateValue <= (int) client.money) {
-                            if(dispute.participants == null){
+                            if (dispute.participants == null) {
                                 dispute.participants = new HashMap<>();
                             }
                             if (!dispute.participants.containsKey(client.id)) {
@@ -293,6 +318,13 @@ public class DisputeDetailFragment extends Fragment {
                                 DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
                                 refParticipant.child(client.id).setValue(participant);
 
+                                dispute.participants.put(client.id, participant);
+                                setSporParticipantCount(dispute.participantCount, dispute, userID);
+
+                                fTeam.setSelected(false);
+                                sTeam.setSelected(false);
+                                rate.setText("");
+
                                 Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(rootview.getContext(), R.string.already_in, Toast.LENGTH_SHORT).show();
@@ -309,6 +341,7 @@ public class DisputeDetailFragment extends Fragment {
             }
         });
 
+        MainActivity.setCurentFragment(this);
         return rootview;
     }
 
@@ -319,7 +352,7 @@ public class DisputeDetailFragment extends Fragment {
 
     }
 
-    private void setSporDate(String date){
+    private void setSporDate(String date) {
         TextView sporDate = (TextView) rootview.findViewById(R.id.spor_date);
         sporDate.setText(date);
     }
@@ -329,40 +362,42 @@ public class DisputeDetailFragment extends Fragment {
         viewCount.setText(viewsCount);
     }
 
-    private void setSporParticipantCount(int numberOfParticipant){
+    private void setSporParticipantCount(int numberOfParticipant, Dispute dispute, String userId) {
         TextView sporParticipantCount = (TextView) rootview.findViewById(R.id.viewers_count);
         sporParticipantCount.setText(Integer.toString(numberOfParticipant));
-        if (numberOfParticipant > 0) {
-            ImageView participant = (ImageView)rootview.findViewById(R.id.imageParticCount);
-            participant.setImageResource(R.drawable.people_black);
+        if (dispute.participants != null) {
+            if (dispute.participants.containsKey(userId)) {
+                ImageView participant = (ImageView) rootview.findViewById(R.id.imageParticCount);
+                participant.setImageResource(R.drawable.people_black);
+            }
         }
     }
 
-    private void setSporLikeCount(int numberOfLikes){
+    private void setSporLikeCount(int numberOfLikes) {
         TextView sporLikeCount = (TextView) rootview.findViewById(R.id.like_count);
         sporLikeCount.setText(Integer.toString(numberOfLikes));
-        if(numberOfLikes > 0) {
-            ImageView like = (ImageView)rootview.findViewById(R.id.imageLike);
+        if (numberOfLikes > 0) {
+            ImageView like = (ImageView) rootview.findViewById(R.id.imageLike);
             like.setImageResource(R.drawable.like);
         }
     }
 
-    private void setSporSubject(String subject){
+    private void setSporSubject(String subject) {
         TextView sporSubject = (TextView) rootview.findViewById(R.id.spor_subject);
         sporSubject.setText(subject);
     }
 
-    private void setSporStartTime(String time){
+    private void setSporStartTime(String time) {
         TextView startTime = (TextView) rootview.findViewById(R.id.spor_time);
         startTime.setText(time);
     }
 
-    private void setImage(){
-        ImageView sporImage = (ImageView)rootview.findViewById(R.id.spor_Image);
+    private void setImage() {
+        ImageView sporImage = (ImageView) rootview.findViewById(R.id.spor_Image);
 
         int drawable;
 
-        switch (dispute.category){
+        switch (dispute.category) {
             case "Футбол":
                 drawable = R.drawable.cat_foot;
                 break;
@@ -413,16 +448,15 @@ public class DisputeDetailFragment extends Fragment {
         this.client = client;
     }
 
-
     public void setMyDatabase(FirebaseDatabase myDatabase) {
         this.myDatabase = myDatabase;
     }
 
     public void setLikeImage(boolean likeImage) {
-        ImageView like = (ImageView)rootview.findViewById(R.id.imageLike);
-        if (likeImage){
+        ImageView like = (ImageView) rootview.findViewById(R.id.imageLike);
+        if (likeImage) {
             like.setImageResource(R.drawable.like);
-        }else {
+        } else {
             like.setImageResource(R.drawable.like_dark);
         }
     }

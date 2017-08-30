@@ -37,6 +37,8 @@ public class DisputeCell extends RecyclerView.ViewHolder {
     TextView viewCount;
 
     private boolean isLiked;
+    private boolean isSorted;
+    private boolean isSortedBySubCategory;
     private User client;
     private String category;
 
@@ -45,7 +47,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         this.view = itemView;
     }
 
-    public void setOnCardListener(final Dispute model, final FirebaseDatabase myDatabase){
+    public void setOnCardListener(final Dispute model, final FirebaseDatabase myDatabase) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String userID = mAuth.getCurrentUser().getUid();
         DatabaseReference reference = myDatabase.getReference();
@@ -57,20 +59,20 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     @Override
                     public void onClick(View view) {
                         int likeCount;
-                        if(!isLiked()) {
+                        if (!isLiked()) {
                             likeCount = Integer.parseInt(sporLikeCount.getText().toString());
                             likeCount++;
 
-                            if(model.likes != null){
-                                if(!model.likes.containsKey(client.id)) {
+                            if (model.likes != null) {
+                                if (!model.likes.containsKey(client.id)) {
                                     model.likes.put(client.id, true);
                                 }
-                            }else {
+                            } else {
                                 HashMap<String, Boolean> likes = new HashMap<>();
                                 likes.put(client.id, true);
                                 model.likes = likes;
                             }
-                        }else {
+                        } else {
                             likeCount = Integer.parseInt(sporLikeCount.getText().toString());
                             likeCount--;
 
@@ -83,11 +85,11 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                         DatabaseReference sporLikes = myDatabase.getReference("spor/" + model.id + "/likes");
                         sporLikes.setValue(model.likes);
 
-                        ImageView like = (ImageView)view.findViewById(R.id.imageLike);
-                        if(!isLiked()) {
+                        ImageView like = (ImageView) view.findViewById(R.id.imageLike);
+                        if (!isLiked()) {
                             like.setImageResource(R.drawable.like);
                             setLiked(true);
-                        }else {
+                        } else {
                             like.setImageResource(R.drawable.like_dark);
                             setLiked(false);
                         }
@@ -101,12 +103,14 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                         DisputeDetailFragment ddf = new DisputeDetailFragment();
                         HashMap<String, Choice> choices = model.choices;
 
-                        String sporDate = ((TextView)view.findViewById(R.id.spor_date)).getText().toString();
-                        int sporParticipantCount = Integer.parseInt(((TextView)view.findViewById(R.id.viewers_count)).getText().toString());
-                        int sporLikeCount = Integer.parseInt(((TextView)view.findViewById(R.id.like_count)).getText().toString());
-                        String viewsCount = ((TextView)view.findViewById(R.id.view_count)).getText().toString();
-                        String sporSubject = ((TextView)view.findViewById(R.id.spor_subject)).getText().toString();
-                        String sporStartTime = ((TextView)view.findViewById(R.id.spor_time)).getText().toString();
+                        String sporDate = ((TextView) view.findViewById(R.id.spor_date)).getText().toString();
+                        int sporParticipantCount = Integer.parseInt(((TextView) view.findViewById(R.id.viewers_count)).getText().toString());
+                        int sporLikeCount = Integer.parseInt(((TextView) view.findViewById(R.id.like_count)).getText().toString());
+                        String viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
+                        int viewsCountNumber = Integer.parseInt(viewsCountMessage.split(" ")[0]);
+                        viewsCountMessage = viewsCountMessage.replace(Integer.toString(viewsCountNumber), Integer.toString(++viewsCountNumber));
+                        String sporSubject = ((TextView) view.findViewById(R.id.spor_subject)).getText().toString();
+                        String sporStartTime = ((TextView) view.findViewById(R.id.spor_time)).getText().toString();
                         int money = model.money;
 
                         ddf.setDate(sporDate);
@@ -114,16 +118,18 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                         ddf.setNumberOfLikes(sporLikeCount);
                         ddf.setSubject(sporSubject);
                         ddf.setTime(sporStartTime);
-                        ddf.setViewCount(viewsCount);
+                        ddf.setViewCount(viewsCountMessage);
                         ddf.setTotalDisputeMoney(money);
                         ddf.setDispute(model);
                         ddf.setClient(client);
                         ddf.setMyDatabase(myDatabase);
                         ddf.setLikedByCurentUser(isLiked());
+                        ddf.setSorted(isSorted());
+                        ddf.setSortedBySubCategory(isSortedBySubCategory());
 
                         int b = 0;
                         for (Choice c : choices.values()) {
-                            if(b == 0)
+                            if (b == 0)
                                 ddf.setFerstTeam(c.choice);
                             else
                                 ddf.setSecondTeam(c.choice);
@@ -148,8 +154,8 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         });
     }
 
-    public void setSporDate(String date){
-        sporDate = (TextView)view.findViewById(R.id.spor_date);
+    public void setSporDate(String date) {
+        sporDate = (TextView) view.findViewById(R.id.spor_date);
         this.sporDate.setText(date);
     }
 
@@ -157,50 +163,68 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         return isLiked;
     }
 
+    public boolean isSorted() {
+        return isSorted;
+    }
+
+    public void setSorted(boolean sorted) {
+        isSorted = sorted;
+    }
+
+    public boolean isSortedBySubCategory() {
+        return isSortedBySubCategory;
+    }
+
+    public void setSortedBySubCategory(boolean sortedBySubCategory) {
+        isSortedBySubCategory = sortedBySubCategory;
+    }
+
     public void setLiked(boolean liked) {
         isLiked = liked;
         setLikedByCurentUser();
     }
 
-    private void setLikedByCurentUser(){
-        if (isLiked()){
-            ImageView like = (ImageView)view.findViewById(R.id.imageLike);
+    private void setLikedByCurentUser() {
+        if (isLiked()) {
+            ImageView like = (ImageView) view.findViewById(R.id.imageLike);
             like.setImageResource(R.drawable.like);
-        }else{
-            ImageView like = (ImageView)view.findViewById(R.id.imageLike);
+        } else {
+            ImageView like = (ImageView) view.findViewById(R.id.imageLike);
             like.setImageResource(R.drawable.like_dark);
         }
     }
 
     public void setViewCount(int count) {
-        viewCount = (TextView)view.findViewById(R.id.view_count);
+        viewCount = (TextView) view.findViewById(R.id.view_count);
         //TODO: сделать так чтобы сообщение было корректным при любом колличестве
         // просмотров, просмотра, просмотр и т.д в записимости от колличества
         String endOfMessage = " просмотров";
         this.viewCount.setText(count + endOfMessage);
     }
 
-    public void setSporParticipantCount(int numberOfParticipant){
-        sporParticipantCount = (TextView)view.findViewById(R.id.viewers_count);
-        this.sporParticipantCount.setText(""+ numberOfParticipant);
-        if(numberOfParticipant > 0) {
-            ImageView participant = (ImageView)view.findViewById(R.id.imageParticCount);
-            participant.setImageResource(R.drawable.people_black);
+    public void setSporParticipantCount(int numberOfParticipant, Dispute dispute, String userId) {
+        sporParticipantCount = (TextView) view.findViewById(R.id.viewers_count);
+        this.sporParticipantCount.setText(Integer.toString(numberOfParticipant));
+        if (dispute.participants != null) {
+            if (dispute.participants.containsKey(userId)) {
+                ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
+                participant.setImageResource(R.drawable.people_black);
+            }
         }
     }
 
-    public void setSporLikeCount(int numberOfLikes){
-        this.sporLikeCount = (TextView)view.findViewById(R.id.like_count);
+    public void setSporLikeCount(int numberOfLikes) {
+        this.sporLikeCount = (TextView) view.findViewById(R.id.like_count);
         this.sporLikeCount.setText(Integer.toString(numberOfLikes));
     }
 
-    public void setSporSubject(String subject){
-        sporSubject = (TextView)view.findViewById(R.id.spor_subject);
+    public void setSporSubject(String subject) {
+        sporSubject = (TextView) view.findViewById(R.id.spor_subject);
         this.sporSubject.setText(subject);
     }
 
-    public void setSporStartTime(String time){
-        startTime = (TextView)view.findViewById(R.id.spor_time);
+    public void setSporStartTime(String time) {
+        startTime = (TextView) view.findViewById(R.id.spor_time);
         this.startTime.setText(time);
     }
 
@@ -208,12 +232,12 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         this.category = category;
     }
 
-    public void setImage(){
-        ImageView sporImage = (ImageView)view.findViewById(R.id.spor_Image);
+    public void setImage() {
+        ImageView sporImage = (ImageView) view.findViewById(R.id.spor_Image);
 
         int drawable;
 
-        switch (category){
+        switch (category) {
             case "Футбол":
                 drawable = R.drawable.cat_foot;
                 break;
@@ -263,7 +287,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                 ProgressBar progressBar = getProgressBar();
                 long curUnixTime = System.currentTimeMillis();
                 long progress = unixTime - curUnixTime;
-                if (progress < 0){
+                if (progress < 0) {
                     TextView progressText = getProgressText();
                     progressBar.setProgress(100);
                     progressBar.setVisibility(View.GONE);
@@ -272,8 +296,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                         progressText.setText(R.string.Live);
                     else
                         progressText.setText(dispute.result);
-                }
-                else {
+                } else {
                     int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
                     progressBar.setProgress(100 - progressInt);
                 }

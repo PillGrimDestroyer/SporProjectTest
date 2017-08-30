@@ -15,7 +15,6 @@ import java.util.Timer;
 import spor.automato.com.sporprojecttest.MyTimerTask;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.View.DisputeCell;
-import spor.automato.com.sporprojecttest.fragments.MainFragment;
 import spor.automato.com.sporprojecttest.models.Dispute;
 
 /**
@@ -28,20 +27,21 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private String userID;
-
-    private static final int TYPE_HEADER = 0;
-    private static final int TYPE_ITEM = 1;
-
     private FirebaseDatabase database;
     private Timer myTimer;
     private MyTimerTask task;
+    private boolean isSorted;
+    private boolean isSortedBySubCategory;
 
     // data is passed into the constructor
-    public SortedDisputeAdapter(final Context context, ArrayList<Dispute> data, String userID, FirebaseDatabase database) {
+    public SortedDisputeAdapter(final Context context, ArrayList<Dispute> data, String userID,
+                                FirebaseDatabase database, boolean isSorted, boolean isSortedBySubCategory) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
         this.userID = userID;
         this.database = database;
+        this.isSorted = isSorted;
+        this.isSortedBySubCategory = isSortedBySubCategory;
     }
 
     // inflates the cell layout from xml when needed
@@ -59,21 +59,23 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
 
         viewHolder.setSporDate(model.date);
         viewHolder.setSporLikeCount(model.likeCount);
-        viewHolder.setSporParticipantCount(model.participantCount);
+        viewHolder.setSporParticipantCount(model.participantCount, model, userID);
         viewHolder.setSporStartTime(model.time);
         viewHolder.setSporSubject(model.subject);
         viewHolder.setViewCount(model.viewCount);
         viewHolder.setCategory(model.category);
         viewHolder.setSubCategory(model.subcategory);
+        viewHolder.setSorted(isSorted);
+        viewHolder.setSortedBySubCategory(isSortedBySubCategory);
         viewHolder.setImage();
 
         boolean isLiked = false;
-        if(model.likes != null) {
+        if (model.likes != null) {
             isLiked = model.likes.containsKey(userID);
         }
         viewHolder.setLiked(isLiked);
         viewHolder.setOnCardListener(model, database);
-        if(myTimer == null){
+        if (myTimer == null) {
             myTimer = new Timer();
             task = new MyTimerTask();
 
@@ -83,7 +85,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
             task.disputeCells.add(viewHolder);
             task.disputes.add(model);
             myTimer.schedule(task, 0, task.time);
-        }else {
+        } else {
             task.disputes.add(model);
             task.disputeCells.add(viewHolder);
         }
@@ -93,23 +95,6 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
     @Override
     public int getItemCount() {
         return mData.size();
-    }
-
-
-    // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView myTextView;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            myTextView = (TextView) itemView.findViewById(R.id.info_text);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
-        }
     }
 
     // convenience method for getting data at click position
@@ -125,5 +110,21 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    // stores and recycles views as they are scrolled off screen
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public TextView myTextView;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            myTextView = (TextView) itemView.findViewById(R.id.info_text);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+        }
     }
 }

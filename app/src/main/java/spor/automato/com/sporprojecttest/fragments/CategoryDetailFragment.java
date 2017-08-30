@@ -122,6 +122,7 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
             }
         });
 
+        MainActivity.setCurentFragment(this);
         return rootView;
     }
 

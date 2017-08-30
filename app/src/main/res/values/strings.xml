@@ -65,4 +65,7 @@
     <string name="myMoney">Деньги</string>
     <string name="age">Возраст</string>
     <string name="myName">Имя</string>
+    <string name="resetPass">Сбросить пароль</string>
+    <string name="youWin" formatted="false">Вы победили в споре: %s. Ваш выигрыш составляет %s тг</string>
+    <string name="youLose">Вы проиграли</string>
 </resources>

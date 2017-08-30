@@ -51,7 +51,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                                                          int viewType) {
         // create a new view
         CardView cv = (CardView) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.design_category_cell, parent, false);
+                .inflate(R.layout.category_cell, parent, false);
 
         return new ViewHolder(cv);
     }

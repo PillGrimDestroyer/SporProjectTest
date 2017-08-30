@@ -2,6 +2,8 @@ package spor.automato.com.sporprojecttest.models;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.HashMap;
+
 @IgnoreExtraProperties
 public class User {
     public String id;
@@ -11,6 +13,7 @@ public class User {
     public boolean hasImage;
     public String birthday;
     public String gender;
+    public HashMap<String, Notification> history;
 
     public User() {
     }
