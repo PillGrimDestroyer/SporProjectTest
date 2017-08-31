@@ -209,13 +209,18 @@ public class DisputeDetailFragment extends Fragment {
             long progress = date.getTime() - curUnixTime;
             if (progress < 0) {
                 TextView progressText = (TextView) rootview.findViewById(R.id.progress_text);
+                TextView status = (TextView) rootview.findViewById(R.id.spor_status);
                 progressBar.setProgress(100);
                 progressBar.setVisibility(View.GONE);
                 progressText.setVisibility(View.VISIBLE);
-                if (dispute.result.equals(""))
+                if (dispute.result.equals("")){
                     progressText.setText(R.string.Live);
-                else
-                    progressText.setText(dispute.result);
+                    status.setText(R.string.Live);
+                }
+                else {
+                    progressText.setText(rootview.getResources().getString(R.string.end, dispute.result));
+                    status.setText(R.string.done);
+                }
             } else {
                 int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
                 progressBar.setProgress(100 - progressInt);

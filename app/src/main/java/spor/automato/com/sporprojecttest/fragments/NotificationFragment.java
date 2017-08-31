@@ -1,6 +1,5 @@
 package spor.automato.com.sporprojecttest.fragments;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,16 +12,18 @@ import android.view.ViewGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.Adapter.NotificationAdapter;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.models.Dispute;
+import spor.automato.com.sporprojecttest.models.Notification;
 import spor.automato.com.sporprojecttest.models.User;
 
 
@@ -35,7 +36,6 @@ public class NotificationFragment extends Fragment {
     User client;
 
     private RecyclerView notifList;
-    private SweetAlertDialog mProgressDialog;
 
     @Nullable
     @Override
@@ -51,61 +51,57 @@ public class NotificationFragment extends Fragment {
         myDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                loadNotifications();
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
+        loadNotifications();
 
         MainActivity.setCurentFragment(this);
         return rootview;
     }
 
     private void loadNotifications() {
+        MainActivity.showLoader();
+
         myDatabase.getReference("users").child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 client = dataSnapshot.getValue(User.class);
-                if (client.history != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mProgressDialog = new SweetAlertDialog(rootview.getContext(), SweetAlertDialog.PROGRESS_TYPE);
-                            mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-                            mProgressDialog.setTitleText("Загрузка");
-                            mProgressDialog.setCancelable(false);
-                            mProgressDialog.show();
-                        }
-                    });
-                    myDatabase.getReference("spor").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            ArrayList<Dispute> disputes = new ArrayList<>();
-                            for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                Dispute dispute = child.getValue(Dispute.class);
-                                if (client.history.containsKey(dispute.id)){
+                myDatabase.getReference("spor").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ArrayList<Dispute> disputes = new ArrayList<>();
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            Dispute dispute = child.getValue(Dispute.class);
+                            if (!dispute.result.equals("") && dispute.participants != null) {
+                                if (dispute.participants.containsKey(client.id)) {
+                                    HashMap<String, Notification> notificationHashMap = client.history != null
+                                            ? client.history : new HashMap<String, Notification>();
+                                    Notification notification = new Notification();
+                                    notification.checked = false;
+                                    notification.money = dispute.participants.get(client.id).money;
+                                    notification.sporID = dispute.id;
+                                    notification.winnings = (int) dispute.participants.get(client.id).winnings;
+
+                                    notificationHashMap.put(dispute.id, notification);
+
+                                    DatabaseReference sporLikeCountInDB = myDatabase.getReference("users/" + client.id + "/history");
+                                    sporLikeCountInDB.setValue(notificationHashMap);
+
+                                    client.history = notificationHashMap;
                                     disputes.add(dispute);
                                 }
                             }
-                            NotificationAdapter adapter = new NotificationAdapter(rootview.getContext(), client.history, disputes);
+                        }
+                        if (client.history != null) {
+                            NotificationAdapter adapter = new NotificationAdapter(rootview.getContext(), client.history, disputes, myDatabase, client.id);
                             notifList.setAdapter(adapter);
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mProgressDialog.dismiss();
-                                }
-                            });
                         }
+                        MainActivity.dismissWithAnimationLoader();
+                    }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-                }
+                    }
+                });
             }
 
             @Override

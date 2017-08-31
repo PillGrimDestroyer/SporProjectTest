@@ -1,5 +1,7 @@
 package spor.automato.com.sporprojecttest;
 
+import android.util.Log;
+
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.FirebaseDatabase;
 

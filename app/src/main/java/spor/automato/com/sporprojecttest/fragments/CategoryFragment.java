@@ -24,8 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import spor.automato.com.sporprojecttest.Adapter.CategoryAdapter;
 import spor.automato.com.sporprojecttest.Activity.MainActivity;
+import spor.automato.com.sporprojecttest.Adapter.CategoryAdapter;
 import spor.automato.com.sporprojecttest.R;
 
 
@@ -35,14 +35,37 @@ public class CategoryFragment extends Fragment {
     private DatabaseReference reference;
     private HashMap<String, Integer> hashMapCategory;
 
-    RecyclerView sporList;
+    private RecyclerView sporList;
+
+    private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order) {
+        List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
+
+        // Сортируем в зависимости от значения
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> o1,
+                               Map.Entry<String, Integer> o2) {
+                if (order) {
+                    return o1.getValue().compareTo(o2.getValue());
+                } else {
+                    return o2.getValue().compareTo(o1.getValue());
+                }
+            }
+        });
+
+        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+        for (Map.Entry<String, Integer> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return sortedMap;
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootview = inflater.inflate(R.layout.fragment_category,container,false);
+        final View rootview = inflater.inflate(R.layout.fragment_category, container, false);
 
-        this.sporList = (RecyclerView)rootview.findViewById(R.id.spor_list);
+        this.sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
@@ -53,6 +76,8 @@ public class CategoryFragment extends Fragment {
         hashMapCategory = new HashMap<>();
 
         final FragmentManager manager = MainActivity.getFragmetManeger();
+
+        MainActivity.showLoader();
 
         ValueEventListener postListener = new ValueEventListener() {
             @Override
@@ -89,43 +114,18 @@ public class CategoryFragment extends Fragment {
 
                 LinearLayoutManager layoutManager = new LinearLayoutManager(rootview.getContext());
                 sporList.setLayoutManager(layoutManager);
+
+                MainActivity.dismissWithAnimationLoader();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
         };
-        reference.addValueEventListener(postListener);
+        reference.addListenerForSingleValueEvent(postListener);
 
         MainActivity.setCurentFragment(this);
         return rootview;
-    }
-
-    private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order)
-    {
-        List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
-
-        // Сортируем в зависимости от значения
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>()
-        {
-            public int compare(Map.Entry<String, Integer> o1,
-                               Map.Entry<String, Integer> o2)
-            {
-                if (order) {
-                    return o1.getValue().compareTo(o2.getValue());
-                }
-                else {
-                    return o2.getValue().compareTo(o1.getValue());
-                }
-            }
-        });
-
-        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
-        for (Map.Entry<String, Integer> entry : list) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-
-        return sortedMap;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package spor.automato.com.sporprojecttest.Activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private static FragmentManager m;
     private static MainActivity myActivity;
     private static Fragment curentFragment;
+    private static SweetAlertDialog mProgressDialog;
     private FirebaseAuth mAuth;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -76,10 +78,26 @@ public class MainActivity extends AppCompatActivity {
         curentFragment = fragment;
     }
 
+    public static void showLoader() {
+        mProgressDialog = new SweetAlertDialog(myActivity, SweetAlertDialog.PROGRESS_TYPE);
+        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        mProgressDialog.setTitleText("Загрузка");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+    }
+
+    public static void dismissWithAnimationLoader() {
+        if (mProgressDialog != null) {
+            mProgressDialog.dismissWithAnimation();
+            mProgressDialog = null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        myActivity = this;
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -90,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
         m = getSupportFragmentManager();
 
         changeFragment(0);
-        myActivity = this;
     }
 
     @Override
@@ -177,11 +194,11 @@ public class MainActivity extends AppCompatActivity {
                         sDialog.cancel();
                     }
                 }).setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        MainActivity.super.onBackPressed();
-                    }
-                }).show();
+            @Override
+            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                MainActivity.super.onBackPressed();
+            }
+        }).show();
     }
 
     private void CategoryDetailBackPress() {

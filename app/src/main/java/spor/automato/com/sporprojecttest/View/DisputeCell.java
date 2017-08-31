@@ -209,7 +209,13 @@ public class DisputeCell extends RecyclerView.ViewHolder {
             if (dispute.participants.containsKey(userId)) {
                 ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
                 participant.setImageResource(R.drawable.people_black);
+            }else {
+                ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
+                participant.setImageResource(R.drawable.people);
             }
+        }else {
+            ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
+            participant.setImageResource(R.drawable.people);
         }
     }
 
@@ -289,18 +295,27 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                 long progress = unixTime - curUnixTime;
                 if (progress < 0) {
                     TextView progressText = getProgressText();
+                    TextView status = getStatusTextView();
                     progressBar.setProgress(100);
                     progressBar.setVisibility(View.GONE);
                     progressText.setVisibility(View.VISIBLE);
-                    if (dispute.result.equals(""))
+                    if (dispute.result.equals("")) {
                         progressText.setText(R.string.Live);
-                    else
-                        progressText.setText(dispute.result);
+                        status.setText(R.string.Live);
+                    }
+                    else {
+                        progressText.setText(view.getResources().getString(R.string.end, dispute.result));
+                        status.setText(R.string.done);
+                    }
                 } else {
                     int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
                     progressBar.setProgress(100 - progressInt);
                 }
             }
         });
+    }
+
+    public TextView getStatusTextView() {
+        return (TextView) view.findViewById(R.id.spor_status);
     }
 }

@@ -1,6 +1,5 @@
 package spor.automato.com.sporprojecttest.fragments;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -22,7 +21,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Timer;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.Adapter.SortedDisputeAdapter;
 import spor.automato.com.sporprojecttest.MyTimerTask;
@@ -36,6 +34,7 @@ public class MainFragment extends Fragment {
 
     private FirebaseDatabase database;
     private DatabaseReference reference;
+    private FirebaseAuth mAuth;
     private View rootView;
 
     private User client;
@@ -50,7 +49,6 @@ public class MainFragment extends Fragment {
     private RecyclerView sporList;
     private Timer myTimer;
     private MyTimerTask task;
-    private SweetAlertDialog mProgressDialog;
 
     public boolean isSorted() {
         return isSorted;
@@ -60,12 +58,12 @@ public class MainFragment extends Fragment {
         isSorted = sorted;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public String getCategory() {
         return this.category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public void setSubCategory(String subCategory) {
@@ -75,6 +73,13 @@ public class MainFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        MainActivity.showLoader();
+
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference("spor");
+        mAuth = FirebaseAuth.getInstance();
+        userID = mAuth.getCurrentUser().getUid();
+
         View rootView;
         if (!isSorted())
             rootView = notSortedData(inflater, container, savedInstanceState);
@@ -86,12 +91,6 @@ public class MainFragment extends Fragment {
         }
         this.rootView = rootView;
         MainActivity.setCurentFragment(this);
-
-        mProgressDialog = new SweetAlertDialog(rootView.getContext(), SweetAlertDialog.PROGRESS_TYPE);
-        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-        mProgressDialog.setTitleText("Загрузка");
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
 
         return rootView;
     }
@@ -105,31 +104,7 @@ public class MainFragment extends Fragment {
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
         sporList.setLayoutManager(llm);
 
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("spor");
-
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        userID = mAuth.getCurrentUser().getUid();
-
-        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Dispute d = ds.getValue(Dispute.class);
-                    if (category.equals(d.category)) {
-                        mData.add(d);
-                    }
-                }
-                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
-                sporList.setAdapter(adapter);
-                mProgressDialog.dismiss();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        sortedByCategorySetAdapter();
 
         return rootview;
     }
@@ -143,32 +118,7 @@ public class MainFragment extends Fragment {
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
         sporList.setLayoutManager(llm);
 
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("spor");
-
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        userID = mAuth.getCurrentUser().getUid();
-
-        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mData.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Dispute d = ds.getValue(Dispute.class);
-                    if (category.equals(d.category) && subCategory.equals(d.subcategory)) {
-                        mData.add(d);
-                    }
-                }
-                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
-                sporList.setAdapter(adapter);
-                mProgressDialog.dismiss();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        sortedBySubCategorySetAdapter();
 
         return rootview;
     }
@@ -181,14 +131,58 @@ public class MainFragment extends Fragment {
 
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
         sporList.setLayoutManager(llm);
+        notSortedSetAdapter();
 
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("spor");
+        return rootview;
+    }
 
+    private void sortedByCategorySetAdapter() {
+        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Dispute d = ds.getValue(Dispute.class);
+                    if (category.equals(d.category)) {
+                        mData.add(d);
+                    }
+                }
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
+                sporList.setAdapter(adapter);
+                MainActivity.dismissWithAnimationLoader();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void sortedBySubCategorySetAdapter() {
+        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mData.clear();
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Dispute d = ds.getValue(Dispute.class);
+                    if (category.equals(d.category) && subCategory.equals(d.subcategory)) {
+                        mData.add(d);
+                    }
+                }
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
+                sporList.setAdapter(adapter);
+                MainActivity.dismissWithAnimationLoader();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void notSortedSetAdapter() {
         Query q = reference.orderByChild("category");
-
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        userID = mAuth.getCurrentUser().getUid();
 
         this.firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Dispute, DisputeCell>(Dispute.class, R.layout.spor_cell_layout, DisputeCell.class, q) {
             @Override
@@ -225,15 +219,11 @@ public class MainFragment extends Fragment {
                     task.disputes.add(model);
                     task.disputeCells.add(viewHolder);
                 }
-                if (mProgressDialog != null){
-                    mProgressDialog.dismiss();
-                    mProgressDialog = null;
-                }
+                MainActivity.dismissWithAnimationLoader();
             }
         };
 
         sporList.setAdapter(firebaseRecyclerAdapter);
-        return rootview;
     }
 
     @Override

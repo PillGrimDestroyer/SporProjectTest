@@ -6,8 +6,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.models.Dispute;
+import spor.automato.com.sporprojecttest.models.Notification;
 import spor.automato.com.sporprojecttest.models.User;
 
 /**
@@ -23,6 +27,9 @@ public class NotificationCell extends RecyclerView.ViewHolder {
     private ImageView sporImage;
 
     private Dispute dispute;
+    private Notification notification;
+    private FirebaseDatabase myDatabase;
+    private String userId;
 
     public NotificationCell(View itemView) {
         super(itemView);
@@ -33,7 +40,7 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         sporImage = (ImageView) itemView.findViewById(R.id.spor_Image);
     }
 
-    public void setText(String text){
+    private void setText(String text){
         this.notifMessage.setText(text);
     }
 
@@ -41,25 +48,68 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         this.dispute = dispute;
     }
 
-    public void setNotifImage(){
-        this.notifImage.setImageResource(R.drawable.arrow_left);
+    private void setNotifImage(){
+        if (notification.winnings > 0){
+            this.notifImage.setImageResource(R.drawable.trophy);
+        }else {
+            this.notifImage.setImageResource(R.drawable.sad);
+        }
     }
 
-    public void setSporImage(String category){
+    private void setSporImage(){
         int drawable;
-        if(category.equals("Футбол"))
-            drawable = R.drawable.football_subcategory;
-        else if(category.equals("Баскетбол"))
-            drawable = R.drawable.basket_subcategory;
-        else if(category.equals("Бокс"))
-            drawable = R.drawable.box_subcategory;
-        else if(category.equals("Теннис"))
-            drawable = R.drawable.tennis_subcategory;
-        else if(category.equals("Борьба"))
-            drawable = R.drawable.cat_wrestling;
-        else
-            drawable = R.drawable.cat_volleyball;
+
+        switch (dispute.category){
+            case "Футбол":
+                drawable = R.drawable.cat_foot;
+                break;
+
+            case "Баскетбол":
+                drawable = R.drawable.cat_bask;
+                break;
+
+            case "Бокс":
+                drawable = R.drawable.cat_boxing;
+                break;
+
+            case "Теннис":
+                drawable = R.drawable.cat_ten;
+                break;
+
+            case "Борьба":
+                drawable = R.drawable.cat_wrestling;
+                break;
+
+            default:
+                drawable = R.drawable.cat_volleyball;
+                break;
+        }
 
         sporImage.setImageResource(drawable);
+    }
+
+    public void setDataBase(FirebaseDatabase dataBase) {
+        this.myDatabase = dataBase;
+    }
+
+    public void setUserId(String userId){
+        this.userId = userId;
+    }
+
+    public void setNotification(Notification notification) {
+        this.notification = notification;
+        String text;
+        if (notification.winnings > 0) {
+            text = rootView.getResources().getString(R.string.youWin, dispute.result, Integer.toString(notification.winnings));
+        }else {
+            text = rootView.getResources().getString(R.string.youLose);
+        }
+        setText(text);
+        setNotifImage();
+        setSporImage();
+        notification.checked = true;
+
+        DatabaseReference sporLikes = myDatabase.getReference("users/" + userId + "/history/" + dispute.id + "/checked");
+        sporLikes.setValue(notification.checked);
     }
 }

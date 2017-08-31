@@ -14,7 +14,6 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/editTextBackground"
-            android:elevation="4dp"
             android:textStyle="bold"
             android:title="@string/category"
             >
@@ -43,8 +42,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            app:menu="@menu/navigation"
-            app:layout_scrollFlags="scroll|enterAlways|snap" />
+            app:itemIconTint="@drawable/nav_item_colors"
+            app:itemTextColor="@drawable/nav_item_colors"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:menu="@menu/navigation" />
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

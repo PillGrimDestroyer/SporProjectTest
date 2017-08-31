@@ -65,8 +65,8 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
                     disputeTime.setText(null);
                 }
                 else {
-                    disputeName.setText(R.string.end);
-                    disputeTime.setText(dispute.result);
+                    disputeName.setText(R.string.done);
+                    disputeTime.setText(rootView.getResources().getString(R.string.end, dispute.result));
                 }
             }
             else {

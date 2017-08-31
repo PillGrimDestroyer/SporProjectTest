@@ -6,6 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,12 +27,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationCell> 
     private View view;
     private LayoutInflater mInflater;
     private ArrayList<Dispute> disputes;
+    private FirebaseDatabase myDatabase;
+    private String userId;
 
     // data is passed into the constructor
-    public NotificationAdapter(final Context context, HashMap<String, Notification> data, ArrayList<Dispute> disputes) {
+    public NotificationAdapter(final Context context, HashMap<String, Notification> data,
+                               ArrayList<Dispute> disputes, FirebaseDatabase myDatabase, String id) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
         this.disputes = disputes;
+        this.myDatabase = myDatabase;
+        this.userId = id;
     }
 
     // inflates the cell layout from xml when needed
@@ -43,17 +51,15 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationCell> 
     // binds the data to the textview in each cell
     @Override
     public void onBindViewHolder(NotificationCell holder, int position) {
-        String text;
         ArrayList<Notification> n = new ArrayList<>(mData.values());
-        holder.setDispute(disputes.get(position));
-        if (n.get(position).winnings > 0) {
-            text = view.getResources().getString(R.string.youWin, disputes.get(position).result, Integer.toString(n.get(position).winnings));
-        }else {
-            text = view.getResources().getString(R.string.youLose);
-        }
-        holder.setText(text);
-        holder.setNotifImage();
-        holder.setSporImage(disputes.get(position).category);
+
+        Notification notification = n.get(position);
+        Dispute dispute = disputes.get(position);
+
+        holder.setDataBase(myDatabase);
+        holder.setUserId(userId);
+        holder.setDispute(dispute);
+        holder.setNotification(notification);
     }
 
     // total number of cells

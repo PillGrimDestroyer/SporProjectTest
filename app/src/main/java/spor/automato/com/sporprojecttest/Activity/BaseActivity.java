@@ -1,6 +1,5 @@
 package spor.automato.com.sporprojecttest.Activity;
 
-import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
@@ -26,7 +25,7 @@ public class BaseActivity extends AppCompatActivity {
 
     public void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
+            mProgressDialog.dismissWithAnimation();
         }
     }
 
