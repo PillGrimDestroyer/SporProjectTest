@@ -1,6 +1,4 @@
-<android.support.v7.widget.CardView
-    android:id="@+id/cv"
-    style="@style/CardViewStyle"
+<android.support.v7.widget.CardView style="@style/CardViewStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -197,13 +195,11 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/spor_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"/>
 
         <LinearLayout
-            android:id="@+id/make_choice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -221,14 +217,12 @@
                 >
 
                 <RadioButton
-                    android:id="@+id/choice1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:text="Германия" />
                 <RadioButton
-                    android:id="@+id/choice2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Мексика"
@@ -244,7 +238,6 @@
                 android:layout_marginLeft="15dp"
                 >
                 <EditText
-                    android:id="@+id/bet_money"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -274,7 +267,6 @@
                         android:layout_height="wrap_content">
 
                         <Button
-                            android:id="@+id/button_make_bet"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"

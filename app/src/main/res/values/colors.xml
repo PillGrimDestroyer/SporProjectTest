@@ -4,16 +4,13 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorAccent2">#FF3B37</color>
-    <color name="background">#009688</color>
     <color name="editTextBackground">#FFFFFF</color>
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
-    <color name="very_grey">#404040</color>
     <color name="progress_background">#D8D8D8</color>
     <color name="orange">#FF3B37</color>
     <color name="orange_opacity13">#ffe6e5</color>
     <color name="black">#000000</color>
-    <color name="grey_text">#424242</color>
     <color name="light_grey">#F3F4F8</color>
 
     <color name="grey_500">#9e9e9e</color>

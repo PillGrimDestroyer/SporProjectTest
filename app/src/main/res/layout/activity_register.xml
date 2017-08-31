@@ -16,7 +16,6 @@
         app:titleTextColor="#fff" />
 
     <ScrollView
-        android:id="@+id/activity_register"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -85,7 +84,6 @@
                 android:weightSum="1">
 
                 <ImageView
-                    android:id="@+id/imageView"
                     android:layout_width="25dp"
                     android:layout_height="match_parent"
                     android:gravity="center"

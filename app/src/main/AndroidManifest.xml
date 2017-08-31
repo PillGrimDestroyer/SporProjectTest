@@ -24,13 +24,28 @@
         </activity>
 
         <activity
-            android:name=".Activity.MainActivity" />
+            android:name=".Activity.MainActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity
-            android:name=".Activity.ForgotPassActivity" />
+            android:name=".Activity.ForgotPassActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity
-            android:name=".Activity.RegistrationActivity" />
+            android:name=".Activity.RegistrationActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
     </application>
 

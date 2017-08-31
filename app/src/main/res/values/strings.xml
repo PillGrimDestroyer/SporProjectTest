@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">Спор</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
 
     <string-array name="category_spor">
         <item>Все споры</item>
@@ -24,18 +21,12 @@
     <string name="menu2">Категории</string>
     <string name="menu3">Уведомления</string>
     <string name="menu4">Профиль</string>
-    <string name="log_out">Выйти</string>
 
     <string name="hint_email">Электронная почта</string>
     <string name="hint_password_">Пароль</string>
 
     <string name="forgot_password">ЗАБЫЛИ ПАРОЛЬ?</string>
-    <string name="choose_photo_tips">choose the photo</string>
-    <string name="add_bet">Добавить спор</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="email">Email</string>
-    <string name="password">Почта</string>
-    <string name="login">Логин</string>
     <string name="signUp">Вы не зарегистрированы?</string>
     <string name="signUpNow">Зарегистрироваться</string>
     <string name="sign_in">Войти</string>
