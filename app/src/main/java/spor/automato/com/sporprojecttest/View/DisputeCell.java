@@ -308,7 +308,10 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                         status.setText(R.string.done);
                     }
                 } else {
-                    int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
+                    int progressInt = Integer.parseInt(Long.toString(progress / 100));
+                    while (progressInt > 100){
+                        progressInt /= 10;
+                    }
                     progressBar.setProgress(100 - progressInt);
                 }
             }

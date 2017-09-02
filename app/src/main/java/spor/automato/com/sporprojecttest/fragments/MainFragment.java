@@ -79,6 +79,7 @@ public class MainFragment extends Fragment {
         reference = database.getReference("spor");
         mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();
+        myTimer = null;
 
         View rootView;
         if (!isSorted())
@@ -216,8 +217,14 @@ public class MainFragment extends Fragment {
                     task.disputes.add(model);
                     myTimer.schedule(task, 0, task.time);
                 } else {
-                    task.disputes.add(model);
-                    task.disputeCells.add(viewHolder);
+                    try{
+                        task.disputes.remove(position);
+                        task.disputeCells.remove(position);
+                    }catch (Exception e){
+
+                    }
+                    task.disputes.add(position, model);
+                    task.disputeCells.add(position, viewHolder);
                 }
                 MainActivity.dismissWithAnimationLoader();
             }

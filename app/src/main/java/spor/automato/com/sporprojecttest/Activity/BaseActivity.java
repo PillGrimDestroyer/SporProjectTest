@@ -12,13 +12,10 @@ public class BaseActivity extends AppCompatActivity {
     public SweetAlertDialog mProgressDialog;
 
     public void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
-            mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-            mProgressDialog.setTitleText("Загрузка");
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
-        }
+        mProgressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        mProgressDialog.setTitleText("Загрузка");
+        mProgressDialog.setCancelable(false);
 
         mProgressDialog.show();
     }
