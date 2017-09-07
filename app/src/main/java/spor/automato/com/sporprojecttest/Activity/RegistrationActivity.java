@@ -4,8 +4,6 @@ import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -41,13 +39,13 @@ import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.fragments.DatePickerFragment;
 import spor.automato.com.sporprojecttest.models.User;
 
-public class RegistrationActivity extends BaseActivity  implements View.OnClickListener{
+public class RegistrationActivity extends BaseActivity implements View.OnClickListener {
 
+    ImageView imageCrop;
     private EditText mEmailField;
     private EditText mPasswordField;
     private EditText mName;
     private EditText mPasswordRepeat;
-    ImageView imageCrop;
     private String gender;
     private FirebaseAuth mAuth;
     private StorageReference mStorage;
@@ -64,78 +62,83 @@ public class RegistrationActivity extends BaseActivity  implements View.OnClickL
 
         imageUriCrop = null;
 
-
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        myToolbar.setTitle("Регистрация");
         setSupportActionBar(myToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        final Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.back_white);
-        upArrow.setColorFilter(ContextCompat.getColor(this, R.color.grey_100), PorterDuff.Mode.SRC_ATOP);
-        getSupportActionBar().setHomeAsUpIndicator(upArrow);
-
+        myToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_left));
+        myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         mEmailField = (EditText) findViewById(R.id.field_email);
         mPasswordField = (EditText) findViewById(R.id.field_password);
         mName = (EditText) findViewById(R.id.field_name);
         mPasswordRepeat = (EditText) findViewById(R.id.field_password_confirm);
-        gender="";
+        gender = "";
 
         findViewById(R.id.email_sign_in_button).setOnClickListener(this);
+    }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        switch(v.getId()){
+        switch (i) {
             case R.id.datePicker:
-
                 DialogFragment newFragment = new DatePickerFragment();
-                newFragment.show(getFragmentManager(),"datePicker");
+                newFragment.show(getFragmentManager(), "datePicker");
                 break;
+
             case R.id.email_sign_in_button:
                 boolean valid = true;
-
-                TextView birthday = (TextView)findViewById(R.id.datePicker);
-                if(mEmailField.getText().toString().equals("")){
+                TextView birthday = (TextView) findViewById(R.id.datePicker);
+                if (mEmailField.getText().toString().equals("")) {
                     mEmailField.setError(getString(R.string.required));
                     valid = false;
                 }
-                if(mPasswordField.getText().toString().equals("") ){
+                if (mPasswordField.getText().toString().equals("")) {
                     mPasswordField.setError(getString(R.string.required));
                     valid = false;
                 }
-                if(mName.getText().toString().equals("")){
+                if (mName.getText().toString().equals("")) {
                     mName.setError(getString(R.string.required));
                     valid = false;
                 }
-                if(mPasswordRepeat.getText().toString().equals("")) {
+                if (mPasswordRepeat.getText().toString().equals("")) {
                     mPasswordRepeat.setError(getString(R.string.required));
                     valid = false;
                     mPasswordRepeat.setError(getString(R.string.required));
                 }
 
-                if(gender.equals("")){
+                if (gender.equals("")) {
                     Toast.makeText(RegistrationActivity.this, R.string.required_gender, Toast.LENGTH_SHORT).show();
                     valid = false;
                 }
-                if(birthday.getText().toString().equals("")){
+                if (birthday.getText().toString().equals("")) {
                     Toast.makeText(RegistrationActivity.this, R.string.required_birthday, Toast.LENGTH_SHORT).show();
                     valid = false;
                 }
 
-                if(!mPasswordField.getText().toString().equals( mPasswordRepeat.getText().toString())){
+                if (!mPasswordField.getText().toString().equals(mPasswordRepeat.getText().toString())) {
                     Toast.makeText(RegistrationActivity.this, R.string.mismatch, Toast.LENGTH_SHORT).show();
                     valid = false;
-                }
-                else if(mPasswordField.getText().toString().length()<6 || mPasswordRepeat.getText().toString().length()<6 ){
+                } else if (mPasswordField.getText().toString().length() < 6 || mPasswordRepeat.getText().toString().length() < 6) {
                     Toast.makeText(RegistrationActivity.this, R.string.password_length_min, Toast.LENGTH_SHORT).show();
                     valid = false;
                 }
 
-                if(valid == true){
+                if (valid) {
                     createAccount(
                             mName.getText().toString(),
                             mEmailField.getText().toString(),
@@ -144,35 +147,36 @@ public class RegistrationActivity extends BaseActivity  implements View.OnClickL
                             gender);
                 }
                 break;
+
             case R.id.female_wrapper:
-                TextView text = (TextView)findViewById(R.id.female_text);
-                ImageView image = (ImageView)findViewById(R.id.female_image);
+                TextView text = (TextView) findViewById(R.id.female_text);
+                ImageView image = (ImageView) findViewById(R.id.female_image);
                 text.setTextColor(ContextCompat.getColor(this, R.color.orange));
                 image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.female_or));
 
-                text = (TextView)findViewById(R.id.male_text);
-                image = (ImageView)findViewById(R.id.male_image);
+                text = (TextView) findViewById(R.id.male_text);
+                image = (ImageView) findViewById(R.id.male_image);
                 text.setTextColor(ContextCompat.getColor(this, R.color.black));
                 image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.male));
 
                 gender = "female";
-
                 break;
+
             case R.id.male_wrapper:
-                TextView textMale = (TextView)findViewById(R.id.male_text);
-                ImageView imageMale = (ImageView)findViewById(R.id.male_image);
+                TextView textMale = (TextView) findViewById(R.id.male_text);
+                ImageView imageMale = (ImageView) findViewById(R.id.male_image);
                 textMale.setTextColor(ContextCompat.getColor(this, R.color.orange));
                 imageMale.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.male_or));
 
-                textMale = (TextView)findViewById(R.id.female_text);
-                imageMale = (ImageView)findViewById(R.id.female_image);
+                textMale = (TextView) findViewById(R.id.female_text);
+                imageMale = (ImageView) findViewById(R.id.female_image);
                 textMale.setTextColor(ContextCompat.getColor(this, R.color.black));
                 imageMale.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.female));
 
                 gender = "male";
                 break;
-            case R.id.upload_photo_imageview:
 
+            case R.id.upload_photo_imageview:
                 imageCrop = (ImageView) findViewById(R.id.upload_photo_imageview);
                 Crop.pickImage(this);
                 break;
@@ -203,10 +207,10 @@ public class RegistrationActivity extends BaseActivity  implements View.OnClickL
 
                             DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
                             final String userId = user.getUid();
-                            User p1 = new User(userId, name, user.getEmail(), birthday,gender );
+                            User p1 = new User(userId, name, user.getEmail(), birthday, gender);
                             mDatabase.child(userId).setValue(p1);
 
-                            if(imageUriCrop!=null){
+                            if (imageUriCrop != null) {
                                 final StorageReference filepath = mStorage.child("Photos").child(userId);
                                 filepath.putFile(imageUriCrop).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                     @Override
@@ -219,7 +223,7 @@ public class RegistrationActivity extends BaseActivity  implements View.OnClickL
                                                 DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
                                                 final StorageReference filepath = mStorage.child("Photos").child(userId);
 
-                                                mDatabase.child(userId+"/hasImage").setValue(true);
+                                                mDatabase.child(userId + "/hasImage").setValue(true);
 
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
@@ -237,13 +241,11 @@ public class RegistrationActivity extends BaseActivity  implements View.OnClickL
                                 });
 
                             }
-                            if(imageUriFull!=null){
-                                final StorageReference filepath = mStorage.child("Photos").child(userId+"-full");
+                            if (imageUriFull != null) {
+                                final StorageReference filepath = mStorage.child("Photos").child(userId + "-full");
                                 filepath.putFile(imageUriFull);
                             }
                             sendEmailVerification();
-                            Intent intent = new Intent(RegistrationActivity.this, LoginActivity.class);
-                            startActivity(intent);
 
                         }
                         hideProgressDialog();
@@ -261,14 +263,16 @@ public class RegistrationActivity extends BaseActivity  implements View.OnClickL
 
                         if (task.isSuccessful()) {
                             Toast.makeText(RegistrationActivity.this,
-                                    "Verification email sent to " + user.getEmail(),
+                                    "Письмо с подтверждением аккаунта отправлено на " + user.getEmail(),
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             Log.e("info", "sendEmailVerification", task.getException());
                             Toast.makeText(RegistrationActivity.this,
-                                    "Failed to send verification email.",
+                                    "Не удалось отправить письмо на электронную почту",
                                     Toast.LENGTH_SHORT).show();
                         }
+                        Intent intent = new Intent(RegistrationActivity.this, LoginActivity.class);
+                        startActivity(intent);
                     }
                 });
     }
@@ -289,8 +293,8 @@ public class RegistrationActivity extends BaseActivity  implements View.OnClickL
                 Toast.makeText(RegistrationActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
             }
 
-        }else {
-            Toast.makeText(RegistrationActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(RegistrationActivity.this, "You haven't picked Image", Toast.LENGTH_LONG).show();
         }
     }
 

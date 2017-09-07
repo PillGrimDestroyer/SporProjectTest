@@ -18,7 +18,7 @@ import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.fragments.CategoryDetailFragment;
 
 /**
- * Created by Apofis on 24.08.2017.
+ * Created by HAOR on 24.08.2017.
  */
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {

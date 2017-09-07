@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -90,6 +91,9 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
         database = FirebaseDatabase.getInstance();
         DatabaseReference reference = database.getReference("spor");
         setImage();
+
+        TextView title = (TextView) getActivity().findViewById(R.id.title);
+        title.setText(category);
 
         reference.orderByKey().addValueEventListener(new ValueEventListener() {
             @Override

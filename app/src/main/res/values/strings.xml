@@ -1,11 +1,15 @@
 <resources>
-    <string name="app_name">Спор</string>
+    <string name="app_name">Dispute</string>
 
     <string-array name="category_spor">
         <item>Все споры</item>
         <item>Активные споры</item>
         <item>Ожидаемые споры</item>
         <item>Завершённые споры</item>
+    </string-array>
+
+    <string-array name="languages">
+        <item>Русский</item>
     </string-array>
 
     <string-array name="category">
@@ -60,4 +64,24 @@
     <string name="youWin" formatted="false">Вы победили в споре: %s. Ваш выигрыш составляет %s тг</string>
     <string name="youLose">Вы проиграли</string>
     <string name="done">Завершен</string>
+    <string name="settings">НАСТРОЙКИ</string>
+    <string name="language">Язык</string>
+    <string name="notification">Уведомления</string>
+    <string name="profile">АККАУНТ</string>
+    <string name="editing">Редактирование</string>
+    <string name="information">ИНФОРМАЦИЯ</string>
+    <string name="about_us_field">О Dispute</string>
+    <string name="terms_of_use_field">Условия использования</string>
+    <string name="privacy_policy_field">Политика конфиденциальности</string>
+    <string name="menu2_admin">Добавить спор</string>
+    <string name="create_dispute_button">Создать спор</string>
+    <string name="spor_name">Название спора</string>
+    <string name="spor_sub_category">Подкатегория</string>
+    <string name="spor_rivor1">Опонент №1</string>
+    <string name="spor_rivor2">Опонент №2</string>
+    <string name="spor_category">Категория</string>
+    <string name="download_image">Загрузите картинку из файла</string>
+    <string name="date">дд/мм/гггг</string>
+    <string name="time">00:00</string>
+    <string name="exit">Выход</string>
 </resources>

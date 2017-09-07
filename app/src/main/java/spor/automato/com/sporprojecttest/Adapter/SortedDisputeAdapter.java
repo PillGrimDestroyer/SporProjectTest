@@ -12,7 +12,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.Timer;
 
-import spor.automato.com.sporprojecttest.MyTimerTask;
+import spor.automato.com.sporprojecttest.other.TimerTask.MyTimerTask;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.models.Dispute;
@@ -67,7 +67,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
         viewHolder.setSubCategory(model.subcategory);
         viewHolder.setSorted(isSorted);
         viewHolder.setSortedBySubCategory(isSortedBySubCategory);
-        viewHolder.setImage();
+        viewHolder.setImage(model.photo);
 
         boolean isLiked = false;
         if (model.likes != null) {

@@ -100,7 +100,7 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         this.notification = notification;
         String text;
         if (notification.winnings > 0) {
-            text = rootView.getResources().getString(R.string.youWin, dispute.result, Integer.toString(notification.winnings));
+            text = rootView.getResources().getString(R.string.youWin, dispute.subject, Integer.toString(notification.winnings));
         }else {
             text = rootView.getResources().getString(R.string.youLose);
         }

@@ -9,17 +9,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import spor.automato.com.sporprojecttest.R;
+import spor.automato.com.sporprojecttest.fragments.AddDisputeCategoryFragment;
+import spor.automato.com.sporprojecttest.fragments.AddDisputeSubCategoryFragment;
 import spor.automato.com.sporprojecttest.fragments.CabinetFragment;
 import spor.automato.com.sporprojecttest.fragments.CategoryDetailFragment;
 import spor.automato.com.sporprojecttest.fragments.CategoryFragment;
@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private static MainActivity myActivity;
     private static Fragment curentFragment;
     private static SweetAlertDialog mProgressDialog;
+    private static boolean isAdmin = false;
     private FirebaseAuth mAuth;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -44,21 +45,46 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.main:
                     changeFragment(0);
                     spinner.setVisibility(View.VISIBLE);
+                    findViewById(R.id.search).setVisibility(View.VISIBLE);
+                    findViewById(R.id.title).setVisibility(View.GONE);
+                    findViewById(R.id.settings_image).setVisibility(View.GONE);
+                    findViewById(R.id.done).setVisibility(View.GONE);
                     return true;
 
                 case R.id.category:
                     changeFragment(1);
+                    findViewById(R.id.search).setVisibility(View.VISIBLE);
+                    findViewById(R.id.title).setVisibility(View.VISIBLE);
                     spinner.setVisibility(View.GONE);
+                    findViewById(R.id.settings_image).setVisibility(View.GONE);
+                    findViewById(R.id.done).setVisibility(View.GONE);
+                    return true;
+
+                case R.id.add_spor:
+                    changeFragment(4);
+                    spinner.setVisibility(View.GONE);
+                    findViewById(R.id.search).setVisibility(View.GONE);
+                    findViewById(R.id.settings_image).setVisibility(View.GONE);
+                    findViewById(R.id.done).setVisibility(View.GONE);
+                    findViewById(R.id.title).setVisibility(View.VISIBLE);
                     return true;
 
                 case R.id.notification:
                     changeFragment(2);
                     spinner.setVisibility(View.GONE);
+                    findViewById(R.id.search).setVisibility(View.GONE);
+                    findViewById(R.id.settings_image).setVisibility(View.GONE);
+                    findViewById(R.id.done).setVisibility(View.GONE);
+                    findViewById(R.id.title).setVisibility(View.VISIBLE);
                     return true;
 
                 case R.id.cabinet:
                     changeFragment(3);
                     spinner.setVisibility(View.GONE);
+                    findViewById(R.id.search).setVisibility(View.GONE);
+                    findViewById(R.id.done).setVisibility(View.GONE);
+                    findViewById(R.id.title).setVisibility(View.VISIBLE);
+                    findViewById(R.id.settings_image).setVisibility(View.VISIBLE);
                     return true;
             }
             return false;
@@ -76,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
 
     public static void setCurentFragment(Fragment fragment) {
         curentFragment = fragment;
+    }
+
+    public static boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public static void setAdmin(boolean admin) {
+        isAdmin = admin;
     }
 
     public static void showLoader() {
@@ -99,44 +133,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         myActivity = this;
 
+        ImageView settings = (ImageView) getActivity().findViewById(R.id.settings_image);
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        if (isAdmin) {
+            navigation.inflateMenu(R.menu.navigation_admin);
+        } else {
+            navigation.inflateMenu(R.menu.navigation);
+        }
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        findViewById(R.id.my_toolbar).setVisibility(View.GONE);
 
         mAuth = FirebaseAuth.getInstance();
 
         m = getSupportFragmentManager();
 
         changeFragment(0);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-
-        // return true so that the menu pop up is opened
-        return true;
-    }
-
-    private void signOut() {
-        mAuth.signOut();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.log_out:
-                signOut();
-                Log.i("info", "log out");
-
-                Intent t = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(t);
-
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     private void changeFragment(int position) {
@@ -154,6 +172,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case 3:
                 newFragment = new CabinetFragment();
+                break;
+            case 4:
+                newFragment = new AddDisputeCategoryFragment();
                 break;
         }
 
@@ -175,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
                 CategoryDetailBackPress();
             } else if (curentFragment.getClass().equals(MainFragment.class)) {
                 MainFragmentBackPress();
+            } else if (curentFragment.getClass().equals(AddDisputeSubCategoryFragment.class)) {
+                AddDisputeSubCategoryBackPress();
             } else {
                 exitApp();
             }
@@ -199,6 +222,14 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.super.onBackPressed();
             }
         }).show();
+    }
+
+    private void AddDisputeSubCategoryBackPress() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment, new AddDisputeCategoryFragment(), "fragment")
+                .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
     }
 
     private void CategoryDetailBackPress() {

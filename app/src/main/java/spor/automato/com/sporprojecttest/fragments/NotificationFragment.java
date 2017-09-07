@@ -1,5 +1,6 @@
 package spor.automato.com.sporprojecttest.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import spor.automato.com.sporprojecttest.Activity.MainActivity;
+import spor.automato.com.sporprojecttest.Activity.SettingsActivity;
 import spor.automato.com.sporprojecttest.Adapter.NotificationAdapter;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.models.Dispute;
@@ -50,6 +54,9 @@ public class NotificationFragment extends Fragment {
 
         myDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
+
+        TextView title = (TextView) getActivity().findViewById(R.id.title);
+        title.setText("Уведомления");
 
         loadNotifications();
 

@@ -1,25 +1,36 @@
 package spor.automato.com.sporprojecttest.fragments;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,8 +71,9 @@ public class DisputeDetailFragment extends Fragment {
     private RadioButton fTeam;
     private RadioButton sTeam;
     private Button submit;
-    private TextView rate;
+    private EditText rate;
     private String selectedChoice;
+    private StorageReference storageReference;
 
     public String getFerstTeam() {
         return ferstTeam;
@@ -164,6 +176,7 @@ public class DisputeDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_dispute_detail, container, false);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
         final String userID = mAuth.getCurrentUser().getUid();
         DatabaseReference reference = myDatabase.getReference();
         reference.child("users").child(userID).orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
@@ -195,7 +208,7 @@ public class DisputeDetailFragment extends Fragment {
         submit = (Button) rootview.findViewById(R.id.submit);
         fTeam = (RadioButton) rootview.findViewById(R.id.ferstTeam);
         sTeam = (RadioButton) rootview.findViewById(R.id.secondTeam);
-        rate = (TextView) rootview.findViewById(R.id.rate);
+        rate = (EditText) rootview.findViewById(R.id.rate);
         ProgressBar progressBar = (ProgressBar) rootview.findViewById(R.id.progress_bar);
 
         fTeam.setText(getFerstTeam());
@@ -213,16 +226,18 @@ public class DisputeDetailFragment extends Fragment {
                 progressBar.setProgress(100);
                 progressBar.setVisibility(View.GONE);
                 progressText.setVisibility(View.VISIBLE);
-                if (dispute.result.equals("")){
+                if (dispute.result.equals("")) {
                     progressText.setText(R.string.Live);
                     status.setText(R.string.Live);
-                }
-                else {
+                } else {
                     progressText.setText(rootview.getResources().getString(R.string.end, dispute.result));
                     status.setText(R.string.done);
                 }
             } else {
-                int progressInt = Integer.parseInt(Long.toString(progress / 100000000));
+                int progressInt = Integer.parseInt(Long.toString(progress / 100));
+                while (progressInt > 100) {
+                    progressInt /= 10;
+                }
                 progressBar.setProgress(100 - progressInt);
             }
         } catch (ParseException e) {
@@ -299,6 +314,11 @@ public class DisputeDetailFragment extends Fragment {
                             if (dispute.participants == null) {
                                 dispute.participants = new HashMap<>();
                             }
+
+                            Context context = rootview.getContext();
+                            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(rate.getWindowToken(), 0);
+
                             if (!dispute.participants.containsKey(client.id)) {
                                 Participant participant = new Participant();
                                 dispute.money += rateValue;
@@ -398,37 +418,56 @@ public class DisputeDetailFragment extends Fragment {
     }
 
     private void setImage() {
-        ImageView sporImage = (ImageView) rootview.findViewById(R.id.spor_Image);
+        final ImageView sporImage = (ImageView) rootview.findViewById(R.id.spor_Image);
 
         int drawable;
 
-        switch (dispute.category) {
-            case "Футбол":
-                drawable = R.drawable.cat_foot;
-                break;
+        if (dispute.photo == null) {
+            switch (dispute.category) {
+                case "Футбол":
+                    drawable = R.drawable.cat_foot;
+                    break;
 
-            case "Баскетбол":
-                drawable = R.drawable.cat_bask;
-                break;
+                case "Баскетбол":
+                    drawable = R.drawable.cat_bask;
+                    break;
 
-            case "Бокс":
-                drawable = R.drawable.cat_boxing;
-                break;
+                case "Бокс":
+                    drawable = R.drawable.cat_boxing;
+                    break;
 
-            case "Теннис":
-                drawable = R.drawable.cat_ten;
-                break;
+                case "Теннис":
+                    drawable = R.drawable.cat_ten;
+                    break;
 
-            case "Борьба":
-                drawable = R.drawable.cat_wrestling;
-                break;
+                case "Борьба":
+                    drawable = R.drawable.cat_wrestling;
+                    break;
 
-            default:
-                drawable = R.drawable.cat_volleyball;
-                break;
+                default:
+                    drawable = R.drawable.cat_volleyball;
+                    break;
+            }
+
+            sporImage.setImageResource(drawable);
+        } else {
+            rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.VISIBLE);
+            storageReference.child("Photos").child(dispute.photo).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    sporImage.setImageBitmap(image);
+                    rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(rootview.getContext(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
+                    Log.e("ImageLoadFailure", e.getMessage());
+                    rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                }
+            });
         }
-
-        sporImage.setImageResource(drawable);
     }
 
     @Override

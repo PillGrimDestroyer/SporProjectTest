@@ -8,6 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,12 +20,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 
 import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.Adapter.SortedDisputeAdapter;
-import spor.automato.com.sporprojecttest.MyTimerTask;
+import spor.automato.com.sporprojecttest.other.TimerTask.MyTimerTask;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.View.DisputeCell;
 import spor.automato.com.sporprojecttest.models.Dispute;
@@ -42,6 +47,7 @@ public class MainFragment extends Fragment {
     private boolean isSorted = false;
     private String category;
     private String subCategory;
+    private boolean fLoad = false;
 
     private FirebaseRecyclerAdapter<Dispute, DisputeCell> firebaseRecyclerAdapter;
     private SortedDisputeAdapter adapter;
@@ -49,6 +55,7 @@ public class MainFragment extends Fragment {
     private RecyclerView sporList;
     private Timer myTimer;
     private MyTimerTask task;
+    private Spinner spinner;
 
     public boolean isSorted() {
         return isSorted;
@@ -81,33 +88,36 @@ public class MainFragment extends Fragment {
         userID = mAuth.getCurrentUser().getUid();
         myTimer = null;
 
-        View rootView;
+        final View rootView;
         if (!isSorted())
             rootView = notSortedData(inflater, container, savedInstanceState);
         else {
-            if (subCategory != null)
-                rootView = sortedBySubCategoryData(inflater, container, savedInstanceState);
-            else
-                rootView = sortedByCategoryData(inflater, container, savedInstanceState);
+            rootView = sortedBySubCategoryData(inflater, container, savedInstanceState);
         }
         this.rootView = rootView;
         MainActivity.setCurentFragment(this);
 
+        spinner = (Spinner) getActivity().findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (fLoad) {
+                    MainActivity.showLoader();
+                    if (!spinner.getSelectedItem().toString().equals("Все споры"))
+                        sortedByTypeSetAdapter(spinner.getSelectedItem().toString());
+                    else
+                        notSortedSetAdapter();
+                } else
+                    fLoad = true;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
         return rootView;
-    }
-
-    public View sortedByCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootview = inflater.inflate(R.layout.fragment_main, container, false);
-
-        this.sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
-        sporList.setHasFixedSize(true);
-
-        LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
-        sporList.setLayoutManager(llm);
-
-        sortedByCategorySetAdapter();
-
-        return rootview;
     }
 
     public View sortedBySubCategoryData(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -137,14 +147,35 @@ public class MainFragment extends Fragment {
         return rootview;
     }
 
-    private void sortedByCategorySetAdapter() {
+    private void sortedByTypeSetAdapter(final String selType) {
+        if (mData != null)
+            mData.clear();
         reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Dispute d = ds.getValue(Dispute.class);
-                    if (category.equals(d.category)) {
-                        mData.add(d);
+                    final String s = d.date + " " + d.time;
+                    SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+                    try {
+                        Date date = format.parse(s);
+                        long curUnixTime = System.currentTimeMillis();
+                        long progress = date.getTime() - curUnixTime;
+
+                        String type;
+                        if (progress < 0 && d.result.equals("")) {
+                            type = "Активные споры";
+                        } else if (progress < 0 && !d.result.equals("")) {
+                            type = "Завершённые споры";
+                        } else {
+                            type = "Ожидаемые споры";
+                        }
+
+                        if (selType.equals(type)) {
+                            mData.add(d);
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
                 }
                 adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
@@ -198,7 +229,7 @@ public class MainFragment extends Fragment {
                 viewHolder.setSubCategory(model.subcategory);
                 viewHolder.setSorted(isSorted());
                 viewHolder.setSortedBySubCategory(subCategory != null);
-                viewHolder.setImage();
+                viewHolder.setImage(model.photo);
 
                 boolean isLiked = false;
                 if (model.likes != null) {
@@ -217,12 +248,13 @@ public class MainFragment extends Fragment {
                     task.disputes.add(model);
                     myTimer.schedule(task, 0, task.time);
                 } else {
-                    try{
+                    try {
                         task.disputes.remove(position);
                         task.disputeCells.remove(position);
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                     }
+
                     task.disputes.add(position, model);
                     task.disputeCells.add(position, viewHolder);
                 }

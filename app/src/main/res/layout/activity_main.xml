@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -15,8 +14,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/editTextBackground"
             android:textStyle="bold"
-            android:title="@string/category"
-            >
+            android:title="@string/category">
 
             <Spinner
                 android:id="@+id/spinner"
@@ -24,18 +22,56 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:layout_gravity="center"
-                android:entries="@array/category_spor"
-                android:textSize="32sp"
-                android:textStyle="bold" />
+                android:entries="@array/category_spor" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:text="TextView"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginRight="10dp"
+                android:src="@android:drawable/ic_menu_search" />
+
+            <ImageView
+                android:id="@+id/done"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/ic_check"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/settings_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_gravity="right"
+                android:layout_marginRight="10dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_settings" />
+
         </android.support.v7.widget.Toolbar>
 
         <FrameLayout
             android:id="@+id/main_fragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bg_4"
-            android:layout_below="@+id/my_toolbar"
-            android:layout_above="@+id/navigation"/>
+            android:layout_above="@+id/navigation"
+            android:layout_below="@id/my_toolbar"
+            android:background="@drawable/bg_4" />
 
         <android.support.design.widget.BottomNavigationView
             android:id="@+id/navigation"
@@ -44,8 +80,7 @@
             android:layout_alignParentBottom="true"
             app:itemIconTint="@drawable/nav_item_colors"
             app:itemTextColor="@drawable/nav_item_colors"
-            app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:menu="@menu/navigation" />
+            app:layout_scrollFlags="scroll|enterAlways|snap" />
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

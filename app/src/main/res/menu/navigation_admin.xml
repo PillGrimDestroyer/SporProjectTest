@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/main"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/menu1" />
+
+    <item
+        android:id="@+id/add_spor"
+        android:icon="@drawable/ic_plus_circle"
+        android:title="@string/menu2_admin" />
+
+    <item
+        android:id="@+id/cabinet"
+        android:icon="@drawable/profile_dark"
+        android:title="@string/menu4" />
+
+</menu>

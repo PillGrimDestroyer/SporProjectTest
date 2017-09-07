@@ -6,9 +6,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -76,6 +78,9 @@ public class CategoryFragment extends Fragment {
         hashMapCategory = new HashMap<>();
 
         final FragmentManager manager = MainActivity.getFragmetManeger();
+
+        TextView title = (TextView) getActivity().findViewById(R.id.title);
+        title.setText("Категории");
 
         MainActivity.showLoader();
 

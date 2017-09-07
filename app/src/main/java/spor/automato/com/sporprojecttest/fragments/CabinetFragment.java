@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import spor.automato.com.sporprojecttest.Activity.MainActivity;
 import spor.automato.com.sporprojecttest.Adapter.UsersDisputeAdapter;
 import spor.automato.com.sporprojecttest.R;
 import spor.automato.com.sporprojecttest.models.Dispute;
@@ -59,7 +60,6 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     TextView userAge;
     TextView userMoney;
     TextView sporLabel;
-    ImageView selector;
     FloatingActionButton activ;
     FloatingActionButton finished;
     FloatingActionButton wait;
@@ -83,6 +83,10 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
         myDatabase = FirebaseDatabase.getInstance();
         reference = myDatabase.getReference();
         mAuth = FirebaseAuth.getInstance();
+
+        TextView title = (TextView) getActivity().findViewById(R.id.title);
+        title.setText("Личный кабинет");
+
         initViews();
         loadUserData();
 
@@ -288,15 +292,21 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
 
     public void initViews() {
         this.userProfileImage = (ImageView) rootView.findViewById(R.id.client_profile);
-        this.selector = (ImageView) rootView.findViewById(R.id.select);
         this.userName = (TextView) rootView.findViewById(R.id.client_name);
         this.userEmail = (TextView) rootView.findViewById(R.id.client_email);
         this.userAge = (TextView) rootView.findViewById(R.id.client_age);
         this.userMoney = (TextView) rootView.findViewById(R.id.client_money);
         this.sporLabel = (TextView) rootView.findViewById(R.id.client_spors_label);
 
-        userProfileImage.setOnClickListener(CabinetFragment.this);
-        selector.setOnClickListener(CabinetFragment.this);
+        if (MainActivity.isAdmin()){
+            rootView.findViewById(R.id.age_layout).setVisibility(View.GONE);
+            rootView.findViewById(R.id.client_money).setVisibility(View.GONE);
+            rootView.findViewById(R.id.sort_buttons).setVisibility(View.GONE);
+            rootView.findViewById(R.id.clientSpors).setVisibility(View.GONE);
+            rootView.findViewById(R.id.client_spors_label).setVisibility(View.GONE);
+        }else {
+            userProfileImage.setOnClickListener(CabinetFragment.this);
+        }
 
         this.activ = (FloatingActionButton) rootView.findViewById(R.id.activ);
         activ.setOnClickListener(CabinetFragment.this);
@@ -348,7 +358,6 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.client_profile:
-            case R.id.select:
                 changeImageClick();
                 break;
 

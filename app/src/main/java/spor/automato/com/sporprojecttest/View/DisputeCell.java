@@ -1,18 +1,27 @@
 package spor.automato.com.sporprojecttest.View;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 
@@ -42,9 +51,12 @@ public class DisputeCell extends RecyclerView.ViewHolder {
     private User client;
     private String category;
 
+    private StorageReference storageReference;
+
     public DisputeCell(View itemView) {
         super(itemView);
         this.view = itemView;
+        storageReference = FirebaseStorage.getInstance().getReference();
     }
 
     public void setOnCardListener(final Dispute model, final FirebaseDatabase myDatabase) {
@@ -97,54 +109,56 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     }
                 });
 
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        DisputeDetailFragment ddf = new DisputeDetailFragment();
-                        HashMap<String, Choice> choices = model.choices;
+                if (!MainActivity.isAdmin()) {
+                    view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            DisputeDetailFragment ddf = new DisputeDetailFragment();
+                            HashMap<String, Choice> choices = model.choices;
 
-                        String sporDate = ((TextView) view.findViewById(R.id.spor_date)).getText().toString();
-                        int sporParticipantCount = Integer.parseInt(((TextView) view.findViewById(R.id.viewers_count)).getText().toString());
-                        int sporLikeCount = Integer.parseInt(((TextView) view.findViewById(R.id.like_count)).getText().toString());
-                        String viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
-                        int viewsCountNumber = Integer.parseInt(viewsCountMessage.split(" ")[0]);
-                        viewsCountMessage = viewsCountMessage.replace(Integer.toString(viewsCountNumber), Integer.toString(++viewsCountNumber));
-                        String sporSubject = ((TextView) view.findViewById(R.id.spor_subject)).getText().toString();
-                        String sporStartTime = ((TextView) view.findViewById(R.id.spor_time)).getText().toString();
-                        int money = model.money;
+                            String sporDate = ((TextView) view.findViewById(R.id.spor_date)).getText().toString();
+                            int sporParticipantCount = Integer.parseInt(((TextView) view.findViewById(R.id.viewers_count)).getText().toString());
+                            int sporLikeCount = Integer.parseInt(((TextView) view.findViewById(R.id.like_count)).getText().toString());
+                            String viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
+                            int viewsCountNumber = Integer.parseInt(viewsCountMessage.split(" ")[0]);
+                            viewsCountMessage = viewsCountMessage.replace(Integer.toString(viewsCountNumber), Integer.toString(++viewsCountNumber));
+                            String sporSubject = ((TextView) view.findViewById(R.id.spor_subject)).getText().toString();
+                            String sporStartTime = ((TextView) view.findViewById(R.id.spor_time)).getText().toString();
+                            int money = model.money;
 
-                        ddf.setDate(sporDate);
-                        ddf.setNumberOfParticipant(sporParticipantCount);
-                        ddf.setNumberOfLikes(sporLikeCount);
-                        ddf.setSubject(sporSubject);
-                        ddf.setTime(sporStartTime);
-                        ddf.setViewCount(viewsCountMessage);
-                        ddf.setTotalDisputeMoney(money);
-                        ddf.setDispute(model);
-                        ddf.setClient(client);
-                        ddf.setMyDatabase(myDatabase);
-                        ddf.setLikedByCurentUser(isLiked());
-                        ddf.setSorted(isSorted());
-                        ddf.setSortedBySubCategory(isSortedBySubCategory());
+                            ddf.setDate(sporDate);
+                            ddf.setNumberOfParticipant(sporParticipantCount);
+                            ddf.setNumberOfLikes(sporLikeCount);
+                            ddf.setSubject(sporSubject);
+                            ddf.setTime(sporStartTime);
+                            ddf.setViewCount(viewsCountMessage);
+                            ddf.setTotalDisputeMoney(money);
+                            ddf.setDispute(model);
+                            ddf.setClient(client);
+                            ddf.setMyDatabase(myDatabase);
+                            ddf.setLikedByCurentUser(isLiked());
+                            ddf.setSorted(isSorted());
+                            ddf.setSortedBySubCategory(isSortedBySubCategory());
 
-                        int b = 0;
-                        for (Choice c : choices.values()) {
-                            if (b == 0)
-                                ddf.setFerstTeam(c.choice);
-                            else
-                                ddf.setSecondTeam(c.choice);
-                            b++;
+                            int b = 0;
+                            for (Choice c : choices.values()) {
+                                if (b == 0)
+                                    ddf.setFerstTeam(c.choice);
+                                else
+                                    ddf.setSecondTeam(c.choice);
+                                b++;
+                            }
+
+                            android.support.v4.app.Fragment newFragment = ddf;
+
+                            MainActivity.getFragmetManeger()
+                                    .beginTransaction()
+                                    .replace(R.id.main_fragment, newFragment, "fragment")
+                                    .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                                    .commit();
                         }
-
-                        android.support.v4.app.Fragment newFragment = ddf;
-
-                        MainActivity.getFragmetManeger()
-                                .beginTransaction()
-                                .replace(R.id.main_fragment, newFragment, "fragment")
-                                .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                .commit();
-                    }
-                });
+                    });
+                }
             }
 
             @Override
@@ -238,42 +252,61 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         this.category = category;
     }
 
-    public void setImage() {
-        ImageView sporImage = (ImageView) view.findViewById(R.id.spor_Image);
+    public void setImage(String photo) {
+        final ImageView sporImage = (ImageView) view.findViewById(R.id.spor_Image);
 
-        int drawable;
+        if (photo == null) {
+            int drawable;
 
-        switch (category) {
-            case "Футбол":
-                drawable = R.drawable.cat_foot;
-                break;
+            switch (category) {
+                case "Футбол":
+                    drawable = R.drawable.cat_foot;
+                    break;
 
-            case "Баскетбол":
-                drawable = R.drawable.cat_bask;
-                break;
+                case "Баскетбол":
+                    drawable = R.drawable.cat_bask;
+                    break;
 
-            case "Бокс":
-                drawable = R.drawable.cat_boxing;
-                break;
+                case "Бокс":
+                    drawable = R.drawable.cat_boxing;
+                    break;
 
-            case "Теннис":
-                drawable = R.drawable.cat_ten;
-                break;
+                case "Теннис":
+                    drawable = R.drawable.cat_ten;
+                    break;
 
-            case "Борьба":
-                drawable = R.drawable.cat_wrestling;
-                break;
+                case "Борьба":
+                    drawable = R.drawable.cat_wrestling;
+                    break;
 
-            default:
-                drawable = R.drawable.cat_volleyball;
-                break;
+                default:
+                    drawable = R.drawable.cat_volleyball;
+                    break;
+            }
+
+            sporImage.setImageResource(drawable);
+        } else {
+            view.findViewById(R.id.client_image_progress_bar).setVisibility(View.VISIBLE);
+            storageReference.child("Photos").child(photo).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    sporImage.setImageBitmap(image);
+                    view.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(MainActivity.getActivity(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
+                    Log.e("ImageLoadFailure", e.getMessage());
+                    view.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                }
+            });
         }
-
-        sporImage.setImageResource(drawable);
     }
 
     public void setSubCategory(String subCategory) {
-        TextView sporSubCategory = (TextView) view.findViewById(R.id.spor_subcategory);
+        TextView sporSubCategory = (TextView) view.findViewById(R.id.spor_sub_category);
         sporSubCategory.setText(subCategory);
     }
 

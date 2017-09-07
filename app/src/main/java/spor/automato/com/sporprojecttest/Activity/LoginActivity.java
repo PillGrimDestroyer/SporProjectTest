@@ -14,25 +14,24 @@ import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import spor.automato.com.sporprojecttest.R;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "EmailPassword";
+    public ProgressDialog mProgressDialog;
     private EditText mEmailField;
     private EditText mPasswordField;
     private TextView forgotPass;
     private Button register;
     private FirebaseAuth mAuth;
-    public ProgressDialog mProgressDialog;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
@@ -64,7 +63,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Intent t = new Intent(LoginActivity.this, MainActivity.class);
-                    //startActivity(t);
+
+                    boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
+                    MainActivity.setAdmin(isAdmin);
+                    startActivity(t);
 
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
@@ -113,13 +115,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private boolean checkIfEmailVerified() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        if (user.isEmailVerified())
-        {
+        if (user.isEmailVerified()) {
             finish();
             return true;
-        }
-        else
-        {
+        } else {
             FirebaseAuth.getInstance().signOut();
             return false;
         }
@@ -138,21 +137,24 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            if(checkIfEmailVerified()){
+                            if (checkIfEmailVerified()) {
                                 Log.d(TAG, "signInWithEmail:success");
+
+                                boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
+                                MainActivity.setAdmin(isAdmin);
 
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
                                 hideProgressDialog();
                                 Toast.makeText(LoginActivity.this, "Успешный вход", Toast.LENGTH_SHORT).show();
 
-                            }else{
-                                Toast.makeText(LoginActivity.this, "Ошибка при входе", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Вы не верифицировали свою почту", Toast.LENGTH_SHORT).show();
                             }
                         } else {
 
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Не получилось авторизоваться", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Не верный логин или пароль", Toast.LENGTH_SHORT).show();
 
                         }
                         hideProgressDialog();
@@ -165,7 +167,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         String email = mEmailField.getText().toString();
         if (TextUtils.isEmpty(email)) {
-            mEmailField.setError("Required.");
+            mEmailField.setError("Обязательно для заполнения");
             valid = false;
         } else {
             mEmailField.setError(null);
@@ -173,7 +175,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         String password = mPasswordField.getText().toString();
         if (TextUtils.isEmpty(password)) {
-            mPasswordField.setError("Required.");
+            mPasswordField.setError("Обязательно для заполнения");
             valid = false;
         } else {
             mPasswordField.setError(null);
@@ -182,7 +184,24 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         return valid;
     }
 
-    private void signOut() {
-        mAuth.signOut();
+    @Override
+    public void onBackPressed() {
+        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText("Выход")
+                .setContentText("Вы хотите выйти из приложения?")
+                .setCancelText("Нет")
+                .setConfirmText("Да")
+                .showCancelButton(true)
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        sDialog.cancel();
+                    }
+                }).setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        LoginActivity.super.onBackPressed();
+                    }
+                }).show();
     }
 }
