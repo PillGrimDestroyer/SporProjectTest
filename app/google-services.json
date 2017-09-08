@@ -41,7 +41,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:842891509855:android:188bd3fbebd9f7d0",
         "android_client_info": {
-          "package_name": "spor.automato.com.sporprojecttest"
+          "package_name": "spor.automato.com.sporproject"
         }
       },
       "oauth_client": [
@@ -49,7 +49,7 @@
           "client_id": "842891509855-c96kjnd9q3spv3rm5qnglbpb4idqql9o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "spor.automato.com.sporprojecttest",
+            "package_name": "spor.automato.com.sporproject",
             "certificate_hash": "674ce559704d80ace11b29753f3bb0c2ffcb5f1e"
           }
         },
