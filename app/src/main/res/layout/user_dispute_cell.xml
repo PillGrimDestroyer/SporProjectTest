@@ -1,21 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    android:id="@+id/user_dispute_relative"
     android:layout_width="300dp"
     android:layout_height="150dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp"
-    android:id="@+id/user_dispute_relative"
-    android:background="@drawable/cat_bask" >
+    android:orientation="vertical">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/spor_Image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/grey_500"
+        android:scaleType="centerCrop"
+        app:riv_corner_radius_bottom_left="0dp"
+        app:riv_corner_radius_bottom_right="0dp"
+        app:riv_corner_radius_top_left="10dp"
+        app:riv_corner_radius_top_right="10dp" />
+
+    <ProgressBar
+        android:id="@+id/image_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:indeterminateDrawable="@drawable/spinner_png"
+        android:indeterminateOnly="true"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/dispute_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="TextView"
+        android:text=""
         android:textColor="@color/white"
         android:textSize="30sp" />
 
@@ -23,10 +42,10 @@
         android:id="@+id/dispute_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:gravity="center"
-        android:text="TextView"
+        android:text=""
         android:textColor="@color/white"
-        android:textSize="18sp"
-        android:layout_centerVertical="true" />
+        android:textSize="18sp" />
 
 </RelativeLayout>

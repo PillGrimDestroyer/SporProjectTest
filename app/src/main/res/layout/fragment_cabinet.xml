@@ -55,16 +55,6 @@
                             android:indeterminateDrawable="@drawable/spinner_png"
                             android:indeterminateOnly="true" />
 
-                    <!--    <ImageButton
-                            android:id="@+id/select"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="bottom|right"
-                            android:layout_margin="0dp"
-                            android:adjustViewBounds="true"
-                            android:background="@drawable/edit_image"
-                            android:scaleType="centerCrop" /> -->
-
 
                     </FrameLayout>
 
