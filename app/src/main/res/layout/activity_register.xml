@@ -15,6 +15,13 @@
         android:elevation="4dp"
         app:titleTextColor="#fff" />
 
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="7dp"
+        android:layout_below="@+id/my_toolbar"
+        android:background="@drawable/toolbar_dropshadow" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">

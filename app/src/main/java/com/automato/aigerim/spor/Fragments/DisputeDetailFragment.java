@@ -434,6 +434,7 @@ public class DisputeDetailFragment extends Fragment {
         int drawable;
 
         if (dispute.photo == null) {
+            sporImage.setBackground(null);
             switch (dispute.category) {
                 case "Футбол":
                     drawable = R.drawable.cat_foot;
@@ -469,6 +470,7 @@ public class DisputeDetailFragment extends Fragment {
                     Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                     sporImage.setImageBitmap(image);
                     rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                    sporImage.setBackground(null);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -476,6 +478,7 @@ public class DisputeDetailFragment extends Fragment {
                     Toast.makeText(rootview.getContext(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
                     Log.e("ImageLoadFailure", e.getMessage());
                     rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                    sporImage.setBackground(null);
                 }
             });
         }

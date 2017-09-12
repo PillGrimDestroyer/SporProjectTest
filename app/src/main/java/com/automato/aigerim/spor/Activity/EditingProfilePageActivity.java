@@ -34,7 +34,7 @@ import com.google.firebase.storage.UploadTask;
 import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.R;
 
-public class EditingPageActivity extends AppCompatActivity implements View.OnClickListener {
+public class EditingProfilePageActivity extends AppCompatActivity implements View.OnClickListener {
 
     static final int GALLERY_REQUEST = 1;
 
@@ -56,7 +56,7 @@ public class EditingPageActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_editing_page);
+        setContentView(R.layout.activity_editing_profile_page);
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
@@ -138,7 +138,7 @@ public class EditingPageActivity extends AppCompatActivity implements View.OnCli
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(EditingPageActivity.this, "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditingProfilePageActivity.this, "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
                     Log.e("ImageLoadFailure", e.getMessage());
                 }
             });
@@ -147,7 +147,7 @@ public class EditingPageActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void changePassClick() {
-        Intent intent = new Intent(EditingPageActivity.this, ChangePassActivity.class);
+        Intent intent = new Intent(EditingProfilePageActivity.this, ChangePassActivity.class);
         startActivity(intent);
     }
 
@@ -214,10 +214,10 @@ public class EditingPageActivity extends AppCompatActivity implements View.OnCli
                     DatabaseReference hasImage = myDatabase.getReference("users/" + userID + "/hasImage");
                     hasImage.setValue(true);
 
-                    Toast.makeText(EditingPageActivity.this, "Изображение успешно обновлено", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditingProfilePageActivity.this, "Изображение успешно обновлено", Toast.LENGTH_SHORT).show();
                     userProfileImage.setImageURI(selectedImage);
                 } catch (Exception e) {
-                    Toast.makeText(EditingPageActivity.this, "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditingProfilePageActivity.this, "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
                     Log.e("ImageUploadFailure", e.getMessage());
                 }
                 progressBar.setVisibility(View.GONE);
@@ -226,7 +226,7 @@ public class EditingPageActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onFailure(@NonNull Exception e) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(EditingPageActivity.this, "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
+                Toast.makeText(EditingProfilePageActivity.this, "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
                 Log.e("ImageUploadFailure", e.getMessage());
             }
         });

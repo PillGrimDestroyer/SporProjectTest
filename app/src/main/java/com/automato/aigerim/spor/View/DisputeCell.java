@@ -12,6 +12,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Fragments.DisputeDetailFragment;
+import com.automato.aigerim.spor.Models.Choice;
+import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,13 +30,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
-
-import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.R;
-import com.automato.aigerim.spor.Fragments.DisputeDetailFragment;
-import com.automato.aigerim.spor.Models.Choice;
-import com.automato.aigerim.spor.Models.Dispute;
-import com.automato.aigerim.spor.Models.User;
 
 
 public class DisputeCell extends RecyclerView.ViewHolder {
@@ -119,9 +118,12 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                             String sporDate = ((TextView) view.findViewById(R.id.spor_date)).getText().toString();
                             int sporParticipantCount = Integer.parseInt(((TextView) view.findViewById(R.id.viewers_count)).getText().toString());
                             int sporLikeCount = Integer.parseInt(((TextView) view.findViewById(R.id.like_count)).getText().toString());
+
                             String viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
                             int viewsCountNumber = Integer.parseInt(viewsCountMessage.split(" ")[0]);
-                            viewsCountMessage = viewsCountMessage.replace(Integer.toString(viewsCountNumber), Integer.toString(++viewsCountNumber));
+                            setViewCount(++viewsCountNumber);
+
+                            viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
                             String sporSubject = ((TextView) view.findViewById(R.id.spor_subject)).getText().toString();
                             String sporStartTime = ((TextView) view.findViewById(R.id.spor_time)).getText().toString();
                             int money = model.money;
@@ -177,6 +179,11 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         return isLiked;
     }
 
+    public void setLiked(boolean liked) {
+        isLiked = liked;
+        setLikedByCurentUser();
+    }
+
     public boolean isSorted() {
         return isSorted;
     }
@@ -193,11 +200,6 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         isSortedBySubCategory = sortedBySubCategory;
     }
 
-    public void setLiked(boolean liked) {
-        isLiked = liked;
-        setLikedByCurentUser();
-    }
-
     private void setLikedByCurentUser() {
         if (isLiked()) {
             ImageView like = (ImageView) view.findViewById(R.id.imageLike);
@@ -210,9 +212,19 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public void setViewCount(int count) {
         viewCount = (TextView) view.findViewById(R.id.view_count);
-        //TODO: сделать так чтобы сообщение было корректным при любом колличестве
-        // просмотров, просмотра, просмотр и т.д в записимости от колличества
         String endOfMessage = " просмотров";
+        int lastNumber = count % 10;
+        if (lastNumber == 2 || lastNumber == 3 || lastNumber == 4) {
+            endOfMessage = " просмотра";
+        } else if (lastNumber == 1) {
+            endOfMessage = " просмотр";
+        }
+        if (Integer.toString(count).length() >= 2) {
+            int lastTwoNumbers = count % 100;
+            if (lastTwoNumbers == 11 || lastTwoNumbers == 12 || lastTwoNumbers == 13 || lastTwoNumbers == 14) {
+                endOfMessage = " просмотров";
+            }
+        }
         this.viewCount.setText(count + endOfMessage);
     }
 
@@ -223,11 +235,11 @@ public class DisputeCell extends RecyclerView.ViewHolder {
             if (dispute.participants.containsKey(userId)) {
                 ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
                 participant.setImageResource(R.drawable.people_black);
-            }else {
+            } else {
                 ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
                 participant.setImageResource(R.drawable.people);
             }
-        }else {
+        } else {
             ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
             participant.setImageResource(R.drawable.people);
         }
@@ -256,6 +268,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         final ImageView sporImage = (ImageView) view.findViewById(R.id.spor_Image);
 
         if (photo == null) {
+            sporImage.setBackground(null);
             int drawable;
 
             switch (category) {
@@ -293,6 +306,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                     sporImage.setImageBitmap(image);
                     view.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                    sporImage.setBackground(null);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -300,6 +314,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     Toast.makeText(MainActivity.getActivity(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
                     Log.e("ImageLoadFailure", e.getMessage());
                     view.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                    sporImage.setBackground(null);
                 }
             });
         }
@@ -335,14 +350,13 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     if (dispute.result.equals("")) {
                         progressText.setText(R.string.Live);
                         status.setText(R.string.Live);
-                    }
-                    else {
+                    } else {
                         progressText.setText(view.getResources().getString(R.string.end, dispute.result));
                         status.setText(R.string.done);
                     }
                 } else {
                     int progressInt = Integer.parseInt(Long.toString(progress / 100));
-                    while (progressInt > 100){
+                    while (progressInt > 100) {
                         progressInt /= 10;
                     }
                     progressBar.setProgress(100 - progressInt);

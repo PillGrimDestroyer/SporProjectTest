@@ -13,9 +13,11 @@ public class User {
     public boolean hasImage;
     public String birthday;
     public String gender;
+    public boolean receiveNotifications;
     public HashMap<String, Notification> history;
 
     public User() {
+
     }
 
     public User(String id, String name, String email, String birthday, String gender) {
@@ -26,9 +28,6 @@ public class User {
         this.hasImage = false;
         this.birthday = birthday;
         this.gender = gender;
-    }
-
-    public User getUser(String id){
-        return null;
+        this.receiveNotifications = true;
     }
 }

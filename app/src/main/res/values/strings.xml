@@ -70,7 +70,7 @@
     <string name="profile">АККАУНТ</string>
     <string name="editing">Редактирование</string>
     <string name="information">ИНФОРМАЦИЯ</string>
-    <string name="about_us_field">О Dispute</string>
+    <string name="about_dispute_field">О Dispute</string>
     <string name="terms_of_use_field">Условия использования</string>
     <string name="privacy_policy_field">Политика конфиденциальности</string>
     <string name="menu2_admin">Добавить спор</string>
@@ -163,4 +163,7 @@
     <string name="old_pass">Старый пароль</string>
     <string name="new_pass">Новый пароль</string>
     <string name="repeat_pass">Подтвердите пароль</string>
+    <string name="about_dispute">Немного он нашем приложении</string>
+    <string name="privacy_policy">Ничто не истина, всё дозволено</string>
+    <string name="terms_of_use">Используй как хочешь</string>
 </resources>

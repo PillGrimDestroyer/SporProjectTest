@@ -14,6 +14,13 @@
         android:elevation="4dp"
         app:titleTextColor="#000" />
 
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="7dp"
+        android:layout_below="@+id/my_toolbar"
+        android:background="@drawable/toolbar_dropshadow" />
+
     <TextView
         android:id="@+id/settings"
         android:layout_width="wrap_content"
@@ -38,6 +45,7 @@
             android:id="@+id/language_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:visibility="gone"
             android:layout_weight="1"
             android:background="@color/white">
 
@@ -93,6 +101,7 @@
                 android:id="@+id/notif_swithc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:checked="false"
                 android:layout_alignParentRight="true"
                 android:text="" />
         </RelativeLayout>
@@ -197,24 +206,25 @@
         android:orientation="vertical">
 
         <RelativeLayout
+            android:id="@+id/about_dispute_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/white">
 
             <TextView
-                android:id="@+id/about_us_field"
+                android:id="@+id/about_dispute_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/fragment_margin"
-                android:text="@string/about_us_field"
+                android:text="@string/about_dispute_field"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/about_us_next"
+                android:id="@+id/about_dispute_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -223,6 +233,7 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/terms_of_use_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="2dp"
@@ -249,6 +260,7 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/privacy_policy_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="2dp"

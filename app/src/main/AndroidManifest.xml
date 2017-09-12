@@ -14,52 +14,51 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:icon">
-
         <activity
-            android:name="com.automato.aigerim.spor.Activity.LoginActivity"
+            android:name=".Activity.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.automato.aigerim.spor.Activity.MainActivity"
+            android:name=".Activity.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.automato.aigerim.spor.Activity.ForgotPassActivity"
+            android:name=".Activity.ForgotPassActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.automato.aigerim.spor.Activity.RegistrationActivity"
+            android:name=".Activity.RegistrationActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.automato.aigerim.spor.Activity.SettingsActivity"
+            android:name=".Activity.SettingsActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Activity.SelectLanguageActivity"
             android:screenOrientation="portrait">
@@ -69,9 +68,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".Activity.EditingPageActivity"
+            android:name=".Activity.EditingProfilePageActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -79,7 +77,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Activity.ChangePassActivity"
             android:screenOrientation="portrait">
@@ -89,7 +86,30 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".Activity.AboutDisputeActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Activity.PrivacyPolicyActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Activity.TermsOfUseActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

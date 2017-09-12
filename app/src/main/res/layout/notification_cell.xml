@@ -18,14 +18,14 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="4">
 
             <ImageView
                 android:id="@+id/notif_image"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_centerVertical="true"
-                app:srcCompat="@drawable/activ" />
+                app:srcCompat="@drawable/trophy" />
 
         </RelativeLayout>
 
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:layout_weight="0.65">
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/notif_message"
@@ -51,6 +51,7 @@
             android:id="@+id/spor_Image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="gone"
             android:layout_weight="1"
             app:srcCompat="@drawable/cat_foot_full" />
 

@@ -182,11 +182,8 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
-    private void createAccount(final String name,
-                               final String email,
-                               final String password,
-                               final String birthday,
-                               final String gender) {
+    private void createAccount(final String name, final String email, final String password,
+                               final String birthday, final String gender) {
 
         Log.d("info", "createAccount:" + email);
         if (!validateForm()) {

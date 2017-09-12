@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activity.PrivacyPolicyActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:elevation="4dp"
+        app:titleTextColor="#000" />
+
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="7dp"
+        android:layout_below="@+id/my_toolbar"
+        android:background="@drawable/toolbar_dropshadow" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/shadow">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_marginTop="10dp"
+                android:id="@+id/privacy_policy_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:text="@string/privacy_policy_field"
+                android:textColor="#ff7777"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/privacy_policy_text"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/privacy_policy_title"
+                android:layout_marginLeft="@dimen/fragment_margin"
+                android:layout_marginRight="@dimen/fragment_margin"
+                android:layout_marginTop="10dp"
+                android:gravity="start"
+                android:text="@string/privacy_policy"
+                android:textAlignment="viewStart"
+                android:textSize="16sp" />
+
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

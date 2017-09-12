@@ -105,7 +105,6 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         cv.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //TODO: Событие клика на категорию
                 CategoryDetailFragment CatDF = new CategoryDetailFragment();
                 String category = ((TextView)v.findViewById(R.id.cat_name)).getText().toString();
                 CatDF.setCategory(category);

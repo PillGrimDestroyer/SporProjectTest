@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/grey_100"
     android:orientation="vertical"
-    tools:context="spor.automato.com.sporproject.Activity.SelectLanguageActivity">
+    tools:context="Activity.SelectLanguageActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
@@ -15,6 +15,13 @@
         android:background="@color/white"
         android:elevation="4dp"
         app:titleTextColor="#000" />
+
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="7dp"
+        android:layout_below="@+id/my_toolbar"
+        android:background="@drawable/toolbar_dropshadow" />
 
     <ListView
         android:id="@+id/list"

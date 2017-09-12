@@ -16,13 +16,13 @@
             android:textStyle="bold"
             android:title="@string/category">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <Spinner
                     android:id="@+id/spinner"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:layout_gravity="center"
@@ -31,7 +31,7 @@
 
                 <TextView
                     android:id="@+id/title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:layout_gravity="center"
@@ -45,9 +45,8 @@
 
                 <ImageView
                     android:id="@+id/search_left"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
                     android:layout_gravity="left|center_vertical"
                     android:layout_marginRight="10dp"
                     android:layout_weight="4"
@@ -58,10 +57,7 @@
                     android:id="@+id/search_field"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
                     android:layout_gravity="center"
-                    android:layout_toLeftOf="@+id/close"
-                    android:layout_toRightOf="@+id/search_left"
                     android:layout_weight="1"
                     android:hint="Поиск"
                     android:imeOptions="actionDone"
@@ -70,11 +66,8 @@
 
                 <ImageView
                     android:id="@+id/search_right"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
                     android:layout_weight="4"
@@ -82,11 +75,8 @@
 
                 <ImageView
                     android:id="@+id/close"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
                     android:layout_weight="4"
@@ -95,11 +85,8 @@
 
                 <ImageView
                     android:id="@+id/done"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
                     android:layout_weight="5"
@@ -108,10 +95,8 @@
 
                 <ImageView
                     android:id="@+id/settings_image"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
@@ -119,29 +104,21 @@
                     android:visibility="gone"
                     app:srcCompat="@drawable/ic_settings" />
 
-            </RelativeLayout>
+            </LinearLayout>
 
         </android.support.v7.widget.Toolbar>
-
-        <View
-            android:id="@+id/shadow"
-            android:layout_width="match_parent"
-            android:layout_height="7dp"
-            android:layout_below="@+id/my_toolbar"
-            android:background="@drawable/toolbar_dropshadow" />
 
         <FrameLayout
             android:id="@+id/main_fragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bg_4"
             android:layout_above="@+id/navigation"
-            android:layout_below="@id/shadow" />
+            android:layout_below="@id/my_toolbar"
+            android:background="@drawable/bg_4" />
 
         <android.support.design.widget.BottomNavigationView
             android:id="@+id/navigation"
             android:layout_width="match_parent"
-            android:background="@color/white"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             app:itemIconTint="@drawable/nav_item_colors"
