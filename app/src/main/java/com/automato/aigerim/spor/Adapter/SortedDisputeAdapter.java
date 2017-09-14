@@ -68,6 +68,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
         viewHolder.setSorted(isSorted);
         viewHolder.setSortedBySubCategory(isSortedBySubCategory);
         viewHolder.setImage(model.photo);
+        viewHolder.setRate(model);
 
         boolean isLiked = false;
         if (model.likes != null) {

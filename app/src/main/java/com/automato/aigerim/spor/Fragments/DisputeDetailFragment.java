@@ -21,6 +21,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.automato.aigerim.spor.Models.Choice;
+import com.automato.aigerim.spor.Other.Tools.Tools;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +36,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -74,6 +77,7 @@ public class DisputeDetailFragment extends Fragment {
     private EditText rate;
     private String selectedChoice;
     private StorageReference storageReference;
+    private Tools tools = new Tools();
 
     public String getFerstTeam() {
         return ferstTeam;
@@ -206,10 +210,12 @@ public class DisputeDetailFragment extends Fragment {
         setSporParticipantCount(getNumberOfParticipant(), dispute, userID);
         setSporLikeCount(getNumberOfLikes());
         setSporSubject(getSubject());
+        setSporSubCategory();
         setSporStartTime(getTime());
         setViewsCount(getViewCount());
         setLikeImage(isLikedByCurentUser());
         setImage();
+        setRate();
 
         dispute.viewCount += 1;
 
@@ -237,6 +243,8 @@ public class DisputeDetailFragment extends Fragment {
                 progressBar.setProgress(100);
                 progressBar.setVisibility(View.GONE);
                 progressText.setVisibility(View.VISIBLE);
+                rootview.findViewById(R.id.time_layout).setVisibility(View.GONE);
+                rootview.findViewById(R.id.spor_date).setVisibility(View.GONE);
                 if (dispute.result.equals("")) {
                     progressText.setText(R.string.Live);
                     status.setText(R.string.Live);
@@ -354,14 +362,26 @@ public class DisputeDetailFragment extends Fragment {
                                 DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
                                 refParticipant.child(client.id).setValue(participant);
 
+                                Choice choice = new Choice();
+                                choice.choice = selectedChoice;
+                                choice.id = selectedChoice;
+                                choice.spor_id = dispute.id;
+                                choice.rate = dispute.choices.get(selectedChoice).rate + rateValue;
+
+                                dispute.choices.put(selectedChoice, choice);
+
+                                DatabaseReference updateChoice = myDatabase.getReference("spor/" + dispute.id + "/choices");
+                                updateChoice.child(selectedChoice).setValue(choice);
+
                                 dispute.participants.put(client.id, participant);
                                 setSporParticipantCount(dispute.participantCount, dispute, userID);
 
                                 fTeam.setSelected(false);
                                 sTeam.setSelected(false);
                                 rate.setText("");
+                                setRate();
 
-                                Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(rootview.getContext(), R.string.already_in, Toast.LENGTH_SHORT).show();
                             }
@@ -379,6 +399,28 @@ public class DisputeDetailFragment extends Fragment {
 
         MainActivity.setCurentFragment(this);
         return rootview;
+    }
+
+    private void setRate() {
+        ArrayList<Choice> arlist = new ArrayList<>(dispute.choices.values());
+
+        TextView leftRateTextView = (TextView) rootview.findViewById(R.id.left_rate);
+        TextView RightRateTextView = (TextView) rootview.findViewById(R.id.right_rate);
+        TextView subjectTextView = (TextView) rootview.findViewById(R.id.spor_subject);
+
+        String fTeam = tools.regex("(.*?)([ ]*?)(-)", subjectTextView.getText().toString(), 1);
+        if (!fTeam.equals(arlist.get(0).choice)){
+            RightRateTextView = (TextView) rootview.findViewById(R.id.left_rate);
+            leftRateTextView = (TextView) rootview.findViewById(R.id.right_rate);
+        }
+
+        leftRateTextView.setText(Integer.toString(arlist.get(0).rate));
+        RightRateTextView.setText(Integer.toString(arlist.get(1).rate));
+    }
+
+    private void setSporSubCategory() {
+        TextView sporSubCategory = (TextView) rootview.findViewById(R.id.spor_sub_category);
+        sporSubCategory.setText(dispute.subcategory);
     }
 
     @Override

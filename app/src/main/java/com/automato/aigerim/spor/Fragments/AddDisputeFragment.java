@@ -99,30 +99,39 @@ public class AddDisputeFragment extends Fragment {
                         if (disputeFromOlimp == null) {
                             prepareData();
                         }
-                        storageReference.child("Photos").child(photo).putFile(selectedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                try {
-                                    writeDisputeInDB();
-                                    Toast.makeText(rootView.getContext(), "Спор успешно добавлен!", Toast.LENGTH_SHORT).show();
+                        if (selectedImage != null) {
+                            storageReference.child("Photos").child(photo).putFile(selectedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    try {
+                                        writeDisputeInDB();
+                                        Toast.makeText(rootView.getContext(), "Спор успешно добавлен!", Toast.LENGTH_SHORT).show();
 
-                                    MainActivity.dismissWithAnimationLoader();
-                                    BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.navigation);
-                                    navigation.setSelectedItemId(R.id.main);
-                                } catch (Exception e) {
+                                        MainActivity.dismissWithAnimationLoader();
+                                        BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.navigation);
+                                        navigation.setSelectedItemId(R.id.main);
+                                    } catch (Exception e) {
+                                        MainActivity.dismissWithAnimationLoader();
+                                        Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
+                                        Log.e("ImageUploadFailure", e.getMessage());
+                                    }
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
                                     MainActivity.dismissWithAnimationLoader();
                                     Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
                                     Log.e("ImageUploadFailure", e.getMessage());
                                 }
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                MainActivity.dismissWithAnimationLoader();
-                                Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
-                                Log.e("ImageUploadFailure", e.getMessage());
-                            }
-                        });
+                            });
+                        }else {
+                            writeDisputeInDB();
+                            Toast.makeText(rootView.getContext(), "Спор успешно добавлен!", Toast.LENGTH_SHORT).show();
+
+                            MainActivity.dismissWithAnimationLoader();
+                            BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.navigation);
+                            navigation.setSelectedItemId(R.id.main);
+                        }
                     } catch (Exception e) {
                         MainActivity.dismissWithAnimationLoader();
                         Toast.makeText(rootView.getContext(), "Ошибка при добавлении спора", Toast.LENGTH_SHORT).show();
@@ -159,14 +168,14 @@ public class AddDisputeFragment extends Fragment {
         Choice choice1 = new Choice();
         Choice choice2 = new Choice();
 
-        choice1.choice = disputeFromOlimp.rivor1;
+        choice1.choice = disputeFromOlimp.rivor1.trim();
         choice1.spor_id = sporID;
-        choice1.id = disputeFromOlimp.rivor1;
-        choice2.choice = disputeFromOlimp.rivor2;
+        choice1.id = disputeFromOlimp.rivor1.trim();
+        choice2.choice = disputeFromOlimp.rivor2.trim();
         choice2.spor_id = sporID;
-        choice2.id = disputeFromOlimp.rivor2;
-        choices.put(disputeFromOlimp.rivor1, choice1);
-        choices.put(disputeFromOlimp.rivor2, choice2);
+        choice2.id = disputeFromOlimp.rivor2.trim();
+        choices.put(disputeFromOlimp.rivor1.trim(), choice1);
+        choices.put(disputeFromOlimp.rivor2.trim(), choice2);
         dispute.choices = choices;
 
         dispute.date = disputeFromOlimp.date;

@@ -98,9 +98,9 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         this.notification = notification;
         String text;
         if (notification.winnings > 0) {
-            text = rootView.getResources().getString(R.string.youWin, dispute.subject, Integer.toString(notification.winnings));
+            text = rootView.getResources().getString(R.string.youWin, dispute.subject, Double.toString(notification.winnings));
         }else {
-            text = rootView.getResources().getString(R.string.youLose);
+            text = rootView.getResources().getString(R.string.youLose, dispute.subject);
         }
         setText(text);
         setNotifImage();

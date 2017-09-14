@@ -8,5 +8,6 @@ public class Choice {
 
     public String id;
     public String choice;
+    public int rate;
     public String spor_id;
 }

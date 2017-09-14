@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -133,14 +134,14 @@ public class MainFragment extends Fragment {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (fLoad) {
+                if (MainActivity.isFerstOpened()) {
                     MainActivity.showLoader();
                     if (!spinner.getSelectedItem().toString().equals("Все споры"))
                         sortedByTypeSetAdapter(spinner.getSelectedItem().toString());
                     else
                         notSortedSetAdapter();
                 } else
-                    fLoad = true;
+                    MainActivity.setFerstOpened(true);
             }
 
             @Override
@@ -161,7 +162,11 @@ public class MainFragment extends Fragment {
                 ((EditText) MainActivity.getActivity().findViewById(R.id.search_field)).getText().clear();
                 searchLeft.performClick();
                 if (!isSorted()){
-                    spinner.setSelection(0, false);
+                    if(spinner.getSelectedItem().toString().equals("Все споры")){
+                        notSortedSetAdapter();
+                    }else {
+                        spinner.setSelection(0, false);
+                    }
                 }else {
                     sortedBySubCategorySetAdapter();
                 }
@@ -515,6 +520,7 @@ public class MainFragment extends Fragment {
                 viewHolder.setSorted(isSorted());
                 viewHolder.setSortedBySubCategory(subCategory != null);
                 viewHolder.setImage(model.photo);
+                viewHolder.setRate(model);
 
                 boolean isLiked = false;
                 if (model.likes != null) {
@@ -546,6 +552,19 @@ public class MainFragment extends Fragment {
                 MainActivity.dismissWithAnimationLoader();
             }
         };
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null)
+                    MainActivity.dismissWithAnimationLoader();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         sporList.setAdapter(firebaseRecyclerAdapter);
     }

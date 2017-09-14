@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/main"
         android:icon="@drawable/ic_home_black_24dp"
+        app:showAsAction="always"
         android:title="@string/menu1" />
 
     <item
         android:id="@+id/category"
         android:icon="@drawable/book_black"
+        app:showAsAction="always"
         android:title="@string/menu2" />
 
     <item
         android:id="@+id/notification"
         android:icon="@drawable/notify_black"
+        app:showAsAction="always"
         android:title="@string/menu3" />
 
     <item
         android:id="@+id/cabinet"
         android:icon="@drawable/profile_dark"
+        app:showAsAction="always"
         android:title="@string/menu4" />
 
 </menu>

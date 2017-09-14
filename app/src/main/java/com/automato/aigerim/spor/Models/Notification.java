@@ -6,7 +6,7 @@ package com.automato.aigerim.spor.Models;
 
 public class Notification {
     public boolean checked;
-    public int money;
+    public double money;
     public String sporID;
-    public int winnings;
+    public double winnings;
 }

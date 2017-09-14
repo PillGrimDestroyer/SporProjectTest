@@ -138,14 +138,71 @@
                 android:textColor="@color/grey_500"
                 android:textSize="14sp" />
 
+            <RelativeLayout
+                android:id="@+id/rate_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="12dp"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/left_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/center_rate"
+                    android:layout_toStartOf="@+id/center_rate"
+                    android:gravity="center"
+                    android:text="500"
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/center_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text=" тг. - "
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/right_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/center_rate"
+                    android:layout_toRightOf="@+id/center_rate"
+                    android:gravity="center"
+                    android:text="1500"
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/right_rate_end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/right_rate"
+                    android:layout_toRightOf="@+id/right_rate"
+                    android:gravity="center"
+                    android:text=" тг."
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
             <TextView
                 android:id="@+id/spor_subject"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="12dp"
                 android:gravity="center"
                 android:text="Германия - Мексика"
+                android:textColor="@color/grey_700"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -155,9 +212,12 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="Кубок Конфидерации 2017. 1/2 финала" />
+                android:text="Кубок Конфидерации 2017. 1/2 финала"
+                android:textColor="@color/grey_500"
+                android:textSize="14sp" />
 
             <LinearLayout
+                android:id="@+id/time_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp">
@@ -175,7 +235,9 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="Начало в 06:35" />
+                    android:text="Начало в 06:35"
+                    android:textColor="@color/grey_500"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <ProgressBar
@@ -194,6 +256,7 @@
                 android:id="@+id/progress_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:text="Live"
                 android:textAlignment="center"
                 android:textColor="@color/grey_700"

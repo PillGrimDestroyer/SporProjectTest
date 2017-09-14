@@ -17,6 +17,7 @@ import com.automato.aigerim.spor.Fragments.DisputeDetailFragment;
 import com.automato.aigerim.spor.Models.Choice;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Tools.Tools;
 import com.automato.aigerim.spor.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,7 +30,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 
 public class DisputeCell extends RecyclerView.ViewHolder {
@@ -51,6 +55,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
     private String category;
 
     private StorageReference storageReference;
+    private Tools tools = new Tools();
 
     public DisputeCell(View itemView) {
         super(itemView);
@@ -166,6 +171,24 @@ public class DisputeCell extends RecyclerView.ViewHolder {
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    public void removeOnCardListener() {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SweetAlertDialog(view.getContext(), SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("Спор завершён")
+                        .setContentText("На этот спор уже нельзя делать ставки")
+                        .setConfirmText("Ок")
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                sweetAlertDialog.dismissWithAnimation();
+                            }
+                        }).show();
             }
         });
     }
@@ -347,10 +370,13 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     progressBar.setProgress(100);
                     progressBar.setVisibility(View.GONE);
                     progressText.setVisibility(View.VISIBLE);
+                    view.findViewById(R.id.time_layout).setVisibility(View.GONE);
+                    view.findViewById(R.id.spor_date).setVisibility(View.GONE);
                     if (dispute.result.equals("")) {
                         progressText.setText(R.string.Live);
                         status.setText(R.string.Live);
                     } else {
+                        removeOnCardListener();
                         progressText.setText(view.getResources().getString(R.string.end, dispute.result));
                         status.setText(R.string.done);
                     }
@@ -367,5 +393,22 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public TextView getStatusTextView() {
         return (TextView) view.findViewById(R.id.spor_status);
+    }
+
+    public void setRate(Dispute dispute) {
+        ArrayList<Choice> arlist = new ArrayList<>(dispute.choices.values());
+
+        TextView leftRateTextView = (TextView) view.findViewById(R.id.left_rate);
+        TextView RightRateTextView = (TextView) view.findViewById(R.id.right_rate);
+        TextView subjectTextView = (TextView) view.findViewById(R.id.spor_subject);
+
+        String fTeam = tools.regex("(.*?)([ ]*?)(-)", subjectTextView.getText().toString(), 1);
+        if (!fTeam.equals(arlist.get(0).choice)){
+            RightRateTextView = (TextView) view.findViewById(R.id.left_rate);
+            leftRateTextView = (TextView) view.findViewById(R.id.right_rate);
+        }
+
+        leftRateTextView.setText(Integer.toString(arlist.get(0).rate));
+        RightRateTextView.setText(Integer.toString(arlist.get(1).rate));
     }
 }

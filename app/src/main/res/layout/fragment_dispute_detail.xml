@@ -34,17 +34,19 @@
 
                     <RadioButton
                         android:id="@+id/ferstTeam"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
                         android:text="RadioButton"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         android:textSize="16sp" />
 
                     <RadioButton
                         android:id="@+id/secondTeam"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="1"
                         android:text="RadioButton"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"

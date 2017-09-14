@@ -10,6 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Adapter.NotificationAdapter;
+import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Models.Notification;
+import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -19,13 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.Adapter.NotificationAdapter;
-import com.automato.aigerim.spor.R;
-import com.automato.aigerim.spor.Models.Dispute;
-import com.automato.aigerim.spor.Models.Notification;
-import com.automato.aigerim.spor.Models.User;
+import java.util.LinkedHashMap;
 
 
 public class NotificationFragment extends Fragment {
@@ -84,7 +84,22 @@ public class NotificationFragment extends Fragment {
                                     notification.sporID = dispute.id;
                                     notification.winnings = (int) dispute.participants.get(client.id).winnings;
 
-                                    notificationHashMap.put(dispute.id, notification);
+                                    if (!notificationHashMap.containsKey(dispute.id)) {
+                                        notificationHashMap.put(dispute.id, notification);
+                                        client.money += notification.winnings;
+
+                                        LinkedHashMap<String, Notification> newMap = new LinkedHashMap <>();
+                                        ArrayList<String> arrayList = new ArrayList<>(notificationHashMap.keySet());
+                                        for (int i = arrayList.size() - 1; i >= 0; i--) {
+                                            String key = arrayList.get(i);
+                                            Notification value = notificationHashMap.get(key);
+                                            newMap.put(key, value);
+                                        }
+                                        notificationHashMap = newMap;
+
+                                        DatabaseReference userMoneyInDB = myDatabase.getReference("users/" + client.id + "/money");
+                                        userMoneyInDB.setValue(client.money);
+                                    }
 
                                     DatabaseReference sporLikeCountInDB = myDatabase.getReference("users/" + client.id + "/history");
                                     sporLikeCountInDB.setValue(notificationHashMap);

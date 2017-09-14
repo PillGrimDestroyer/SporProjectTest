@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
@@ -17,6 +16,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Adapter.CategoryAdapter;
+import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,11 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.Adapter.CategoryAdapter;
-import com.automato.aigerim.spor.Other.Tools.Tools;
-import com.automato.aigerim.spor.R;
 
 
 public class CategoryFragment extends Fragment {
@@ -67,7 +65,9 @@ public class CategoryFragment extends Fragment {
 
         Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
         for (Map.Entry<String, Integer> entry : list) {
-            sortedMap.put(entry.getKey(), entry.getValue());
+            if (entry.getValue() != null)
+                if (!entry.getValue().equals(0))
+                    sortedMap.put(entry.getKey(), entry.getValue());
         }
 
         return sortedMap;
@@ -148,13 +148,13 @@ public class CategoryFragment extends Fragment {
                         if (part.getKey().equals("category")) {
                             String category = part.getValue().toString();
 
-                            if (isSorted){
-                                if (tools.regex(searchField.getText().toString().toLowerCase(), category.toLowerCase())){
+                            if (isSorted) {
+                                if (tools.regex(searchField.getText().toString().toLowerCase(), category.toLowerCase())) {
                                     //считаем сколько споров в каждой категории
                                     Integer catCounter = hashMapCategory.get(category);
                                     hashMapCategory.put(category, catCounter == null ? 1 : catCounter + 1);
                                 }
-                            }else {
+                            } else {
                                 Integer catCounter = hashMapCategory.get(category);
                                 hashMapCategory.put(category, catCounter == null ? 1 : catCounter + 1);
                             }

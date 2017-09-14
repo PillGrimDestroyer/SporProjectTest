@@ -15,11 +15,15 @@ import android.widget.Toast;
 import com.automato.aigerim.spor.R;
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.StreamDownloadTask;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -59,21 +63,45 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+            public void onAuthStateChanged(@NonNull final FirebaseAuth firebaseAuth) {
+                final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    if (user.isEmailVerified()) {
-                        Intent t = new Intent(LoginActivity.this, MainActivity.class);
-                        t.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    user.reload().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            if (user.isEmailVerified()) {
+                                Intent t = new Intent(LoginActivity.this, MainActivity.class);
+                                t.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                        boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
-                        MainActivity.setAdmin(isAdmin);
-                        startActivity(t);
+                                boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
+                                MainActivity.setAdmin(isAdmin);
+                                startActivity(t);
 
-                        Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    }
+                                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            String message = e.getMessage();
+                            if (e instanceof FirebaseAuthInvalidUserException){
+                                message = "Данный пользователь отсутсвует в системе";
+                            }
+                            new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+                                    .setTitleText("Ошибка")
+                                    .setContentText(message)
+                                    .setConfirmText("Ок")
+                                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                        @Override
+                                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                            sweetAlertDialog.dismissWithAnimation();
+                                            firebaseAuth.signOut();
+                                        }
+                                    }).show();
+                            Log.d(TAG, "authError:" + e.getMessage());
+                        }
+                    });
                 } else {
-
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
             }

@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static FragmentManager m;
     private static MainActivity myActivity;
+    private static boolean ferstOpened = false;
     private static Fragment curentFragment;
     private static SweetAlertDialog mProgressDialog;
     private static boolean isAdmin = false;
@@ -135,6 +136,14 @@ public class MainActivity extends AppCompatActivity {
         mProgressDialog.setTitleText("Загрузка");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
+    }
+
+    public static boolean isFerstOpened(){
+        return ferstOpened;
+    }
+
+    public static void setFerstOpened(boolean bool){
+        ferstOpened = bool;
     }
 
     public static void dismissWithAnimationLoader() {
@@ -245,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                 }).setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
             public void onClick(SweetAlertDialog sweetAlertDialog) {
-                MainActivity.super.onBackPressed();
+                finishAffinity();
             }
         }).show();
     }

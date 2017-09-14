@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -20,6 +19,7 @@ import android.widget.Toast;
 
 import com.automato.aigerim.spor.Fragments.DatePickerFragment;
 import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Tools.Tools;
 import com.automato.aigerim.spor.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -38,9 +39,12 @@ import com.soundcloud.android.crop.Crop;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 public class RegistrationActivity extends BaseActivity implements View.OnClickListener {
 
     ImageView imageCrop;
+    Tools tools = new Tools();
     private EditText mEmailField;
     private EditText mPasswordField;
     private EditText mName;
@@ -102,29 +106,30 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
             case R.id.email_sign_in_button:
                 boolean valid = true;
                 TextView birthday = (TextView) findViewById(R.id.datePicker);
-                if (mEmailField.getText().toString().equals("")) {
+                if (tools.isNullOrWhitespace(mEmailField.getText().toString())) {
                     mEmailField.setError(getString(R.string.required));
                     valid = false;
                 }
-                if (mPasswordField.getText().toString().equals("")) {
+                if (tools.isNullOrWhitespace(mPasswordField.getText().toString())) {
                     mPasswordField.setError(getString(R.string.required));
                     valid = false;
                 }
-                if (mName.getText().toString().equals("")) {
+                if (tools.isNullOrWhitespace(mName.getText().toString())) {
                     mName.setError(getString(R.string.required));
                     valid = false;
                 }
-                if (mPasswordRepeat.getText().toString().equals("")) {
+                if (tools.isNullOrWhitespace(mPasswordRepeat.getText().toString())) {
                     mPasswordRepeat.setError(getString(R.string.required));
                     valid = false;
                     mPasswordRepeat.setError(getString(R.string.required));
                 }
 
-                if (gender.equals("")) {
+                if (tools.isNullOrWhitespace(gender)) {
                     Toast.makeText(RegistrationActivity.this, R.string.required_gender, Toast.LENGTH_SHORT).show();
                     valid = false;
                 }
-                if (birthday.getText().toString().equals("")) {
+
+                if (tools.isNullOrWhitespace(birthday.getText().toString()) || birthday.getText().toString().equals("ДД/MM/ГГ")) {
                     Toast.makeText(RegistrationActivity.this, R.string.required_birthday, Toast.LENGTH_SHORT).show();
                     valid = false;
                 }
@@ -186,67 +191,76 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
                                final String birthday, final String gender) {
 
         Log.d("info", "createAccount:" + email);
-        if (!validateForm()) {
-            return;
-        }
-
         showProgressDialog();
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+        mAuth.createUserWithEmailAndPassword(email, password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+            @Override
+            public void onSuccess(AuthResult authResult) {
+                Log.d("info", "createUserWithEmail:success");
+                final FirebaseUser user = mAuth.getCurrentUser();
 
-                            Log.d("info", "createUserWithEmail:success");
-                            final FirebaseUser user = mAuth.getCurrentUser();
+                DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
+                final String userId = user.getUid();
+                User p1 = new User(userId, name, user.getEmail(), birthday, gender);
+                mDatabase.child(userId).setValue(p1);
 
-                            DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
-                            final String userId = user.getUid();
-                            User p1 = new User(userId, name, user.getEmail(), birthday, gender);
-                            mDatabase.child(userId).setValue(p1);
+                if (imageUriCrop != null) {
+                    final StorageReference filepath = mStorage.child("Photos").child(userId);
+                    filepath.putFile(imageUriCrop).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            final long ONE_MEGABYTE = 1024 * 1024;
+                            filepath.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                @Override
+                                public void onSuccess(byte[] bytes) {
+                                    DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
+                                    mDatabase.child(userId + "/hasImage").setValue(true);
 
-                            if (imageUriCrop != null) {
-                                final StorageReference filepath = mStorage.child("Photos").child(userId);
-                                filepath.putFile(imageUriCrop).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                    @Override
-                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                                        final long ONE_MEGABYTE = 1024 * 1024;
-                                        filepath.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                            @Override
-                                            public void onSuccess(byte[] bytes) {
-                                                DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
-                                                final StorageReference filepath = mStorage.child("Photos").child(userId);
-
-                                                mDatabase.child(userId + "/hasImage").setValue(true);
-
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception exception) {
-                                            }
-                                        });
-
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(RegistrationActivity.this, "Photo was NOT uploaded!", Toast.LENGTH_LONG).show();
-                                    }
-                                });
-
-                            }
-                            if (imageUriFull != null) {
-                                final StorageReference filepath = mStorage.child("Photos").child(userId + "-full");
-                                filepath.putFile(imageUriFull);
-                            }
-                            sendEmailVerification();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                }
+                            });
 
                         }
-                        hideProgressDialog();
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(RegistrationActivity.this, "Не удалось загрузить изображение", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                }
+                if (imageUriFull != null) {
+                    final StorageReference filepath = mStorage.child("Photos").child(userId + "-full");
+                    filepath.putFile(imageUriFull);
+                }
+                hideProgressDialog();
+                sendEmailVerification();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                String message = e.getMessage();
+                String title = "Ошибка";
+                SweetAlertDialog dialog = new SweetAlertDialog(RegistrationActivity.this, SweetAlertDialog.ERROR_TYPE);
+                dialog.setTitleText(title);
+                dialog.setConfirmText("Ок");
+                if (e instanceof FirebaseAuthUserCollisionException) {
+                    message = "Пользователь с данным email уже существует";
+                }
+                dialog.setContentText(message);
+                dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        sweetAlertDialog.dismissWithAnimation();
                     }
                 });
+                hideProgressDialog();
+                dialog.show();
+            }
+        });
     }
 
     private void sendEmailVerification() {
@@ -276,7 +290,6 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
     @Override
     protected void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);
-
         if (resultCode == RESULT_OK) {
             try {
                 this.imageUriCrop = data.getData();
@@ -285,34 +298,21 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
                 imageCrop.setImageBitmap(selectedImage);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                Toast.makeText(RegistrationActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                String message = e.getMessage();
+                String title = "Ошибка";
+
+                SweetAlertDialog dialog = new SweetAlertDialog(RegistrationActivity.this, SweetAlertDialog.ERROR_TYPE);
+                dialog.setTitleText(title);
+                dialog.setConfirmText("Ок");
+                dialog.setContentText(message);
+                dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        sweetAlertDialog.dismissWithAnimation();
+                    }
+                });
+                dialog.show();
             }
-
-        } else {
-            Toast.makeText(RegistrationActivity.this, "You haven't picked Image", Toast.LENGTH_LONG).show();
         }
     }
-
-    private boolean validateForm() {
-        boolean valid = true;
-
-        String email = mEmailField.getText().toString();
-        if (TextUtils.isEmpty(email)) {
-            mEmailField.setError("Required.");
-            valid = false;
-        } else {
-            mEmailField.setError(null);
-        }
-
-        String password = mPasswordField.getText().toString();
-        if (TextUtils.isEmpty(password)) {
-            mPasswordField.setError("Required.");
-            valid = false;
-        } else {
-            mPasswordField.setError(null);
-        }
-
-        return valid;
-    }
-
 }
