@@ -14,10 +14,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.automato.aigerim.spor.Models.User;
 import com.google.firebase.auth.FirebaseAuth;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import ru.cloudpayments.sdk.PaymentWidget;
+import ru.cloudpayments.sdk.business.domain.model.BaseResponse;
+import ru.cloudpayments.sdk.view.PaymentTaskListener;
+
 import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.Fragments.AddDisputeCategoryFragment;
 import com.automato.aigerim.spor.Fragments.AddDisputeSubCategoryFragment;
@@ -131,11 +137,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void showLoader() {
-        mProgressDialog = new SweetAlertDialog(myActivity, SweetAlertDialog.PROGRESS_TYPE);
-        mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-        mProgressDialog.setTitleText("Загрузка");
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
+        if (mProgressDialog == null) {
+            mProgressDialog = new SweetAlertDialog(myActivity, SweetAlertDialog.PROGRESS_TYPE);
+            mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            mProgressDialog.setTitleText("Загрузка");
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+        }
     }
 
     public static boolean isFerstOpened(){

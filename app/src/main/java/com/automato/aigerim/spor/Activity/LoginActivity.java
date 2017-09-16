@@ -23,7 +23,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.StreamDownloadTask;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -37,6 +36,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private Button register;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private boolean mainLogin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,41 +66,52 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             public void onAuthStateChanged(@NonNull final FirebaseAuth firebaseAuth) {
                 final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    user.reload().addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            if (user.isEmailVerified()) {
-                                Intent t = new Intent(LoginActivity.this, MainActivity.class);
-                                t.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    if (!mainLogin) {
+                        showProgressDialog();
+                        if (user.isEmailVerified()) {
+                            user.reload().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    if (user.isEmailVerified()) {
+                                        Intent t = new Intent(LoginActivity.this, MainActivity.class);
+                                        t.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                                boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
-                                MainActivity.setAdmin(isAdmin);
-                                startActivity(t);
+                                        hideProgressDialog();
 
-                                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                            }
+                                        boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
+                                        MainActivity.setAdmin(isAdmin);
+                                        startActivity(t);
+
+                                        Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                                    }
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    String message = e.getMessage();
+                                    if (e instanceof FirebaseAuthInvalidUserException) {
+                                        message = "Данный пользователь отсутсвует в системе";
+                                    }
+                                    hideProgressDialog();
+                                    new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+                                            .setTitleText("Ошибка")
+                                            .setContentText(message)
+                                            .setConfirmText("Ок")
+                                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                                @Override
+                                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                    sweetAlertDialog.dismissWithAnimation();
+                                                    firebaseAuth.signOut();
+                                                }
+                                            }).show();
+                                    Log.d(TAG, "authError:" + e.getMessage());
+                                }
+                            });
+                        } else {
+                            hideProgressDialog();
+                            Toast.makeText(LoginActivity.this, "Для автоматического входа требуется верификация аккаунта", Toast.LENGTH_LONG).show();
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            String message = e.getMessage();
-                            if (e instanceof FirebaseAuthInvalidUserException){
-                                message = "Данный пользователь отсутсвует в системе";
-                            }
-                            new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
-                                    .setTitleText("Ошибка")
-                                    .setContentText(message)
-                                    .setConfirmText("Ок")
-                                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                        @Override
-                                        public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                            sweetAlertDialog.dismissWithAnimation();
-                                            firebaseAuth.signOut();
-                                        }
-                                    }).show();
-                            Log.d(TAG, "authError:" + e.getMessage());
-                        }
-                    });
+                    }
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
@@ -147,11 +158,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user.isEmailVerified()) {
-            finish();
+            //finish();
             return true;
         } else {
-            FirebaseAuth.getInstance().signOut();
-            return false;
+            //FirebaseAuth.getInstance().signOut();
+            return true; //false
         }
 
     }
@@ -162,6 +173,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             return;
         }
 
+        mainLogin = true;
         showProgressDialog();
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -174,11 +186,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
                                 MainActivity.setAdmin(isAdmin);
 
+                                hideProgressDialog();
+
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
-
-                                hideProgressDialog();
                             } else {
                                 Toast.makeText(LoginActivity.this, "Вы не верифицировали свою почту", Toast.LENGTH_SHORT).show();
                             }

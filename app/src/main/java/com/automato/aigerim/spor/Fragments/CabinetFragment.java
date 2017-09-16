@@ -1,9 +1,7 @@
 package com.automato.aigerim.spor.Fragments;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +17,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Adapter.UsersDisputeAdapter;
+import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.R;
 import com.firebase.client.annotations.Nullable;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -30,20 +33,31 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.Adapter.UsersDisputeAdapter;
-import com.automato.aigerim.spor.R;
-import com.automato.aigerim.spor.Models.Dispute;
-import com.automato.aigerim.spor.Models.User;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
-import static android.app.Activity.RESULT_OK;
+import cn.pedant.SweetAlert.SweetAlertDialog;
+import ru.cloudpayments.sdk.CardFactory;
+import ru.cloudpayments.sdk.ICard;
+import ru.cloudpayments.sdk.IPayment;
+import ru.cloudpayments.sdk.PaymentFactory;
+import ru.cloudpayments.sdk.business.domain.model.BaseResponse;
+import ru.cloudpayments.sdk.business.domain.model.billing.CardsAuthConfirmResponse;
+import ru.cloudpayments.sdk.business.domain.model.billing.CardsAuthResponse;
+import ru.cloudpayments.sdk.view.PaymentTaskListener;
+
+import static ru.cloudpayments.sdk.utils.Logger.log;
 
 
 public class CabinetFragment extends Fragment implements View.OnClickListener {
@@ -68,6 +82,46 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     FirebaseAuth mAuth;
     User client;
     ArrayList<Dispute> userDisputes = new ArrayList<>();
+    private PaymentTaskListener paymentTaskListener = new PaymentTaskListener() {
+        @Override
+        public void success(BaseResponse baseResponse) {
+            // успешно
+            Toast.makeText(rootView.getContext(), "Ok", Toast.LENGTH_SHORT).show();
+            // baseResponse instanceof CardsAuthConfirmResponse - оплата 3ds
+            // baseResponse instanceof CardsAuthResponse
+        }
+
+        @Override
+        public void error(BaseResponse response) {
+            // ошибка
+            log("BuildInActivity got error " + response);
+            if (response instanceof CardsAuthConfirmResponse)
+                showErrorResult(((CardsAuthConfirmResponse) response).transaction.cardHolderMessage);
+            if (response instanceof CardsAuthResponse)
+                showErrorResult(((CardsAuthResponse) response).auth.cardHolderMessage);
+            else
+                showErrorResult(response.message);
+        }
+
+        @Override
+        public void cancel() {
+            // отменено пользователем
+            Toast.makeText(rootView.getContext(), "Cancel", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private void showErrorResult(String message) {
+        SweetAlertDialog mProgressDialog = new SweetAlertDialog(rootView.getContext(), SweetAlertDialog.ERROR_TYPE);
+        mProgressDialog.setTitleText("Ошибка");
+        mProgressDialog.setContentText(message);
+        mProgressDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                sweetAlertDialog.dismissWithAnimation();
+            }
+        });
+        mProgressDialog.show();
+    }
 
     @Nullable
     @Override
@@ -294,12 +348,22 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
         this.userMoney = (TextView) rootView.findViewById(R.id.client_money);
         this.sporLabel = (TextView) rootView.findViewById(R.id.client_spors_label);
 
-        if (MainActivity.isAdmin()){
+        TextView topUpTheBalance = (TextView) rootView.findViewById(R.id.top_up_balance);
+        topUpTheBalance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(rootView.getContext(), "Click", Toast.LENGTH_SHORT).show();
+                topUpTheBalance();
+            }
+        });
+
+        if (MainActivity.isAdmin()) {
             rootView.findViewById(R.id.age_layout).setVisibility(View.GONE);
             rootView.findViewById(R.id.client_money).setVisibility(View.GONE);
             rootView.findViewById(R.id.sort_buttons).setVisibility(View.GONE);
             rootView.findViewById(R.id.clientSpors).setVisibility(View.GONE);
             rootView.findViewById(R.id.client_spors_label).setVisibility(View.GONE);
+            topUpTheBalance.setVisibility(View.GONE);
         }
 
         this.activ = (FloatingActionButton) rootView.findViewById(R.id.activ);
@@ -315,6 +379,23 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
         llm.setOrientation(LinearLayoutManager.HORIZONTAL);
         userDisputesList.setLayoutManager(llm);
+    }
+
+    public void topUpTheBalance() {
+        ICard card = CardFactory.create("5200828282828210", "0718", "123");
+        if (card.isValidNumber()) {
+            try {
+                String criptogram = card.cardCryptogram("pk_d1f87a40424414e08730cadea80a1");
+                IPayment paymentAuth = PaymentFactory.auth(getActivity(),
+                        "pk_d1f87a40424414e08730cadea80a1", "testInvoiceId", "test_acc@mail.ru",
+                        criptogram, "Piter", 15.0, "KZT", "Поплнение счёта на Dispute", "");
+                paymentAuth.run(paymentTaskListener);
+            } catch (UnsupportedEncodingException | NoSuchPaddingException | NoSuchProviderException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //CardNumber is not valid
+        }
     }
 
     private void waitButtonClick() {

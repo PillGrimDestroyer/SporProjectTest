@@ -46,6 +46,8 @@ import com.automato.aigerim.spor.Models.Participant;
 import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.R;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 /**
  * Created by HAOR on 23.08.2017.
  */
@@ -179,7 +181,7 @@ public class DisputeDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_dispute_detail, container, false);
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
         storageReference = FirebaseStorage.getInstance().getReference();
         final String userID = mAuth.getCurrentUser().getUid();
 
@@ -339,49 +341,63 @@ public class DisputeDetailFragment extends Fragment {
                             imm.hideSoftInputFromWindow(rate.getWindowToken(), 0);
 
                             if (!dispute.participants.containsKey(client.id)) {
-                                Participant participant = new Participant();
-                                dispute.money += rateValue;
-                                client.money -= rateValue;
-                                dispute.participantCount += 1;
+                                if(mAuth.getCurrentUser().isEmailVerified()) {
+                                    Participant participant = new Participant();
+                                    dispute.money += rateValue;
+                                    client.money -= rateValue;
+                                    dispute.participantCount += 1;
 
-                                DatabaseReference participantCount = myDatabase.getReference("spor/" + dispute.id + "/participantCount");
-                                participantCount.setValue(dispute.participantCount);
+                                    DatabaseReference participantCount = myDatabase.getReference("spor/" + dispute.id + "/participantCount");
+                                    participantCount.setValue(dispute.participantCount);
 
-                                DatabaseReference sporMoney = myDatabase.getReference("spor/" + dispute.id + "/totalDisputeMoney");
-                                sporMoney.setValue(dispute.money);
+                                    DatabaseReference sporMoney = myDatabase.getReference("spor/" + dispute.id + "/totalDisputeMoney");
+                                    sporMoney.setValue(dispute.money);
 
-                                DatabaseReference clientMoney = myDatabase.getReference("users/" + client.id + "/money");
-                                clientMoney.setValue(client.money);
+                                    DatabaseReference clientMoney = myDatabase.getReference("users/" + client.id + "/money");
+                                    clientMoney.setValue(client.money);
 
-                                participant.choice = selectedChoice;
-                                participant.money = rateValue;
-                                participant.spor_id = dispute.id;
-                                participant.user_id = client.id;
-                                participant.winnings = 0;
+                                    participant.choice = selectedChoice;
+                                    participant.money = rateValue;
+                                    participant.spor_id = dispute.id;
+                                    participant.user_id = client.id;
+                                    participant.winnings = 0;
 
-                                DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
-                                refParticipant.child(client.id).setValue(participant);
+                                    DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
+                                    refParticipant.child(client.id).setValue(participant);
 
-                                Choice choice = new Choice();
-                                choice.choice = selectedChoice;
-                                choice.id = selectedChoice;
-                                choice.spor_id = dispute.id;
-                                choice.rate = dispute.choices.get(selectedChoice).rate + rateValue;
+                                    Choice choice = new Choice();
+                                    choice.choice = selectedChoice;
+                                    choice.id = selectedChoice;
+                                    choice.spor_id = dispute.id;
+                                    choice.rate = dispute.choices.get(selectedChoice).rate + rateValue;
 
-                                dispute.choices.put(selectedChoice, choice);
+                                    dispute.choices.put(selectedChoice, choice);
 
-                                DatabaseReference updateChoice = myDatabase.getReference("spor/" + dispute.id + "/choices");
-                                updateChoice.child(selectedChoice).setValue(choice);
+                                    DatabaseReference updateChoice = myDatabase.getReference("spor/" + dispute.id + "/choices");
+                                    updateChoice.child(selectedChoice).setValue(choice);
 
-                                dispute.participants.put(client.id, participant);
-                                setSporParticipantCount(dispute.participantCount, dispute, userID);
+                                    dispute.participants.put(client.id, participant);
+                                    setSporParticipantCount(dispute.participantCount, dispute, userID);
 
-                                fTeam.setSelected(false);
-                                sTeam.setSelected(false);
-                                rate.setText("");
-                                setRate();
+                                    fTeam.setSelected(false);
+                                    sTeam.setSelected(false);
+                                    rate.setText("");
+                                    setRate();
 
-                                Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_LONG).show();
+                                    Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_LONG).show();
+                                } else {
+                                    mAuth.getCurrentUser().sendEmailVerification();
+                                    SweetAlertDialog mProgressDialog = new SweetAlertDialog(view.getContext(), SweetAlertDialog.ERROR_TYPE);
+                                    mProgressDialog.setTitleText("Ошибка");
+                                    mProgressDialog.setContentText(getResources().getString(R.string.not_verified));
+                                    mProgressDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                        @Override
+                                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                            sweetAlertDialog.dismissWithAnimation();
+                                        }
+                                    });
+                                    mProgressDialog.show();
+                                }
                             } else {
                                 Toast.makeText(rootview.getContext(), R.string.already_in, Toast.LENGTH_SHORT).show();
                             }
