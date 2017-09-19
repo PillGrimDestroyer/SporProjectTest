@@ -6,12 +6,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -21,6 +27,7 @@ import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Adapter.UsersDisputeAdapter;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Tools.Tools;
 import com.automato.aigerim.spor.R;
 import com.firebase.client.annotations.Nullable;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -42,6 +49,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -55,14 +63,13 @@ import ru.cloudpayments.sdk.PaymentFactory;
 import ru.cloudpayments.sdk.business.domain.model.BaseResponse;
 import ru.cloudpayments.sdk.business.domain.model.billing.CardsAuthConfirmResponse;
 import ru.cloudpayments.sdk.business.domain.model.billing.CardsAuthResponse;
+import ru.cloudpayments.sdk.business.domain.model.billing.CardsChargeResponse;
 import ru.cloudpayments.sdk.view.PaymentTaskListener;
 
 import static ru.cloudpayments.sdk.utils.Logger.log;
 
 
 public class CabinetFragment extends Fragment implements View.OnClickListener {
-
-    View rootView;
 
     ImageView userProfileImage;
     TextView userName;
@@ -76,19 +83,43 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     ProgressBar progressBar;
     RecyclerView userDisputesList;
     FirebaseStorage storage;
+    EditText cardNumber;
+    EditText expMonth;
+    EditText expYear;
+    EditText cvv;
+    EditText cardHolder;
+    EditText payment;
     StorageReference storageReference;
     FirebaseDatabase myDatabase;
     DatabaseReference reference;
     FirebaseAuth mAuth;
+    CheckBox has3DSecure;
     User client;
     ArrayList<Dispute> userDisputes = new ArrayList<>();
+    private View rootView;
+    private String publickKey = "pk_d1f87a40424414e08730cadea80a1";
+    private Pattern CODE_PATTERN = Pattern.compile("([0-9]{0,4})|([0-9]{4}-)+|([0-9]{4}-[0-9]{0,4})+");
+    private Tools tools = new Tools();
+
     private PaymentTaskListener paymentTaskListener = new PaymentTaskListener() {
         @Override
-        public void success(BaseResponse baseResponse) {
+        public void success(BaseResponse response) {
             // успешно
-            Toast.makeText(rootView.getContext(), "Ok", Toast.LENGTH_SHORT).show();
-            // baseResponse instanceof CardsAuthConfirmResponse - оплата 3ds
-            // baseResponse instanceof CardsAuthResponse
+            if (response instanceof CardsAuthConfirmResponse)
+                showSuccessResult(((CardsAuthConfirmResponse) response).transaction.cardHolderMessage);
+            else if (response instanceof CardsAuthResponse)
+                showSuccessResult(((CardsAuthResponse) response).auth.cardHolderMessage);
+            else {
+                if (!tools.isNullOrWhitespace(response.message)) {
+                    showSuccessResult(response.message);
+                } else {
+                    if (response instanceof CardsChargeResponse) {
+                        showSuccessResult(((CardsChargeResponse) response).transaction.cardHolderMessage);
+                    } else {
+                        Toast.makeText(rootView.getContext(), "Успешное пополнение счёта", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
         }
 
         @Override
@@ -97,18 +128,64 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             log("BuildInActivity got error " + response);
             if (response instanceof CardsAuthConfirmResponse)
                 showErrorResult(((CardsAuthConfirmResponse) response).transaction.cardHolderMessage);
-            if (response instanceof CardsAuthResponse)
+            else if (response instanceof CardsAuthResponse)
                 showErrorResult(((CardsAuthResponse) response).auth.cardHolderMessage);
-            else
-                showErrorResult(response.message);
+            else {
+                if (!tools.isNullOrWhitespace(response.message)) {
+                    if (!response.message.equals("Авторизация не пройдена")) {
+                        showErrorResult(response.message);
+                    } else { //Если такой вариант не подойдёт то надо стереть "} else {" и всё его содержимое а на лэйауте включить CheckBox
+                        String cardNumberString = cardNumber.getText().toString().replace("-", "");
+                        String expDate = getExpDate(expMonth, expYear);
+                        String cvvCode = cvv.getText().toString();
+                        String cardHolderName = cardHolder.getText().toString();
+
+                        double money = Double.parseDouble(payment.getText().toString());
+                        ICard card = CardFactory.create(cardNumberString, expDate, cvvCode);
+                        if (card.isValidNumber()) {
+                            try {
+                                String criptogram = card.cardCryptogram(publickKey);
+                                IPayment paymentAuth;
+                                String message = "Take my money";
+                                String currency = "KZT";
+                                String description = "Поплнение счёта на Dispute";
+                                paymentAuth = PaymentFactory.charge(getActivity(),
+                                        publickKey, client.id, message,
+                                        criptogram, cardHolderName, money, currency, description, "");
+                                paymentAuth.run(paymentTaskListener);
+                            } catch (UnsupportedEncodingException | NoSuchPaddingException | NoSuchProviderException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } else {
+                    if (response instanceof CardsChargeResponse) {
+                        showErrorResult(((CardsChargeResponse) response).transaction.cardHolderMessage);
+                    } else {
+                        showErrorResult("Произошла неизвестная ошибка");
+                    }
+                }
+            }
         }
 
         @Override
         public void cancel() {
             // отменено пользователем
-            Toast.makeText(rootView.getContext(), "Cancel", Toast.LENGTH_SHORT).show();
         }
     };
+
+    private void showSuccessResult(String message) {
+        SweetAlertDialog mProgressDialog = new SweetAlertDialog(rootView.getContext(), SweetAlertDialog.SUCCESS_TYPE);
+        mProgressDialog.setTitleText("Успех!");
+        mProgressDialog.setContentText(message);
+        mProgressDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                sweetAlertDialog.dismissWithAnimation();
+            }
+        });
+        mProgressDialog.show();
+    }
 
     private void showErrorResult(String message) {
         SweetAlertDialog mProgressDialog = new SweetAlertDialog(rootView.getContext(), SweetAlertDialog.ERROR_TYPE);
@@ -382,20 +459,180 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     }
 
     public void topUpTheBalance() {
-        ICard card = CardFactory.create("5200828282828210", "0718", "123");
-        if (card.isValidNumber()) {
-            try {
-                String criptogram = card.cardCryptogram("pk_d1f87a40424414e08730cadea80a1");
-                IPayment paymentAuth = PaymentFactory.auth(getActivity(),
-                        "pk_d1f87a40424414e08730cadea80a1", "testInvoiceId", "test_acc@mail.ru",
-                        criptogram, "Piter", 15.0, "KZT", "Поплнение счёта на Dispute", "");
-                paymentAuth.run(paymentTaskListener);
-            } catch (UnsupportedEncodingException | NoSuchPaddingException | NoSuchProviderException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-                e.printStackTrace();
+        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_top_up_balance, null); // Получаем layout по его ID
+        AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
+
+        builder.setView(view);
+        builder.setCancelable(true);
+
+        AlertDialog dialog = builder.create();
+        initAndShowPaymentsDialog(dialog, view);
+    }
+
+    private void initAndShowPaymentsDialog(final AlertDialog dialog, View view) {
+        Button ok = (Button) view.findViewById(R.id.done_up_balance);
+        Button cancel = (Button) view.findViewById(R.id.cancel_up_balance);
+        cardNumber = (EditText) view.findViewById(R.id.card_number_text);
+        expMonth = (EditText) view.findViewById(R.id.expMonth);
+        expYear = (EditText) view.findViewById(R.id.expYear);
+        cvv = (EditText) view.findViewById(R.id.cvv_text);
+        cardHolder = (EditText) view.findViewById(R.id.card_holder_text);
+        payment = (EditText) view.findViewById(R.id.payment_text);
+        has3DSecure = (CheckBox) view.findViewById(R.id.has_3d_secure);
+
+        cardNumber.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
             }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0 && !CODE_PATTERN.matcher(s).matches()) {
+                    String input = s.toString();
+                    String numbersOnly = keepNumbersOnly(input);
+                    String code = formatNumbersAsCode(numbersOnly);
+
+                    Log.w("", "numbersOnly" + numbersOnly);
+                    Log.w("", "code" + code);
+
+                    cardNumber.removeTextChangedListener(this);
+                    cardNumber.setText(code);
+                    // You could also remember the previous position of the cursor
+                    cardNumber.setSelection(code.length());
+                    cardNumber.addTextChangedListener(this);
+                }
+            }
+
+            private String keepNumbersOnly(CharSequence s) {
+                return s.toString().replaceAll("[^0-9]", ""); // Should of course be more robust
+            }
+
+            private String formatNumbersAsCode(CharSequence s) {
+                int groupDigits = 0;
+                String tmp = "";
+                for (int i = 0; i < s.length(); ++i) {
+                    tmp += s.charAt(i);
+                    ++groupDigits;
+                    if (groupDigits == 4) {
+                        tmp += "-";
+                        groupDigits = 0;
+                    }
+                }
+                return tmp;
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String cardNumberString = cardNumber.getText().toString().replace("-", "");
+                String expDate = getExpDate(expMonth, expYear);
+                String cvvCode = cvv.getText().toString();
+                String cardHolderName = cardHolder.getText().toString();
+
+                boolean checked = check(cardNumberString, cvvCode, cardHolderName, cardNumber, expMonth, expYear, cvv, cardHolder, payment);
+
+                if (checked) {
+                    double money = Double.parseDouble(payment.getText().toString());
+                    ICard card = CardFactory.create(cardNumberString, expDate, cvvCode);
+                    if (card.isValidNumber()) {
+                        try {
+                            String criptogram = card.cardCryptogram(publickKey);
+                            IPayment paymentAuth;
+                            String message = "Take my money";
+                            String currency = "KZT";
+                            String description = "Поплнение счёта на Dispute";
+                            if (has3DSecure.isChecked()) {
+                                paymentAuth = PaymentFactory.charge(getActivity(),
+                                        publickKey, client.id, message,
+                                        criptogram, cardHolderName, money, currency, description, "");
+                            } else {
+                                paymentAuth = PaymentFactory.auth(getActivity(),
+                                        publickKey, client.id, message,
+                                        criptogram, cardHolderName, money, currency, description, "");
+                            }
+                            paymentAuth.run(paymentTaskListener);
+                            dialog.dismiss();
+                        } catch (UnsupportedEncodingException | NoSuchPaddingException | NoSuchProviderException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        showErrorResult("Вы ввели не верный номер карты");
+                    }
+                }
+            }
+        });
+        dialog.show();
+    }
+
+    private boolean check(String cardNumberString, String cvvCode, String cardHolderName, EditText cardNumber, EditText expMonth, EditText expYear, EditText cvv, EditText cardHolder, EditText payment) {
+        boolean checked = true;
+
+        if (tools.isNullOrWhitespace(cardNumberString)) {
+            checked = false;
+            cardNumber.setError("Обязательно");
         } else {
-            //CardNumber is not valid
+            cardNumber.setError(null);
         }
+
+        if (tools.isNullOrWhitespace(expMonth.getText().toString())) {
+            checked = false;
+            expMonth.setError("Обязательно");
+        } else {
+            if (Integer.parseInt(expMonth.getText().toString()) > 12) {
+                checked = false;
+                expMonth.setError("Не корректный ввод");
+            } else {
+                expMonth.setError(null);
+            }
+        }
+
+        if (tools.isNullOrWhitespace(expYear.getText().toString())) {
+            checked = false;
+            expYear.setError("Обязательно");
+        } else {
+            expYear.setError(null);
+        }
+
+        if (tools.isNullOrWhitespace(cvvCode)) {
+            checked = false;
+            cvv.setError("Обязательно");
+        } else {
+            cvv.setError(null);
+        }
+
+        if (tools.isNullOrWhitespace(cardHolderName)) {
+            checked = false;
+            cardHolder.setError("Обязательно");
+        } else {
+            cardHolder.setError(null);
+        }
+
+        if (tools.isNullOrWhitespace(payment.getText().toString())) {
+            checked = false;
+            payment.setError("Обязательно");
+        } else {
+            payment.setError(null);
+        }
+        return checked;
+    }
+
+    private String getExpDate(EditText expMonth, EditText expYear) {
+        String month = expMonth.getText().length() < 2 ? "0" + expMonth.getText().toString() : expMonth.getText().toString();
+        return month + expYear.getText().toString();
     }
 
     private void waitButtonClick() {

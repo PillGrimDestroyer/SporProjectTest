@@ -7,15 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.R;
+import com.automato.aigerim.spor.View.DisputeCell;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.Timer;
-
-import com.automato.aigerim.spor.Other.TimerTask.MyTimerTask;
-import com.automato.aigerim.spor.R;
-import com.automato.aigerim.spor.View.DisputeCell;
-import com.automato.aigerim.spor.Models.Dispute;
 
 /**
  * Created by HAOR on 25.08.2017.
@@ -28,8 +25,6 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
     private ItemClickListener mClickListener;
     private String userID;
     private FirebaseDatabase database;
-    private Timer myTimer;
-    private MyTimerTask task;
     private boolean isSorted;
     private boolean isSortedBySubCategory;
 
@@ -75,8 +70,9 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
             isLiked = model.likes.containsKey(userID);
         }
         viewHolder.setLiked(isLiked);
-        viewHolder.setOnCardListener(model, database);
-        if (myTimer == null) {
+        viewHolder.setListener(model, database);
+        viewHolder.runTimer(model);
+        /*if (myTimer == null) {
             myTimer = new Timer();
             task = new MyTimerTask();
 
@@ -95,7 +91,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
             }
             task.disputes.add(position, model);
             task.disputeCells.add(position, viewHolder);
-        }
+        }*/
     }
 
     // total number of cells

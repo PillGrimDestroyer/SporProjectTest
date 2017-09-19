@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/fragment_margin">
+
+    <TextView
+        android:id="@+id/card_title"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_card_number"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/card_number_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/card_title"
+        android:hint="Ваш номер карты"
+        android:inputType="numberSigned"
+        android:maxLength="19" />
+
+    <TextView
+        android:id="@+id/card_holder_title"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/card_number_text"
+        android:text="@string/enter_card_holder_name"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/card_holder_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/card_holder_title"
+        android:hint="Ваше имя"
+        android:inputType="textPersonName" />
+
+    <TextView
+        android:id="@+id/cvv_title"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/cvv_text"
+        android:layout_alignBottom="@+id/cvv_text"
+        android:layout_toLeftOf="@+id/cvv_text"
+        android:layout_toStartOf="@+id/cvv_text"
+        android:text="@string/cvv_title"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/date_title"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/expMonth"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="@string/valid_date_title"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/cvv_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/card_holder_text"
+        android:layout_toEndOf="@+id/date_title"
+        android:layout_toRightOf="@id/date_title"
+        android:ems="2"
+        android:hint="@string/cvv_hint"
+        android:inputType="numberSigned"
+        android:maxLength="3"
+        android:maxLines="1" />
+
+    <EditText
+        android:id="@+id/expMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cvv_title"
+        android:layout_toEndOf="@id/date_title"
+        android:layout_toRightOf="@id/date_title"
+        android:ems="2"
+        android:hint="MM"
+        android:inputType="numberSigned"
+        android:maxLength="2" />
+
+    <EditText
+        android:id="@+id/expYear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cvv_title"
+        android:layout_toEndOf="@+id/expMonth"
+        android:layout_toRightOf="@+id/expMonth"
+        android:ems="2"
+        android:hint="YY"
+        android:inputType="numberSigned"
+        android:maxLength="2" />
+
+    <CheckBox
+        android:id="@+id/has_3d_secure"
+        android:checked="false"
+        android:text="@string/has_3d_secure"
+        android:textSize="16sp"
+        android:layout_below="@id/expYear"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/payment_title"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/payment_text"
+        android:layout_below="@+id/has_3d_secure"
+        android:text="@string/payment_count"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/payment_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/has_3d_secure"
+        android:layout_marginRight="10dp"
+        android:inputType="numberSigned"
+        android:layout_toEndOf="@+id/payment_title"
+        android:layout_toLeftOf="@+id/currency"
+        android:layout_toRightOf="@+id/payment_title"
+        android:layout_toStartOf="@+id/currency"
+        android:hint="0"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/currency"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/payment_text"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/payment_title"
+        android:text="KZT"
+        android:textSize="18sp" />
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/payment_text"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancel_up_balance"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@android:string/cancel" />
+
+        <Button
+            android:id="@+id/done_up_balance"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/cancel_up_balance"
+            android:layout_weight="1"
+            android:text="@string/balance_up" />
+
+    </LinearLayout>
+
+</RelativeLayout>

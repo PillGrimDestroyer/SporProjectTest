@@ -84,6 +84,7 @@
     <string name="date">дд/мм/гггг</string>
     <string name="time">00:00</string>
     <string name="exit">Выход</string>
+    <string name="balance_up">Пополнить баланс</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
@@ -178,4 +179,7 @@
 </string>
     <string name="terms_of_use">Используй как хочешь</string>
     <string name="not_verified">Для этого действия требуется верификация аккаунта. Вам на почту было выслано сообщение с ссылкой для верификации аккаунта</string>
+    <string name="wait">Ожидается</string>
+    <string name="payment_count">Сумма:</string>
+    <string name="has_3d_secure">Моя карта защищена 3D Secure</string>
 </resources>

@@ -17,6 +17,7 @@ import com.automato.aigerim.spor.Fragments.DisputeDetailFragment;
 import com.automato.aigerim.spor.Models.Choice;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.TimerTask.MySingleTimerTask;
 import com.automato.aigerim.spor.Other.Tools.Tools;
 import com.automato.aigerim.spor.R;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -32,6 +33,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Timer;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -56,6 +58,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     private StorageReference storageReference;
     private Tools tools = new Tools();
+    private Timer myTimer;
 
     public DisputeCell(View itemView) {
         super(itemView);
@@ -63,7 +66,51 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         storageReference = FirebaseStorage.getInstance().getReference();
     }
 
-    public void setOnCardListener(final Dispute model, final FirebaseDatabase myDatabase) {
+    private void setOnLikeListener(final Dispute model, final FirebaseDatabase myDatabase) {
+        view.findViewById(R.id.imageLike).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int likeCount;
+                if (!isLiked()) {
+                    likeCount = Integer.parseInt(sporLikeCount.getText().toString());
+                    likeCount++;
+
+                    if (model.likes != null) {
+                        if (!model.likes.containsKey(client.id)) {
+                            model.likes.put(client.id, true);
+                        }
+                    } else {
+                        HashMap<String, Boolean> likes = new HashMap<>();
+                        likes.put(client.id, true);
+                        model.likes = likes;
+                    }
+                } else {
+                    likeCount = Integer.parseInt(sporLikeCount.getText().toString());
+                    likeCount--;
+
+                    model.likes.remove(client.id);
+                }
+
+                DatabaseReference sporLikeCountInDB = myDatabase.getReference("spor/" + model.id + "/likeCount");
+                sporLikeCountInDB.setValue(likeCount);
+
+                DatabaseReference sporLikes = myDatabase.getReference("spor/" + model.id + "/likes");
+                sporLikes.setValue(model.likes);
+
+                ImageView like = (ImageView) view.findViewById(R.id.imageLike);
+                if (!isLiked()) {
+                    like.setImageResource(R.drawable.like);
+                    setLiked(true);
+                } else {
+                    like.setImageResource(R.drawable.like_dark);
+                    setLiked(false);
+                }
+                sporLikeCount.setText(Integer.toString(likeCount));
+            }
+        });
+    }
+
+    public void setListener(final Dispute model, final FirebaseDatabase myDatabase) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String userID = mAuth.getCurrentUser().getUid();
         DatabaseReference reference = myDatabase.getReference();
@@ -71,106 +118,66 @@ public class DisputeCell extends RecyclerView.ViewHolder {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 client = dataSnapshot.getValue(User.class);
-                view.findViewById(R.id.imageLike).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        int likeCount;
-                        if (!isLiked()) {
-                            likeCount = Integer.parseInt(sporLikeCount.getText().toString());
-                            likeCount++;
-
-                            if (model.likes != null) {
-                                if (!model.likes.containsKey(client.id)) {
-                                    model.likes.put(client.id, true);
-                                }
-                            } else {
-                                HashMap<String, Boolean> likes = new HashMap<>();
-                                likes.put(client.id, true);
-                                model.likes = likes;
-                            }
-                        } else {
-                            likeCount = Integer.parseInt(sporLikeCount.getText().toString());
-                            likeCount--;
-
-                            model.likes.remove(client.id);
-                        }
-
-                        DatabaseReference sporLikeCountInDB = myDatabase.getReference("spor/" + model.id + "/likeCount");
-                        sporLikeCountInDB.setValue(likeCount);
-
-                        DatabaseReference sporLikes = myDatabase.getReference("spor/" + model.id + "/likes");
-                        sporLikes.setValue(model.likes);
-
-                        ImageView like = (ImageView) view.findViewById(R.id.imageLike);
-                        if (!isLiked()) {
-                            like.setImageResource(R.drawable.like);
-                            setLiked(true);
-                        } else {
-                            like.setImageResource(R.drawable.like_dark);
-                            setLiked(false);
-                        }
-                        sporLikeCount.setText(Integer.toString(likeCount));
-                    }
-                });
-
-                if (!MainActivity.isAdmin()) {
-                    view.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            DisputeDetailFragment ddf = new DisputeDetailFragment();
-                            HashMap<String, Choice> choices = model.choices;
-
-                            String sporDate = ((TextView) view.findViewById(R.id.spor_date)).getText().toString();
-                            int sporParticipantCount = Integer.parseInt(((TextView) view.findViewById(R.id.viewers_count)).getText().toString());
-                            int sporLikeCount = Integer.parseInt(((TextView) view.findViewById(R.id.like_count)).getText().toString());
-
-                            String viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
-                            int viewsCountNumber = Integer.parseInt(viewsCountMessage.split(" ")[0]);
-                            setViewCount(++viewsCountNumber);
-
-                            viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
-                            String sporSubject = ((TextView) view.findViewById(R.id.spor_subject)).getText().toString();
-                            String sporStartTime = ((TextView) view.findViewById(R.id.spor_time)).getText().toString();
-                            int money = model.money;
-
-                            ddf.setDate(sporDate);
-                            ddf.setNumberOfParticipant(sporParticipantCount);
-                            ddf.setNumberOfLikes(sporLikeCount);
-                            ddf.setSubject(sporSubject);
-                            ddf.setTime(sporStartTime);
-                            ddf.setViewCount(viewsCountMessage);
-                            ddf.setTotalDisputeMoney(money);
-                            ddf.setDispute(model);
-                            ddf.setClient(client);
-                            ddf.setMyDatabase(myDatabase);
-                            ddf.setLikedByCurentUser(isLiked());
-                            ddf.setSorted(isSorted());
-                            ddf.setSortedBySubCategory(isSortedBySubCategory());
-
-                            int b = 0;
-                            for (Choice c : choices.values()) {
-                                if (b == 0)
-                                    ddf.setFerstTeam(c.choice);
-                                else
-                                    ddf.setSecondTeam(c.choice);
-                                b++;
-                            }
-
-                            android.support.v4.app.Fragment newFragment = ddf;
-
-                            MainActivity.getFragmetManeger()
-                                    .beginTransaction()
-                                    .replace(R.id.main_fragment, newFragment, "fragment")
-                                    .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                    .commit();
-                        }
-                    });
-                }
+                setOnLikeListener(model, myDatabase);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    private void setOnCardListener(final Dispute model, final FirebaseDatabase myDatabase) {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DisputeDetailFragment ddf = new DisputeDetailFragment();
+                HashMap<String, Choice> choices = model.choices;
+
+                String sporDate = ((TextView) view.findViewById(R.id.spor_date)).getText().toString();
+                int sporParticipantCount = Integer.parseInt(((TextView) view.findViewById(R.id.viewers_count)).getText().toString());
+                int sporLikeCount = Integer.parseInt(((TextView) view.findViewById(R.id.like_count)).getText().toString());
+
+                String viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
+                int viewsCountNumber = Integer.parseInt(viewsCountMessage.split(" ")[0]);
+                setViewCount(++viewsCountNumber);
+
+                viewsCountMessage = ((TextView) view.findViewById(R.id.view_count)).getText().toString();
+                String sporSubject = ((TextView) view.findViewById(R.id.spor_subject)).getText().toString();
+                String sporStartTime = ((TextView) view.findViewById(R.id.spor_time)).getText().toString();
+                int money = model.money;
+
+                ddf.setDate(sporDate);
+                ddf.setNumberOfParticipant(sporParticipantCount);
+                ddf.setNumberOfLikes(sporLikeCount);
+                ddf.setSubject(sporSubject);
+                ddf.setTime(sporStartTime);
+                ddf.setViewCount(viewsCountMessage);
+                ddf.setTotalDisputeMoney(money);
+                ddf.setDispute(model);
+                ddf.setClient(client);
+                ddf.setMyDatabase(myDatabase);
+                ddf.setLikedByCurentUser(isLiked());
+                ddf.setSorted(isSorted());
+                ddf.setSortedBySubCategory(isSortedBySubCategory());
+
+                int b = 0;
+                for (Choice c : choices.values()) {
+                    if (b == 0)
+                        ddf.setFerstTeam(c.choice);
+                    else
+                        ddf.setSecondTeam(c.choice);
+                    b++;
+                }
+
+                android.support.v4.app.Fragment newFragment = ddf;
+
+                MainActivity.getFragmetManeger()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment, newFragment, "fragment")
+                        .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commit();
             }
         });
     }
@@ -356,23 +363,29 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         return (TextView) view.findViewById(R.id.progress_text);
     }
 
-    public void setProgress(final long unixTime, final DisputeCell disputeCell, final Dispute dispute) {
-        MainActivity m = MainActivity.getActivity();
-        m.runOnUiThread(new Runnable() {
+    public void setProgress(final long unixTime, final Dispute dispute) {
+        MainActivity.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (!MainActivity.isAdmin()) {
+                    setOnCardListener(dispute, FirebaseDatabase.getInstance());
+                }
                 ProgressBar progressBar = getProgressBar();
+                TextView progressText = getProgressText();
+                TextView status = getStatusTextView();
+
                 long curUnixTime = System.currentTimeMillis();
                 long progress = unixTime - curUnixTime;
                 if (progress < 0) {
-                    TextView progressText = getProgressText();
-                    TextView status = getStatusTextView();
-                    progressBar.setProgress(100);
+                    //progressBar.setProgress(100);
+
                     progressBar.setVisibility(View.GONE);
                     progressText.setVisibility(View.VISIBLE);
                     view.findViewById(R.id.time_layout).setVisibility(View.GONE);
                     view.findViewById(R.id.spor_date).setVisibility(View.GONE);
+
                     if (dispute.result.equals("")) {
+                        setOnCardListener(dispute, FirebaseDatabase.getInstance());
                         progressText.setText(R.string.Live);
                         status.setText(R.string.Live);
                     } else {
@@ -381,11 +394,32 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                         status.setText(R.string.done);
                     }
                 } else {
-                    int progressInt = Integer.parseInt(Long.toString(progress / 100));
-                    while (progressInt > 100) {
-                        progressInt /= 10;
-                    }
-                    progressBar.setProgress(100 - progressInt);
+                    progressBar.setVisibility(View.VISIBLE);
+                    progressText.setVisibility(View.GONE);
+                    view.findViewById(R.id.time_layout).setVisibility(View.VISIBLE);
+                    view.findViewById(R.id.spor_date).setVisibility(View.VISIBLE);
+
+                    setOnCardListener(dispute, FirebaseDatabase.getInstance());
+                    status.setText(R.string.wait);
+
+                    progressBar.setMax(99999999);
+                    progressBar.setProgress(99999999 - (int) progress);
+
+                    /*int max = (int) (unixTime % 1000000000l);
+                    int curent = (int) (curUnixTime % 1000000000l);
+
+                    progressBar.setMax(max);
+                    progressBar.setProgress(curent);*/
+
+                    /*int progressInt = Integer.parseInt(Long.toString(progress / 100));
+                    if (progressInt > 100) {
+                        while (progressInt > 100) {
+                            progressInt /= 10;
+                        }
+                        progressBar.setProgress(100 - progressInt);
+                    }else {
+                        progressInt =
+                    }*/
                 }
             }
         });
@@ -403,12 +437,25 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         TextView subjectTextView = (TextView) view.findViewById(R.id.spor_subject);
 
         String fTeam = tools.regex("(.*?)([ ]*?)(-)", subjectTextView.getText().toString(), 1);
-        if (!fTeam.equals(arlist.get(0).choice)){
+        if (!fTeam.equals(arlist.get(0).choice)) {
             RightRateTextView = (TextView) view.findViewById(R.id.left_rate);
             leftRateTextView = (TextView) view.findViewById(R.id.right_rate);
         }
 
         leftRateTextView.setText(Integer.toString(arlist.get(0).rate));
         RightRateTextView.setText(Integer.toString(arlist.get(1).rate));
+    }
+
+    public void runTimer(Dispute model) {
+        if (myTimer != null) {
+            myTimer.cancel();
+            myTimer.purge();
+        }
+        myTimer = new Timer();
+        MySingleTimerTask task = new MySingleTimerTask();
+
+        task.dispute = model;
+        task.disputeCell = DisputeCell.this;
+        myTimer.schedule(task, 0, task.time);
     }
 }

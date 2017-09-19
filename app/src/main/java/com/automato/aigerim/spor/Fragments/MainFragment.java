@@ -20,8 +20,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Adapter.SortedDisputeAdapter;
+import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.R;
+import com.automato.aigerim.spor.View.DisputeCell;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -35,16 +41,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Timer;
-
-import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.Adapter.SortedDisputeAdapter;
-import com.automato.aigerim.spor.Models.Dispute;
-import com.automato.aigerim.spor.Models.User;
-import com.automato.aigerim.spor.Other.TimerTask.MyTimerTask;
-import com.automato.aigerim.spor.Other.Tools.Tools;
-import com.automato.aigerim.spor.R;
-import com.automato.aigerim.spor.View.DisputeCell;
 
 
 public class MainFragment extends Fragment {
@@ -67,8 +63,6 @@ public class MainFragment extends Fragment {
     private SortedDisputeAdapter adapter;
     private ArrayList<Dispute> mData = new ArrayList<>();
     private RecyclerView sporList;
-    private Timer myTimer;
-    private MyTimerTask task;
     private Spinner spinner;
     private ImageView searchRight;
     private ImageView searchLeft;
@@ -104,7 +98,6 @@ public class MainFragment extends Fragment {
         reference = database.getReference("spor");
         mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();
-        myTimer = null;
 
         final View rootView;
         if (!isSorted())
@@ -121,7 +114,7 @@ public class MainFragment extends Fragment {
         searchField = (EditText) getActivity().findViewById(R.id.search_field);
         close = (ImageView) getActivity().findViewById(R.id.close);
 
-        if (!isSorted()){
+        if (!isSorted()) {
             spinner.setVisibility(View.VISIBLE);
             getActivity().findViewById(R.id.title).setVisibility(View.GONE);
         }
@@ -161,13 +154,13 @@ public class MainFragment extends Fragment {
             public void onClick(View view) {
                 ((EditText) MainActivity.getActivity().findViewById(R.id.search_field)).getText().clear();
                 searchLeft.performClick();
-                if (!isSorted()){
-                    if(spinner.getSelectedItem().toString().equals("Все споры")){
+                if (!isSorted()) {
+                    if (spinner.getSelectedItem().toString().equals("Все споры")) {
                         notSortedSetAdapter();
-                    }else {
+                    } else {
                         spinner.setSelection(0, false);
                     }
-                }else {
+                } else {
                     sortedBySubCategorySetAdapter();
                 }
             }
@@ -527,8 +520,9 @@ public class MainFragment extends Fragment {
                     isLiked = model.likes.containsKey(userID);
                 }
                 viewHolder.setLiked(isLiked);
-                viewHolder.setOnCardListener(model, database);
-                if (myTimer == null) {
+                viewHolder.setListener(model, database);
+                viewHolder.runTimer(model);
+                /*if (myTimer == null) {
                     myTimer = new Timer();
                     task = new MyTimerTask();
 
@@ -548,7 +542,7 @@ public class MainFragment extends Fragment {
 
                     task.disputes.add(position, model);
                     task.disputeCells.add(position, viewHolder);
-                }
+                }*/
                 MainActivity.dismissWithAnimationLoader();
             }
         };

@@ -27,7 +27,7 @@ public class MyTimerTask extends TimerTask {
             SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
             try {
                 Date date = format.parse(s);
-                disputeCells.get(i).setProgress(date.getTime(), disputeCells.get(i), disputes.get(i));
+                disputeCells.get(i).setProgress(date.getTime(), disputes.get(i));
             } catch (ParseException e) {
                 e.printStackTrace();
             }

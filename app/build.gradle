@@ -8,8 +8,8 @@ android {
         applicationId "com.automato.aigerim.spor"
         minSdkVersion 18
         targetSdkVersion 24
-        versionCode 8
-        versionName '1.4'
+        versionCode 10
+        versionName '1.55'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     repositories {
