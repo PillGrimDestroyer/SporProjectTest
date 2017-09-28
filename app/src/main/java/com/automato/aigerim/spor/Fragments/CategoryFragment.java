@@ -88,6 +88,9 @@ public class CategoryFragment extends Fragment {
         reference = database.getReference("spor");
         hashMapCategory = new HashMap<>();
 
+        getActivity().findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
+        getActivity().findViewById(R.id.shadow).setVisibility(View.VISIBLE);
+
         TextView title = (TextView) getActivity().findViewById(R.id.title);
         searchField = (EditText) getActivity().findViewById(R.id.search_field);
         close = (ImageView) getActivity().findViewById(R.id.close);

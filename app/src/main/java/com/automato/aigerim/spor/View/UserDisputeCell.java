@@ -21,6 +21,7 @@ import com.google.firebase.storage.StorageReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 
 public class UserDisputeCell extends RecyclerView.ViewHolder {
@@ -45,7 +46,10 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
 
             switch (dispute.category) {
                 case "Футбол":
-                    drawable = R.drawable.cat_foot;
+//                    drawable = R.drawable.cat_foot;
+                    Random randomFoot = new Random();
+                    int numberFoot = 1;//randomFoot.nextInt(3) + 1;
+                    drawable = rootView.getResources().getIdentifier("foot" + numberFoot, "drawable", MainActivity.getActivity().getPackageName());
                     break;
 
                 case "Баскетбол":
@@ -57,15 +61,22 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
                     break;
 
                 case "Теннис":
-                    drawable = R.drawable.cat_ten;
+//                    drawable = R.drawable.cat_ten;
+                    Random randomTen = new Random();
+                    int numberTen = 2;//randomTen.nextInt(3) + 1;
+                    drawable = rootView.getResources().getIdentifier("ten" + numberTen, "drawable", MainActivity.getActivity().getPackageName());
                     break;
 
                 case "Борьба":
                     drawable = R.drawable.cat_wrestling;
                     break;
 
-                default:
+                case "Волейбол":
                     drawable = R.drawable.cat_volleyball;
+                    break;
+
+                default:
+                    drawable = R.drawable.foot1;
                     break;
             }
 
@@ -96,7 +107,8 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
         this.dispute = dispute;
         setImage();
 
-        final String s = dispute.date + " " + dispute.time;
+        String s = dispute.date + " " + dispute.time;
+        s = s.replace("/", ".");
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         try {
             Date date = format.parse(s);
@@ -108,10 +120,14 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
                     disputeTime.setText(null);
                 } else {
                     disputeName.setText(R.string.done);
-                    disputeTime.setText(rootView.getResources().getString(R.string.end, dispute.result));
+                    if (dispute.result.equals("equal")){
+                        disputeTime.setText(R.string.equal);
+                    }else {
+                        disputeTime.setText(rootView.getResources().getString(R.string.end, dispute.result));
+                    }
                 }
             } else {
-                disputeName.setText("Начало в:");
+                disputeName.setText("Начало в");
                 disputeTime.setText(dispute.time);
             }
         } catch (ParseException e) {

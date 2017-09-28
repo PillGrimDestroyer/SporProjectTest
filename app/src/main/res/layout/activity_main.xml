@@ -25,8 +25,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
                     android:entries="@array/category_spor" />
 
                 <TextView
@@ -34,10 +32,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="TextView"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -45,14 +39,12 @@
 
                 <ImageView
                     android:id="@+id/search_left"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="18dp"
+                    android:layout_height="20dp"
                     android:layout_centerVertical="true"
                     android:layout_gravity="left|center_vertical"
                     android:layout_marginRight="10dp"
-                    android:layout_weight="4"
-                    android:src="@android:drawable/ic_menu_search"
-                    android:visibility="gone" />
+                    android:src="@drawable/lupa_dark_small" />
 
                 <EditText
                     android:id="@+id/search_field"
@@ -62,23 +54,22 @@
                     android:layout_gravity="center"
                     android:layout_toLeftOf="@+id/close"
                     android:layout_toRightOf="@+id/search_left"
-                    android:layout_weight="1"
-                    android:hint="Поиск"
+                    android:hint="Поиск..."
+                    android:textSize="16sp"
                     android:imeOptions="actionDone"
                     android:inputType="text"
                     android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/search_right"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="22dp"
+                    android:layout_height="24dp"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
-                    android:layout_weight="4"
-                    android:src="@android:drawable/ic_menu_search" />
+                    android:src="@drawable/lupa" />
 
                 <ImageView
                     android:id="@+id/close"
@@ -89,7 +80,6 @@
                     android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
-                    android:layout_weight="4"
                     android:src="@drawable/ic_close"
                     android:visibility="gone" />
 
@@ -102,7 +92,6 @@
                     android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
-                    android:layout_weight="5"
                     android:src="@drawable/ic_check"
                     android:visibility="gone" />
 
@@ -115,7 +104,6 @@
                     android:layout_centerVertical="true"
                     android:layout_gravity="right|center_vertical"
                     android:layout_marginRight="10dp"
-                    android:layout_weight="5"
                     android:visibility="gone"
                     app:srcCompat="@drawable/ic_settings" />
 
@@ -126,7 +114,7 @@
         <View
             android:id="@+id/shadow"
             android:layout_width="match_parent"
-            android:layout_height="7dp"
+            android:layout_height="6dp"
             android:layout_below="@+id/my_toolbar"
             android:background="@drawable/toolbar_dropshadow" />
 
@@ -134,7 +122,7 @@
             android:id="@+id/main_fragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bg_4"
+            android:background="@drawable/bg_1"
             android:layout_above="@+id/navigation"
             android:layout_below="@id/shadow" />
 

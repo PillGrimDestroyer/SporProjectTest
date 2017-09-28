@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_100"
+    android:background="@color/bg_light_blue"
     android:orientation="vertical"
     tools:context="Activity.SelectLanguageActivity">
 
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="7dp"
         android:layout_below="@+id/my_toolbar"
-        android:background="@drawable/toolbar_dropshadow" />
+        android:background="@drawable/toolbar_dropshadow_settings" />
 
     <ListView
         android:id="@+id/list"

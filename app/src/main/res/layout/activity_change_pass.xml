@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_100"
+    android:background="@color/bg_light_blue"
     tools:context="Activity.ChangePassActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
+        android:background="@color/white"
         android:layout_height="?attr/actionBarSize"
         android:elevation="4dp"
         app:titleTextColor="#000">
@@ -29,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="7dp"
         android:layout_below="@+id/my_toolbar"
-        android:background="@drawable/toolbar_dropshadow" />
+        android:background="@drawable/toolbar_dropshadow_settings" />
 
     <TextView
         android:id="@+id/title_pass"
@@ -41,8 +42,8 @@
         android:text="@string/security"
         android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="#ff7777"
-        android:textSize="22sp" />
+        android:textColor="#ff8888"
+        android:textSize="20sp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -50,61 +51,67 @@
         android:layout_below="@id/title_pass"
         android:layout_marginTop="10dp"
         android:background="@color/white"
-        android:padding="10dp">
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
 
         <RelativeLayout
             android:id="@+id/new_pass_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp">
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/new_pass_text"
+                android:layout_width="150dp"
+                android:textSize="14sp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true" />
 
             <TextView
                 android:id="@+id/new_pass"
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
+                android:layout_alignBaseline="@id/new_pass_text"
                 android:text="@string/new_pass"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
-            <EditText
-                android:id="@+id/new_pass_text"
-                android:layout_width="170dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true" />
-
-            <RelativeLayout
-                android:id="@+id/line2"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:layout_below="@+id/new_pass_text"
-                android:layout_marginTop="5dp"
-                android:background="@color/grey_100" />
         </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_below="@+id/new_pass_layout"
+            android:layout_marginTop="5dp"
+            android:background="@color/grey_100" />
 
         <RelativeLayout
             android:id="@+id/repeat_pass_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/new_pass_layout"
-            android:layout_marginTop="5dp">
+            android:layout_below="@+id/line2"
+            android:layout_marginBottom="7dp">
+
+            <EditText
+                android:id="@+id/repeat_pass_text"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true" />
 
             <TextView
                 android:id="@+id/repeat_pass"
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
+                android:layout_alignBaseline="@+id/repeat_pass_text"
                 android:text="@string/repeat_pass"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
-            <EditText
-                android:id="@+id/repeat_pass_text"
-                android:layout_width="170dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true" />
         </RelativeLayout>
 
 

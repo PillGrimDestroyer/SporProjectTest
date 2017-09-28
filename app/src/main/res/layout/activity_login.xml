@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_grey"
+    android:background="@color/bg_light_blue"
     android:orientation="vertical">
 
     <LinearLayout
@@ -26,7 +26,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0.15"
             android:orientation="vertical">
 
             <EditText
@@ -34,6 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
+                android:textSize="16sp"
                 android:hint="@string/hint_email"
                 android:inputType="textEmailAddress" />
 
@@ -42,11 +43,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
+                android:textSize="16sp"
                 android:hint="@string/hint_password_"
                 android:inputType="textPassword"
                 android:shadowColor="@color/colorAccent2" />
         </LinearLayout>
-
 
         <TextView
             android:id="@+id/forgot_password"
@@ -54,6 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:clickable="true"
+            android:layout_weight="1.2"
             android:onClick="onClick"
             android:text="@string/forgot_password"
             android:textColor="@color/red"
@@ -62,9 +64,10 @@
         <Button
             android:id="@+id/sign_in_button"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="53dp"
+            android:textSize="16sp"
             android:layout_marginTop="60dp"
-            android:background="@drawable/button_round"
+            android:background="@drawable/button_round_whis_stroke"
             android:text="@string/sign_in"
             android:theme="@style/ThemeOverlay.MyDarkButton" />
 
@@ -73,12 +76,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:layout_marginBottom="25dp"
-            android:layout_weight="2"
+            android:layout_weight="0.3"
             android:foregroundGravity="bottom"
             android:gravity="bottom"
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|bottom"

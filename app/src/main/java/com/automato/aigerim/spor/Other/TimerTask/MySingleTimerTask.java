@@ -20,7 +20,8 @@ public class MySingleTimerTask extends TimerTask {
 
     @Override
     public void run() {
-        final String s = dispute.date + " " + dispute.time;
+        String s = dispute.date + " " + dispute.time;
+        s = s.replace("/", ".");
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         try {
             Date date = format.parse(s);

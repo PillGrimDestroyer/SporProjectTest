@@ -3,12 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/bg_light_blue"
     android:layout_height="match_parent"
     tools:context=".Activity.PrivacyPolicyActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
+        android:background="@color/white"
         android:layout_height="?attr/actionBarSize"
         android:elevation="4dp"
         app:titleTextColor="#000" />
@@ -18,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="7dp"
         android:layout_below="@+id/my_toolbar"
-        android:background="@drawable/toolbar_dropshadow" />
+        android:background="@drawable/toolbar_dropshadow_settings" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -31,15 +33,15 @@
             android:orientation="vertical">
 
             <TextView
-                android:layout_marginTop="10dp"
                 android:id="@+id/privacy_policy_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
                 android:gravity="center"
                 android:text="@string/privacy_policy_field"
-                android:textColor="#ff7777"
-                android:textSize="22sp" />
+                android:textColor="#ff8888"
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/privacy_policy_text"

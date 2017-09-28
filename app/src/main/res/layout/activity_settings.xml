@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_100">
+    android:background="@color/bg_light_blue">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="7dp"
         android:layout_below="@+id/my_toolbar"
-        android:background="@drawable/toolbar_dropshadow" />
+        android:background="@drawable/toolbar_dropshadow_settings" />
 
     <TextView
         android:id="@+id/settings"
@@ -30,8 +30,8 @@
         android:layout_marginTop="@dimen/fragment_margin"
         android:text="@string/settings"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="#ff7777"
-        android:textSize="22sp" />
+        android:textColor="#ff8888"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:id="@+id/linear_settings"
@@ -45,9 +45,9 @@
             android:id="@+id/language_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:visibility="gone"
             android:layout_weight="1"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/language_field"
@@ -81,7 +81,7 @@
         <RelativeLayout
             android:id="@+id/notif_layout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="35dp"
             android:layout_marginTop="2dp"
             android:layout_weight="1"
             android:background="@color/white">
@@ -94,15 +94,16 @@
                 android:layout_marginLeft="@dimen/fragment_margin"
                 android:text="@string/notification"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <Switch
                 android:id="@+id/notif_swithc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="false"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:checked="false"
                 android:text="" />
         </RelativeLayout>
 
@@ -117,8 +118,8 @@
         android:layout_marginTop="@dimen/fragment_margin"
         android:text="@string/profile"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="#ff7777"
-        android:textSize="22sp" />
+        android:textColor="#ff8888"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:id="@+id/linear_profile"
@@ -131,10 +132,10 @@
         <RelativeLayout
             android:id="@+id/editing_layout"
             android:layout_width="match_parent"
-            android:clickable="true"
-            android:layout_height="0dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:clickable="true">
 
             <TextView
                 android:id="@+id/editing_field"
@@ -144,7 +145,7 @@
                 android:layout_marginLeft="@dimen/fragment_margin"
                 android:text="@string/editing"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <ImageView
@@ -152,34 +153,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                app:srcCompat="@drawable/ic_chevron_right" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/log_out_layout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="2dp"
-            android:layout_weight="1"
-            android:background="@color/white">
-
-            <TextView
-                android:id="@+id/log_out"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/fragment_margin"
-                android:text="@string/exit"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/log_out_next"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 app:srcCompat="@drawable/ic_chevron_right" />
 
         </RelativeLayout>
@@ -194,8 +168,8 @@
         android:layout_marginTop="@dimen/fragment_margin"
         android:text="@string/information"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="#ff7777"
-        android:textSize="22sp" />
+        android:textColor="#ff8888"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:id="@+id/linear_information"
@@ -208,7 +182,7 @@
         <RelativeLayout
             android:id="@+id/about_dispute_layout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
             android:background="@color/white">
 
@@ -220,7 +194,7 @@
                 android:layout_marginLeft="@dimen/fragment_margin"
                 android:text="@string/about_dispute_field"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <ImageView
@@ -228,6 +202,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 app:srcCompat="@drawable/ic_chevron_right" />
 
         </RelativeLayout>
@@ -237,9 +212,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="2dp"
-            android:visibility="gone"
             android:layout_weight="1"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/terms_of_use_field"
@@ -263,7 +238,7 @@
         <RelativeLayout
             android:id="@+id/privacy_policy_layout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="35dp"
             android:layout_marginTop="2dp"
             android:layout_weight="1"
             android:background="@color/white">
@@ -276,7 +251,7 @@
                 android:layout_marginLeft="@dimen/fragment_margin"
                 android:text="@string/privacy_policy_field"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <ImageView
@@ -284,7 +259,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 app:srcCompat="@drawable/ic_chevron_right" />
         </RelativeLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/log_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linear_information"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/fragment_margin"
+        android:layout_marginTop="@dimen/fragment_margin"
+        android:text="@string/exit"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/red"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 </RelativeLayout>

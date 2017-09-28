@@ -108,6 +108,9 @@ public class MainFragment extends Fragment {
         this.rootView = rootView;
         MainActivity.setCurentFragment(this);
 
+        getActivity().findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
+        getActivity().findViewById(R.id.shadow).setVisibility(View.VISIBLE);
+
         spinner = (Spinner) getActivity().findViewById(R.id.spinner);
         searchRight = (ImageView) getActivity().findViewById(R.id.search_right);
         searchLeft = (ImageView) getActivity().findViewById(R.id.search_left);
@@ -413,7 +416,8 @@ public class MainFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Dispute d = ds.getValue(Dispute.class);
-                    final String s = d.date + " " + d.time;
+                    String s = d.date + " " + d.time;
+                    s = s.replace("/", ".");
                     SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
                     try {
                         Date date = format.parse(s);

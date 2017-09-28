@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,8 +70,12 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
                 drawable = R.drawable.cat_wrestling;
                 break;
 
-            default:
+            case "Волейбол":
                 drawable = R.drawable.cat_volleyball;
+                break;
+
+            default:
+                drawable = R.drawable.football_header;
                 break;
         }
 
@@ -92,11 +97,21 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
         DatabaseReference reference = database.getReference("spor");
         setImage();
 
-        getActivity().findViewById(R.id.search_right).setVisibility(View.GONE);
-        getActivity().findViewById(R.id.search_left).setVisibility(View.GONE);
-        getActivity().findViewById(R.id.search_field).setVisibility(View.GONE);
-        getActivity().findViewById(R.id.close).setVisibility(View.GONE);
-        getActivity().findViewById(R.id.spinner).setVisibility(View.GONE);
+        getActivity().findViewById(R.id.my_toolbar).setVisibility(View.GONE);
+        getActivity().findViewById(R.id.shadow).setVisibility(View.GONE);
+
+        Toolbar myToolbar = (Toolbar) rootView.findViewById(R.id.my_transparent_toolbar);
+        myToolbar.setTitle(category);
+        myToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        MainActivity.getActivity().setSupportActionBar(myToolbar);
+
+        myToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_left));
+        myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.CategoryDetailBackPress();
+            }
+        });
 
         TextView title = (TextView) getActivity().findViewById(R.id.title);
         title.setText(category);

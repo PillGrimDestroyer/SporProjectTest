@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_grey"
+    android:background="@color/bg_light_blue"
     android:orientation="vertical">
 
     <LinearLayout
@@ -34,6 +34,7 @@
                 android:id="@+id/field_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textSize="16sp"
                 android:layout_marginTop="15dp"
                 android:hint="@string/hint_email"
                 android:inputType="textEmailAddress" />
@@ -45,7 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="60dp"
-            android:background="@drawable/button_round"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/button_round_whis_stroke"
             android:text="@string/resetPass"
             android:theme="@style/ThemeOverlay.MyDarkButton" />
 

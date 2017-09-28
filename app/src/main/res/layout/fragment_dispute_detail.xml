@@ -4,8 +4,6 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="@dimen/fragment_margin"
     android:layout_marginRight="@dimen/fragment_margin"
-    android:layout_marginTop="@dimen/fragment_margin"
-    android:background="@color/white"
     android:orientation="vertical">
 
     <ScrollView
@@ -22,12 +20,16 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="10dp"
-                android:layout_marginStart="10dp">
+                android:layout_marginTop="-10dp"
+                android:layout_marginBottom="@dimen/fragment_margin"
+                android:paddingTop="8dp"
+                android:background="@drawable/spor_cell_bottom_white_bg">
 
                 <RadioGroup
                     android:id="@+id/radio_group"
                     android:layout_width="match_parent"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="10dp"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:orientation="horizontal">
@@ -36,11 +38,11 @@
                         android:id="@+id/ferstTeam"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
                         android:text="RadioButton"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <RadioButton
                         android:id="@+id/secondTeam"
@@ -50,13 +52,16 @@
                         android:layout_weight="1"
                         android:text="RadioButton"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
                 </RadioGroup>
 
                 <EditText
                     android:id="@+id/rate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:textSize="16sp"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_below="@+id/radio_group"
@@ -70,6 +75,7 @@
                     android:id="@+id/rateCaption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
                     android:layout_alignBaseline="@+id/rate"
                     android:layout_alignBottom="@+id/rate"
                     android:layout_alignParentEnd="true"
@@ -79,17 +85,18 @@
 
                 <Button
                     android:id="@+id/submit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="200dp"
+                    android:layout_height="43dp"
                     android:layout_below="@+id/rate"
                     android:layout_centerHorizontal="true"
                     android:layout_marginBottom="10dp"
-                    android:background="@color/red"
+                    android:layout_marginTop="5dp"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
                     android:text="Поставить"
+                    android:background="@drawable/button_round"
                     android:textAllCaps="false"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:theme="@style/ThemeOverlay.MyDarkButton" />
 
             </RelativeLayout>

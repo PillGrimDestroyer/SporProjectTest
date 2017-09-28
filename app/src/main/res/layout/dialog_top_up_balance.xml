@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:background="@color/bg_light_blue"
     android:layout_height="wrap_content"
     android:padding="@dimen/fragment_margin">
 
@@ -100,13 +101,13 @@
 
     <CheckBox
         android:id="@+id/has_3d_secure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/expYear"
         android:checked="false"
         android:text="@string/has_3d_secure"
         android:textSize="16sp"
-        android:layout_below="@id/expYear"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/payment_title"
@@ -124,12 +125,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/has_3d_secure"
         android:layout_marginRight="10dp"
-        android:inputType="numberSigned"
         android:layout_toEndOf="@+id/payment_title"
         android:layout_toLeftOf="@+id/currency"
         android:layout_toRightOf="@+id/payment_title"
         android:layout_toStartOf="@+id/currency"
         android:hint="0"
+        android:inputType="numberSigned"
         android:textSize="20sp" />
 
     <TextView
@@ -147,25 +148,33 @@
     <LinearLayout
         android:id="@+id/buttons"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="38dp"
         android:layout_below="@id/payment_text"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/fragment_margin"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/cancel_up_balance"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:text="@android:string/cancel" />
+            android:background="@drawable/button_round"
+            android:text="@android:string/cancel"
+            android:textColor="@color/white"
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/done_up_balance"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_toRightOf="@+id/cancel_up_balance"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
-            android:text="@string/balance_up" />
+            android:background="@drawable/button_round"
+            android:text="@string/balance_up"
+            android:textColor="@color/white"
+            android:textSize="13sp" />
 
     </LinearLayout>
 

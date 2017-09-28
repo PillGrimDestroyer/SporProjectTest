@@ -38,6 +38,9 @@ import com.soundcloud.android.crop.Crop;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -104,45 +107,9 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
                 break;
 
             case R.id.email_sign_in_button:
-                boolean valid = true;
                 TextView birthday = (TextView) findViewById(R.id.datePicker);
-                if (tools.isNullOrWhitespace(mEmailField.getText().toString())) {
-                    mEmailField.setError(getString(R.string.required));
-                    valid = false;
-                }
-                if (tools.isNullOrWhitespace(mPasswordField.getText().toString())) {
-                    mPasswordField.setError(getString(R.string.required));
-                    valid = false;
-                }
-                if (tools.isNullOrWhitespace(mName.getText().toString())) {
-                    mName.setError(getString(R.string.required));
-                    valid = false;
-                }
-                if (tools.isNullOrWhitespace(mPasswordRepeat.getText().toString())) {
-                    mPasswordRepeat.setError(getString(R.string.required));
-                    valid = false;
-                    mPasswordRepeat.setError(getString(R.string.required));
-                }
 
-                if (tools.isNullOrWhitespace(gender)) {
-                    Toast.makeText(RegistrationActivity.this, R.string.required_gender, Toast.LENGTH_SHORT).show();
-                    valid = false;
-                }
-
-                if (tools.isNullOrWhitespace(birthday.getText().toString()) || birthday.getText().toString().equals("ДД/MM/ГГ")) {
-                    Toast.makeText(RegistrationActivity.this, R.string.required_birthday, Toast.LENGTH_SHORT).show();
-                    valid = false;
-                }
-
-                if (!mPasswordField.getText().toString().equals(mPasswordRepeat.getText().toString())) {
-                    Toast.makeText(RegistrationActivity.this, R.string.mismatch, Toast.LENGTH_SHORT).show();
-                    valid = false;
-                } else if (mPasswordField.getText().toString().length() < 6 || mPasswordRepeat.getText().toString().length() < 6) {
-                    Toast.makeText(RegistrationActivity.this, R.string.password_length_min, Toast.LENGTH_SHORT).show();
-                    valid = false;
-                }
-
-                if (valid) {
+                if (checkValidate()) {
                     createAccount(
                             mName.getText().toString(),
                             mEmailField.getText().toString(),
@@ -185,6 +152,91 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
                 Crop.pickImage(this);
                 break;
         }
+    }
+
+    private boolean checkValidate() {
+        TextView birthday = (TextView) findViewById(R.id.datePicker);
+        boolean valid = true;
+        if (tools.isNullOrWhitespace(mEmailField.getText().toString())) {
+            mEmailField.setError(getString(R.string.required));
+            valid = false;
+        } else {
+            mEmailField.setError(null);
+        }
+
+        if (tools.isNullOrWhitespace(mPasswordField.getText().toString())) {
+            mPasswordField.setError(getString(R.string.required));
+            valid = false;
+        } else {
+            mPasswordField.setError(null);
+        }
+
+        if (tools.isNullOrWhitespace(mName.getText().toString())) {
+            mName.setError(getString(R.string.required));
+            valid = false;
+        } else {
+            mName.setError(null);
+        }
+
+        if (tools.isNullOrWhitespace(mPasswordRepeat.getText().toString())) {
+            mPasswordRepeat.setError(getString(R.string.required));
+            valid = false;
+        } else {
+            mPasswordRepeat.setError(null);
+        }
+
+        if (tools.isNullOrWhitespace(gender)) {
+            Toast.makeText(RegistrationActivity.this, R.string.required_gender, Toast.LENGTH_SHORT).show();
+            valid = false;
+        }
+
+        if (tools.isNullOrWhitespace(birthday.getText().toString()) || birthday.getText().toString().equals("ДД/MM/ГГ")) {
+            birthday.setError(getString(R.string.required_birthday));
+            valid = false;
+        } else if (checkAge(birthday.getText().toString())) {
+            Toast.makeText(RegistrationActivity.this, getString(R.string.smallAge), Toast.LENGTH_SHORT).show();
+            valid = false;
+        } else {
+            birthday.setError(null);
+        }
+
+        if (!mPasswordField.getText().toString().equals(mPasswordRepeat.getText().toString())) {
+            mPasswordField.setError(getString(R.string.mismatch));
+            mPasswordRepeat.setError(getString(R.string.mismatch));
+            valid = false;
+        } else if (mPasswordField.getText().toString().length() < 6 || mPasswordRepeat.getText().toString().length() < 6) {
+            if (mPasswordField.getText().toString().length() < 6) {
+                mPasswordField.setError(getString(R.string.mismatch));
+            }
+            if (mPasswordRepeat.getText().toString().length() < 6) {
+                mPasswordRepeat.setError(getString(R.string.mismatch));
+            }
+            valid = false;
+        } else {
+            mPasswordField.setError(null);
+            mPasswordRepeat.setError(null);
+        }
+
+        return valid;
+    }
+
+    private boolean checkAge(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/mm/yyyy");
+        Date yearOfBirth;
+        boolean bb = false;
+        try {
+            yearOfBirth = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return true;
+        }
+        int currentYear = new Date().getYear();
+        int birthYear = yearOfBirth.getYear();
+        int diference = currentYear - birthYear;
+        if (diference < 18) {
+            bb = true;
+        }
+        return bb;
     }
 
     private void createAccount(final String name, final String email, final String password,

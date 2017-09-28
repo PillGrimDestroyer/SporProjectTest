@@ -74,7 +74,7 @@ public class NotificationFragment extends Fragment {
                         ArrayList<Dispute> disputes = new ArrayList<>();
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             Dispute dispute = child.getValue(Dispute.class);
-                            if (!dispute.result.equals("") && dispute.participants != null) {
+                            if (!dispute.result.equals("") && dispute.participants != null && dispute.calculated) {
                                 if (dispute.participants.containsKey(client.id)) {
                                     HashMap<String, Notification> notificationHashMap = client.history != null
                                             ? client.history : new HashMap<String, Notification>();

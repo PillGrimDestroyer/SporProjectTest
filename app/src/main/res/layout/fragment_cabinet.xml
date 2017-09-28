@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:layout_margin="0dp"
     android:layout_weight="1"
-    android:background="@color/grey_100"
+    android:background="@color/bg_light_blue"
     android:orientation="vertical">
 
     <ScrollView
@@ -19,201 +19,225 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:id="@+id/data_block"
+            <RelativeLayout
+                android:id="@+id/bg_white"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="30dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:background="@color/white">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:id="@+id/data_block"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:orientation="horizontal"
-                    android:padding="0dp">
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_marginTop="30dp"
+                    android:orientation="vertical">
 
-                    <FrameLayout
-                        android:layout_width="110dp"
-                        android:layout_height="110dp"
-                        android:layout_margin="0dp">
-
-                        <ImageView
-                            android:id="@+id/client_profile"
-                            android:layout_width="110dp"
-                            android:layout_height="110dp"
-                            android:layout_gravity="center_horizontal|center_vertical|center"
-                            android:adjustViewBounds="true"
-                            android:src="@drawable/upload_photo" />
-
-                        <ProgressBar
-                            android:id="@+id/client_image_progress_bar"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal|center_vertical|center"
-                            android:indeterminateDrawable="@drawable/spinner_png"
-                            android:indeterminateOnly="true" />
-
-
-                    </FrameLayout>
-
-                </LinearLayout>
-                <!-- Name, Email i t d -->
-                <TextView
-                    android:id="@+id/client_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/myName"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/client_email"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="3dp"
-                    android:text="@string/email"
-                    android:textSize="16sp" />
-
-                <LinearLayout
-                    android:id="@+id/age_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="3dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        app:srcCompat="@drawable/male_or" />
-
-                    <TextView
-                        android:id="@+id/client_age"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/age"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                        android:orientation="horizontal"
+                        android:padding="0dp">
 
-                <LinearLayout
-                    android:id="@+id/money_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="3dp"
-                    android:orientation="vertical">
+                        <FrameLayout
+                            android:layout_width="120dp"
+                            android:layout_height="120dp">
 
+                            <com.makeramen.roundedimageview.RoundedImageView
+                                android:id="@+id/client_profile"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center_horizontal|center_vertical|center"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/upload_photo"
+                                app:riv_oval="true" />
+
+                            <ImageButton
+                                android:id="@+id/change_profile"
+                                android:layout_width="35dp"
+                                android:layout_height="35dp"
+                                android:layout_gravity="bottom|right"
+                                android:layout_margin="0dp"
+                                android:adjustViewBounds="true"
+                                android:background="@drawable/edit_image"
+                                android:scaleType="centerCrop" />
+
+                            <ProgressBar
+                                android:id="@+id/client_image_progress_bar"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal|center_vertical|center"
+                                android:indeterminateDrawable="@drawable/spinner_png"
+                                android:indeterminateOnly="true" />
+
+
+                        </FrameLayout>
+
+                    </LinearLayout>
+                    <!-- Name, Email i t d -->
                     <TextView
-                        android:id="@+id/client_money"
-                        android:layout_width="match_parent"
+                        android:id="@+id/client_name"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/myMoney"
-                        android:textColor="@color/orange"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/myName"
+                        android:textColor="@color/grey_700"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/top_up_balance"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Пололнить"
-                        android:textColor="@color/grey_700"
-                        android:textSize="12sp" />
-
-                </LinearLayout>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:onClick="onClick"
-                    android:text="asdads"
-                    android:theme="@style/ThemeOverlay.MyDarkButton"
-                    android:visibility="gone" />
-
-                <LinearLayout
-                    android:id="@+id/sort_buttons"
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <LinearLayout
+                        android:id="@+id/client_email"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:scrollbarAlwaysDrawHorizontalTrack="false">
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:text="@string/email"
+                        android:textColor="@color/grey_700"
+                        android:textSize="16sp" />
 
-                        <android.support.design.widget.FloatingActionButton
-                            android:id="@+id/activ"
+                    <LinearLayout
+                        android:id="@+id/age_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="5dp"
+                            android:layout_marginRight="5dp"
+                            app:srcCompat="@drawable/male_or" />
+
+                        <TextView
+                            android:id="@+id/client_age"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="bottom|center_vertical|center_horizontal"
-                            app:backgroundTint="@color/common_google_signin_btn_text_dark_disabled"
-                            app:srcCompat="@drawable/activ" />
+                            android:layout_gravity="center"
+                            android:text="@string/age"
+                            android:textColor="@color/grey_700"
+                            android:textSize="16sp" />
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/money_layout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical|fill_horizontal"
-                        android:layout_weight="1"
-
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
                         android:orientation="vertical">
 
-                        <android.support.design.widget.FloatingActionButton
-                            android:id="@+id/finished"
-                            android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/client_money"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            app:backgroundTint="@color/common_google_signin_btn_text_dark_disabled"
-                            app:srcCompat="@drawable/orange_check" />
+                            android:gravity="center"
+                            android:text="@string/myMoney"
+                            android:textColor="@color/orange"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/top_up_balance"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="Пололнить"
+                            android:textColor="@color/grey_700"
+                            android:textSize="12sp" />
+
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:weightSum="1">
-
-                        <android.support.design.widget.FloatingActionButton
-                            android:id="@+id/wait"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom|center_horizontal"
-                            android:layout_weight="0.59"
-                            app:backgroundTint="@color/common_google_signin_btn_text_dark_disabled"
-                            app:srcCompat="@drawable/hourglass_orange" />
-                    </LinearLayout>
                 </LinearLayout>
+            </RelativeLayout>
 
-                <TextView
-                    android:id="@+id/client_spors_label"
+            <RelativeLayout
+                android:id="@+id/sort_buttons_bg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/bg_white"
+                android:layout_alignBottom="@+id/sort_buttons"
+                android:background="@drawable/bg_white_fabs" />
+
+            <LinearLayout
+                android:id="@+id/sort_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/bg_white"
+                android:orientation="horizontal">
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="20dp"
-                    android:text=""
-                    android:textSize="24sp" />
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:scrollbarAlwaysDrawHorizontalTrack="false">
 
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/activ"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_vertical|center_horizontal"
+                        app:backgroundTint="@color/common_google_signin_btn_text_dark_disabled"
+                        app:srcCompat="@drawable/activ" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/finished"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        app:backgroundTint="@color/common_google_signin_btn_text_dark_disabled"
+                        app:srcCompat="@drawable/orange_check" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:weightSum="1">
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/wait"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_weight="0.59"
+                        app:backgroundTint="@color/common_google_signin_btn_text_dark_disabled"
+                        app:srcCompat="@drawable/hourglass_orange" />
+                </LinearLayout>
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/client_spors_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sort_buttons"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:layout_marginBottom="15dp"
+                android:layout_marginTop="20dp"
+                android:text=""
+                android:textColor="@color/grey_500"
+                android:textSize="16sp" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/clientSpors"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:layout_below="@+id/data_block"
+                android:layout_below="@+id/client_spors_label"
                 android:layout_marginBottom="10dp" />
 
 

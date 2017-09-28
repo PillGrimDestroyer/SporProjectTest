@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.automato.aigerim.spor.Fragments.AddDisputeFragment;
 import com.automato.aigerim.spor.Models.User;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -54,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.main:
                     changeFragment(0);
                     spinner.setVisibility(View.VISIBLE);
+                    findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
+                    findViewById(R.id.shadow).setVisibility(View.VISIBLE);
                     findViewById(R.id.title).setVisibility(View.GONE);
                     findViewById(R.id.settings_image).setVisibility(View.GONE);
                     findViewById(R.id.done).setVisibility(View.GONE);
@@ -66,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.category:
                     changeFragment(1);
                     findViewById(R.id.title).setVisibility(View.VISIBLE);
+                    findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
+                    findViewById(R.id.shadow).setVisibility(View.VISIBLE);
                     spinner.setVisibility(View.GONE);
                     findViewById(R.id.settings_image).setVisibility(View.GONE);
                     findViewById(R.id.done).setVisibility(View.GONE);
@@ -78,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.add_spor:
                     changeFragment(4);
                     spinner.setVisibility(View.GONE);
+                    findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
+                    findViewById(R.id.shadow).setVisibility(View.VISIBLE);
                     findViewById(R.id.settings_image).setVisibility(View.GONE);
                     findViewById(R.id.done).setVisibility(View.GONE);
                     findViewById(R.id.title).setVisibility(View.VISIBLE);
@@ -90,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.notification:
                     changeFragment(2);
                     spinner.setVisibility(View.GONE);
+                    findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
+                    findViewById(R.id.shadow).setVisibility(View.VISIBLE);
                     findViewById(R.id.settings_image).setVisibility(View.GONE);
                     findViewById(R.id.done).setVisibility(View.GONE);
                     findViewById(R.id.title).setVisibility(View.VISIBLE);
@@ -102,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.cabinet:
                     changeFragment(3);
                     spinner.setVisibility(View.GONE);
+                    findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
+                    findViewById(R.id.shadow).setVisibility(View.GONE);
                     findViewById(R.id.done).setVisibility(View.GONE);
                     findViewById(R.id.title).setVisibility(View.VISIBLE);
                     findViewById(R.id.settings_image).setVisibility(View.VISIBLE);
@@ -217,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                 newFragment = new CabinetFragment();
                 break;
             case 4:
-                newFragment = new AddDisputeCategoryFragment();
+                newFragment = new AddDisputeFragment();
                 break;
         }
 
@@ -275,8 +286,8 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void CategoryDetailBackPress() {
-        getSupportFragmentManager()
+    public static void CategoryDetailBackPress() {
+        MainActivity.getFragmetManeger()
                 .beginTransaction()
                 .replace(R.id.main_fragment, new CategoryFragment(), "fragment")
                 .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)

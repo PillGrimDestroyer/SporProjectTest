@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-
-    style="@style/CategoryCardViewStyle"
     android:layout_width="match_parent"
-    android:layout_height="200dp">
+    android:layout_height="175dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginTop="15dp">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -36,23 +35,23 @@
                 android:id="@+id/cat_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Футбол"
-                android:textColor="@color/white"
-                android:textSize="22sp"
                 android:layout_gravity="center"
                 android:gravity="center"
-                />
+                android:text="Футбол"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/cat_counter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(0)"
-                android:textColor="@color/white"
-                android:textSize="22sp"
                 android:layout_gravity="center"
                 android:gravity="center"
-                />
+                android:text="(0)"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
 
         </LinearLayout>
     </FrameLayout>
-</android.support.v7.widget.CardView>
+</RelativeLayout>

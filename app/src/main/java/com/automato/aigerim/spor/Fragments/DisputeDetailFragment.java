@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Models.Dispute;
@@ -185,6 +186,7 @@ public class DisputeDetailFragment extends Fragment {
         storageReference = FirebaseStorage.getInstance().getReference();
         final String userID = mAuth.getCurrentUser().getUid();
 
+
         getActivity().findViewById(R.id.search_right).setVisibility(View.GONE);
         getActivity().findViewById(R.id.search_left).setVisibility(View.GONE);
         getActivity().findViewById(R.id.search_field).setVisibility(View.GONE);
@@ -255,11 +257,15 @@ public class DisputeDetailFragment extends Fragment {
                     status.setText(R.string.done);
                 }
             } else {
-                int progressInt = Integer.parseInt(Long.toString(progress / 100));
-                while (progressInt > 100) {
-                    progressInt /= 10;
+                progressBar.setVisibility(View.VISIBLE);
+                rootview.findViewById(R.id.progress_text).setVisibility(View.GONE);
+                progressBar.setMax(99999999);
+                int progressInt = 99999999 - (int) progress;
+                if (Integer.signum(progressInt) == 1) {
+                    progressBar.setProgress(99999999 - (int) progress);
+                }else {
+                    progressBar.setProgress(0);
                 }
-                progressBar.setProgress(100 - progressInt);
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -369,12 +375,23 @@ public class DisputeDetailFragment extends Fragment {
                                     choice.choice = selectedChoice;
                                     choice.id = selectedChoice;
                                     choice.spor_id = dispute.id;
-                                    choice.rate = dispute.choices.get(selectedChoice).rate + rateValue;
 
-                                    dispute.choices.put(selectedChoice, choice);
+                                    ArrayList<Choice> choiceList = new ArrayList<>(dispute.choices.values());
+                                    ArrayList<String> keyList = new ArrayList<>(dispute.choices.keySet());
+                                    String selChoiceKey;
 
-                                    DatabaseReference updateChoice = myDatabase.getReference("spor/" + dispute.id + "/choices");
-                                    updateChoice.child(selectedChoice).setValue(choice);
+                                    if (choiceList.get(0).choice.equals(selectedChoice)){
+                                        choice.rate = choiceList.get(0).rate + rateValue;
+                                        selChoiceKey = keyList.get(0);
+                                    }else {
+                                        choice.rate = choiceList.get(1).rate + rateValue;
+                                        selChoiceKey = keyList.get(1);
+                                    }
+
+                                    dispute.choices.put(selChoiceKey, choice);
+
+                                    DatabaseReference updateChoice = myDatabase.getReference("spor/" + dispute.id + "/choices/" + selChoiceKey);
+                                    updateChoice.setValue(choice);
 
                                     dispute.participants.put(client.id, participant);
                                     setSporParticipantCount(dispute.participantCount, dispute, userID);
@@ -458,12 +475,19 @@ public class DisputeDetailFragment extends Fragment {
 
     private void setSporParticipantCount(int numberOfParticipant, Dispute dispute, String userId) {
         TextView sporParticipantCount = (TextView) rootview.findViewById(R.id.viewers_count);
+        ImageView participant = (ImageView) rootview.findViewById(R.id.imageParticCount);
         sporParticipantCount.setText(Integer.toString(numberOfParticipant));
         if (dispute.participants != null) {
             if (dispute.participants.containsKey(userId)) {
-                ImageView participant = (ImageView) rootview.findViewById(R.id.imageParticCount);
                 participant.setImageResource(R.drawable.people_black);
+                ((TextView) rootview.findViewById(R.id.viewers_count)).setTextColor(rootview.getResources().getColor(R.color.grey_700));
+            } else {
+                participant.setImageResource(R.drawable.people);
+                ((TextView) rootview.findViewById(R.id.viewers_count)).setTextColor(rootview.getResources().getColor(R.color.grey_300));
             }
+        } else {
+            participant.setImageResource(R.drawable.people);
+            ((TextView) rootview.findViewById(R.id.viewers_count)).setTextColor(rootview.getResources().getColor(R.color.grey_300));
         }
     }
 
@@ -490,12 +514,16 @@ public class DisputeDetailFragment extends Fragment {
         final ImageView sporImage = (ImageView) rootview.findViewById(R.id.spor_Image);
 
         int drawable;
+        boolean hasImage = true;
 
         if (dispute.photo == null) {
             sporImage.setBackground(null);
             switch (dispute.category) {
                 case "Футбол":
-                    drawable = R.drawable.cat_foot;
+//                    drawable = R.drawable.cat_foot;
+                    Random randomFoot = new Random();
+                    int numberFoot = 1;//randomFoot.nextInt(3) + 1;
+                    drawable = rootview.getResources().getIdentifier("foot" + numberFoot, "drawable", MainActivity.getActivity().getPackageName());
                     break;
 
                 case "Баскетбол":
@@ -507,19 +535,29 @@ public class DisputeDetailFragment extends Fragment {
                     break;
 
                 case "Теннис":
-                    drawable = R.drawable.cat_ten;
+//                    drawable = R.drawable.cat_ten;
+                    Random randomTen = new Random();
+                    int numberTen = 2;//randomTen.nextInt(3) + 1;
+                    drawable = rootview.getResources().getIdentifier("ten" + numberTen, "drawable", MainActivity.getActivity().getPackageName());
                     break;
 
                 case "Борьба":
                     drawable = R.drawable.cat_wrestling;
                     break;
 
-                default:
+                case "Волейбол":
                     drawable = R.drawable.cat_volleyball;
+                    break;
+
+                default:
+                    drawable = R.drawable.foot1;
+                    //drawable = 0;
+                    //hasImage = false;
                     break;
             }
 
-            sporImage.setImageResource(drawable);
+            if (hasImage)
+                sporImage.setImageResource(drawable);
         } else {
             rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.VISIBLE);
             storageReference.child("Photos").child(dispute.photo).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -572,8 +610,10 @@ public class DisputeDetailFragment extends Fragment {
         ImageView like = (ImageView) rootview.findViewById(R.id.imageLike);
         if (likeImage) {
             like.setImageResource(R.drawable.like);
+            ((TextView) rootview.findViewById(R.id.like_count)).setTextColor(rootview.getResources().getColor(R.color.grey_700));
         } else {
             like.setImageResource(R.drawable.like_dark);
+            ((TextView) rootview.findViewById(R.id.like_count)).setTextColor(rootview.getResources().getColor(R.color.grey_300));
         }
     }
 }

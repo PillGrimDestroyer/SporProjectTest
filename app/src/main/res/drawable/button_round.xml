@@ -10,6 +10,4 @@
         android:radius="100dp"   >
     </corners>
 
-    <stroke android:width="7dp" android:color="@color/orange_opacity13"/>
-
 </shape>

@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.Models.Dispute;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 /**
  * Created by HAOR on 25.08.2017.
@@ -67,7 +68,7 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
         }
 
         public void setImage(){
-            LinearLayout sporImage = (LinearLayout) itemView.findViewById(R.id.backgroundImage);
+            RoundedImageView sporImage = (RoundedImageView) itemView.findViewById(R.id.cat_image);
 
             int drawable;
             if(category.equals("Футбол"))
@@ -80,10 +81,12 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
                 drawable = R.drawable.tennis_subcategory;
             else if(category.equals("Борьба"))
                 drawable = R.drawable.cat_wrestling;
-            else
+            else if(category.equals("Волейбол"))
                 drawable = R.drawable.cat_volleyball;
+            else
+                drawable = R.drawable.foot3;
 
-            sporImage.setBackgroundResource(drawable);
+            sporImage.setImageResource(drawable);
         }
 
         @Override

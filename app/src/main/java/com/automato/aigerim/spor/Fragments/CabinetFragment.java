@@ -1,7 +1,9 @@
 package com.automato.aigerim.spor.Fragments;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -23,7 +25,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.automato.aigerim.spor.Activity.EditingProfilePageActivity;
 import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Activity.SettingsActivity;
 import com.automato.aigerim.spor.Adapter.UsersDisputeAdapter;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
@@ -40,6 +44,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.soundcloud.android.crop.Crop;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -77,6 +82,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     TextView userAge;
     TextView userMoney;
     TextView sporLabel;
+    ImageView changeProfile;
     FloatingActionButton activ;
     FloatingActionButton finished;
     FloatingActionButton wait;
@@ -211,8 +217,10 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
         reference = myDatabase.getReference();
         mAuth = FirebaseAuth.getInstance();
 
+        getActivity().findViewById(R.id.shadow).setVisibility(View.GONE);
+
         TextView title = (TextView) getActivity().findViewById(R.id.title);
-        title.setText("Личный кабинет");
+        title.setText("Мой профиль");
 
         initViews();
         loadUserData();
@@ -361,7 +369,8 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     }
 
     private long getProgress(Dispute dispute) {
-        final String s = dispute.date + " " + dispute.time;
+        String s = dispute.date + " " + dispute.time;
+        s = s.replace("/", ".");
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         long progres = 0;
         try {
@@ -383,8 +392,33 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
                 client = dataSnapshot.getValue(User.class);
                 userName.setText(client.name);
                 userEmail.setText(client.email);
-                userAge.setText(client.birthday);
-                userMoney.setText(client.money + " тг");
+
+                try {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/mm/yyyy");
+                    Date date = simpleDateFormat.parse(client.birthday);
+                    int count = new Date().getYear() - date.getYear();
+
+                    String endOfMessage = " лет";
+                    int lastNumber = count % 10;
+                    if (lastNumber == 2 || lastNumber == 3 || lastNumber == 4) {
+                        endOfMessage = " года";
+                    } else if (lastNumber == 1) {
+                        endOfMessage = " год";
+                    }
+                    if (Integer.toString(count).length() >= 2) {
+                        int lastTwoNumbers = count % 100;
+                        if (lastTwoNumbers == 11 || lastTwoNumbers == 12 || lastTwoNumbers == 13 || lastTwoNumbers == 14) {
+                            endOfMessage = " лет";
+                        }
+                    }
+
+                    userAge.setText(count + endOfMessage);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    userAge.setText(client.birthday);
+                }
+
+                userMoney.setText(client.money + " тенге");
                 loadingClientProfile(client.id);
                 loadAllMyDisputes();
             }
@@ -424,12 +458,12 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
         this.userAge = (TextView) rootView.findViewById(R.id.client_age);
         this.userMoney = (TextView) rootView.findViewById(R.id.client_money);
         this.sporLabel = (TextView) rootView.findViewById(R.id.client_spors_label);
+        this.changeProfile = (ImageView) rootView.findViewById(R.id.change_profile);
 
         TextView topUpTheBalance = (TextView) rootView.findViewById(R.id.top_up_balance);
         topUpTheBalance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(rootView.getContext(), "Click", Toast.LENGTH_SHORT).show();
                 topUpTheBalance();
             }
         });
@@ -443,6 +477,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             topUpTheBalance.setVisibility(View.GONE);
         }
 
+        changeProfile.setOnClickListener(CabinetFragment.this);
         this.activ = (FloatingActionButton) rootView.findViewById(R.id.activ);
         activ.setOnClickListener(CabinetFragment.this);
         this.finished = (FloatingActionButton) rootView.findViewById(R.id.finished);
@@ -662,9 +697,18 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
                 waitButtonClick();
                 break;
 
+            case R.id.change_profile:
+                changeProfileClick();
+                break;
+
             default:
                 break;
         }
+    }
+
+    private void changeProfileClick() {
+        Intent intent = new Intent(getActivity(), EditingProfilePageActivity.class);
+        startActivity(intent);
     }
 }
 

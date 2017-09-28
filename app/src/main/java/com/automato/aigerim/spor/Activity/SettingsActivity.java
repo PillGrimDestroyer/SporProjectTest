@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.R;
@@ -24,7 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 public class
 SettingsActivity extends BaseActivity {
 
-    RelativeLayout LogOutLayout;
+    TextView LogOutLayout;
     private RelativeLayout LanguageLayout;
     private RelativeLayout EditProfleLayout;
     private Switch notifSwitch;
@@ -63,7 +64,7 @@ SettingsActivity extends BaseActivity {
             }
         });
 
-        LogOutLayout = (RelativeLayout) findViewById(R.id.log_out_layout);
+        LogOutLayout = (TextView) findViewById(R.id.log_out);
         LanguageLayout = (RelativeLayout) findViewById(R.id.language_layout);
         EditProfleLayout = (RelativeLayout) findViewById(R.id.editing_layout);
         notifSwitch = (Switch) findViewById(R.id.notif_swithc);
@@ -75,8 +76,9 @@ SettingsActivity extends BaseActivity {
 
         if (MainActivity.isAdmin()) {
             findViewById(R.id.notif_layout).setVisibility(View.GONE);
-            findViewById(R.id.editing_layout).setVisibility(View.GONE);
+            findViewById(R.id.linear_profile).setVisibility(View.GONE);
             findViewById(R.id.settings).setVisibility(View.GONE);
+            findViewById(R.id.profile).setVisibility(View.GONE);
         }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

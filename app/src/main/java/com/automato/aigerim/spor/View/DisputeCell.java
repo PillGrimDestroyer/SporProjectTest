@@ -33,6 +33,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Timer;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -59,6 +60,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
     private StorageReference storageReference;
     private Tools tools = new Tools();
     private Timer myTimer;
+    private MySingleTimerTask task;
 
     public DisputeCell(View itemView) {
         super(itemView);
@@ -162,14 +164,8 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                 ddf.setSorted(isSorted());
                 ddf.setSortedBySubCategory(isSortedBySubCategory());
 
-                int b = 0;
-                for (Choice c : choices.values()) {
-                    if (b == 0)
-                        ddf.setFerstTeam(c.choice);
-                    else
-                        ddf.setSecondTeam(c.choice);
-                    b++;
-                }
+                ddf.setFerstTeam(choices.get("rivor1").choice);
+                ddf.setSecondTeam(choices.get("rivor2").choice);
 
                 android.support.v4.app.Fragment newFragment = ddf;
 
@@ -182,7 +178,25 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         });
     }
 
-    public void removeOnCardListener() {
+    public void disputeLiveOnCardListener() {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SweetAlertDialog(view.getContext(), SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("Спор в прямом эфире")
+                        .setContentText("На этот спор уже нельзя делать ставки")
+                        .setConfirmText("Ок")
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                sweetAlertDialog.dismissWithAnimation();
+                            }
+                        }).show();
+            }
+        });
+    }
+
+    public void disputeEndOnCardListener() {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -234,9 +248,11 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         if (isLiked()) {
             ImageView like = (ImageView) view.findViewById(R.id.imageLike);
             like.setImageResource(R.drawable.like);
+            ((TextView) view.findViewById(R.id.like_count)).setTextColor(view.getResources().getColor(R.color.grey_700));
         } else {
             ImageView like = (ImageView) view.findViewById(R.id.imageLike);
             like.setImageResource(R.drawable.like_dark);
+            ((TextView) view.findViewById(R.id.like_count)).setTextColor(view.getResources().getColor(R.color.grey_300));
         }
     }
 
@@ -265,13 +281,16 @@ public class DisputeCell extends RecyclerView.ViewHolder {
             if (dispute.participants.containsKey(userId)) {
                 ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
                 participant.setImageResource(R.drawable.people_black);
+                ((TextView) view.findViewById(R.id.viewers_count)).setTextColor(view.getResources().getColor(R.color.grey_700));
             } else {
                 ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
                 participant.setImageResource(R.drawable.people);
+                ((TextView) view.findViewById(R.id.viewers_count)).setTextColor(view.getResources().getColor(R.color.grey_300));
             }
         } else {
             ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
             participant.setImageResource(R.drawable.people);
+            ((TextView) view.findViewById(R.id.viewers_count)).setTextColor(view.getResources().getColor(R.color.grey_300));
         }
     }
 
@@ -300,10 +319,14 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         if (photo == null) {
             sporImage.setBackground(null);
             int drawable;
+            boolean hasImage = true;
 
             switch (category) {
                 case "Футбол":
-                    drawable = R.drawable.cat_foot;
+//                    drawable = R.drawable.cat_foot;
+                    Random randomFoot = new Random();
+                    int numberFoot = 1;//randomFoot.nextInt(3) + 1;
+                    drawable = view.getResources().getIdentifier("foot" + numberFoot, "drawable", MainActivity.getActivity().getPackageName());
                     break;
 
                 case "Баскетбол":
@@ -315,19 +338,29 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     break;
 
                 case "Теннис":
-                    drawable = R.drawable.cat_ten;
+//                    drawable = R.drawable.cat_ten;
+                    Random randomTen = new Random();
+                    int numberTen = 2;//randomTen.nextInt(3) + 1;
+                    drawable = view.getResources().getIdentifier("ten" + numberTen, "drawable", MainActivity.getActivity().getPackageName());
                     break;
 
                 case "Борьба":
                     drawable = R.drawable.cat_wrestling;
                     break;
 
-                default:
+                case "Волейбол":
                     drawable = R.drawable.cat_volleyball;
+                    break;
+
+                default:
+                    drawable = R.drawable.foot1;
+                    //drawable = 0;
+                    //hasImage = false;
                     break;
             }
 
-            sporImage.setImageResource(drawable);
+            if (hasImage)
+                sporImage.setImageResource(drawable);
         } else {
             view.findViewById(R.id.client_image_progress_bar).setVisibility(View.VISIBLE);
             storageReference.child("Photos").child(photo).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -385,12 +418,16 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     view.findViewById(R.id.spor_date).setVisibility(View.GONE);
 
                     if (dispute.result.equals("")) {
-                        setOnCardListener(dispute, FirebaseDatabase.getInstance());
+                        disputeLiveOnCardListener();
                         progressText.setText(R.string.Live);
                         status.setText(R.string.Live);
                     } else {
-                        removeOnCardListener();
-                        progressText.setText(view.getResources().getString(R.string.end, dispute.result));
+                        disputeEndOnCardListener();
+                        if (dispute.result.equals("equal")){
+                            progressText.setText(R.string.equal);
+                        }else {
+                            progressText.setText(view.getResources().getString(R.string.end, dispute.result));
+                        }
                         status.setText(R.string.done);
                     }
                 } else {
@@ -399,27 +436,17 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     view.findViewById(R.id.time_layout).setVisibility(View.VISIBLE);
                     view.findViewById(R.id.spor_date).setVisibility(View.VISIBLE);
 
-                    setOnCardListener(dispute, FirebaseDatabase.getInstance());
+                    if (!MainActivity.isAdmin())
+                        setOnCardListener(dispute, FirebaseDatabase.getInstance());
                     status.setText(R.string.wait);
 
                     progressBar.setMax(99999999);
-                    progressBar.setProgress(99999999 - (int) progress);
-
-                    /*int max = (int) (unixTime % 1000000000l);
-                    int curent = (int) (curUnixTime % 1000000000l);
-
-                    progressBar.setMax(max);
-                    progressBar.setProgress(curent);*/
-
-                    /*int progressInt = Integer.parseInt(Long.toString(progress / 100));
-                    if (progressInt > 100) {
-                        while (progressInt > 100) {
-                            progressInt /= 10;
-                        }
-                        progressBar.setProgress(100 - progressInt);
-                    }else {
-                        progressInt =
-                    }*/
+                    int progressInt = 99999999 - (int) progress;
+                    if (Integer.signum(progressInt) == 1) {
+                        progressBar.setProgress(99999999 - (int) progress);
+                    } else {
+                        progressBar.setProgress(0);
+                    }
                 }
             }
         });
@@ -448,11 +475,10 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public void runTimer(Dispute model) {
         if (myTimer != null) {
-            myTimer.cancel();
-            myTimer.purge();
+            task.cancel();
         }
         myTimer = new Timer();
-        MySingleTimerTask task = new MySingleTimerTask();
+        task = new MySingleTimerTask();
 
         task.dispute = model;
         task.disputeCell = DisputeCell.this;

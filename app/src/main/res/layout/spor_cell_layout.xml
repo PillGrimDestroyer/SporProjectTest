@@ -2,17 +2,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp">
+    android:layout_marginTop="20dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/shape_bg_white_rounded_rect"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="200dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom"
+                android:background="@color/white" />
 
             <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/spor_Image"
@@ -34,14 +39,34 @@
                 android:indeterminateOnly="true"
                 android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/view_count"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|right"
-                android:layout_margin="5dp"
-                android:text="0 просмотра"
-                android:textColor="@color/white" />
+                android:layout_marginBottom="6dp"
+                android:layout_marginRight="15dp">
+
+                <ImageView
+                    android:id="@+id/binoculars_image"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_toLeftOf="@+id/view_count"
+                    android:layout_toStartOf="@+id/view_count"
+                    android:src="@drawable/binoculars" />
+
+                <TextView
+                    android:id="@+id/view_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="8dp"
+                    android:text="0 просмотра"
+                    android:textColor="@color/white"
+                    android:textSize="12sp" />
+
+            </RelativeLayout>
 
             <ImageView
                 android:id="@+id/complait"
@@ -56,9 +81,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/spor_cell_bottom_white_bg"
             android:orientation="vertical"
-            android:padding="16dp">
-
+            android:paddingTop="6dp"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp" >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -69,13 +97,14 @@
 
                 <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/spor_status"
+                        android:layout_gravity="center_vertical"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/wait"
@@ -107,11 +136,15 @@
                         android:layout_height="match_parent"
                         android:layout_gravity="right"
                         android:gravity="center"
-                        android:text="0" />
+                        android:text="0"
+                        android:layout_marginRight="5dp"
+                        android:textColor="@color/grey_300"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
                     <ImageView
                         android:id="@+id/imageParticCount"
-                        android:layout_width="50dp"
+                        android:layout_width="40dp"
                         android:layout_height="match_parent"
                         android:layout_gravity="right"
                         android:padding="3dp"
@@ -123,7 +156,10 @@
                         android:layout_height="match_parent"
                         android:layout_gravity="right"
                         android:gravity="center"
-                        android:text="0" />
+                        android:text="0"
+                        android:textColor="@color/grey_300"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 
@@ -136,75 +172,18 @@
                 android:layout_height="wrap_content"
                 android:text="18.07.2017"
                 android:textColor="@color/grey_500"
-                android:textSize="14sp" />
-
-            <RelativeLayout
-                android:id="@+id/rate_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="12dp"
-                android:gravity="center">
-
-                <TextView
-                    android:id="@+id/left_rate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@+id/center_rate"
-                    android:layout_toStartOf="@+id/center_rate"
-                    android:gravity="center"
-                    android:text="500"
-                    android:textColor="@color/grey_700"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/center_rate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:gravity="center"
-                    android:text=" тг. - "
-                    android:textColor="@color/grey_700"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/right_rate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@+id/center_rate"
-                    android:layout_toRightOf="@+id/center_rate"
-                    android:gravity="center"
-                    android:text="1500"
-                    android:textColor="@color/grey_700"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/right_rate_end"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@+id/right_rate"
-                    android:layout_toRightOf="@+id/right_rate"
-                    android:gravity="center"
-                    android:text=" тг."
-                    android:textColor="@color/grey_700"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-            </RelativeLayout>
+                android:textSize="10sp" />
 
             <TextView
                 android:id="@+id/spor_subject"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginTop="6dp"
                 android:gravity="center"
                 android:text="Германия - Мексика"
                 android:textColor="@color/grey_700"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/spor_sub_category"
@@ -216,29 +195,95 @@
                 android:textColor="@color/grey_500"
                 android:textSize="14sp" />
 
-            <LinearLayout
+            <RelativeLayout
+                android:id="@+id/rate_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/left_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/center_rate"
+                    android:layout_toStartOf="@+id/center_rate"
+                    android:gravity="center"
+                    android:text="500"
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/center_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text=" тг. - "
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/right_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/center_rate"
+                    android:layout_toRightOf="@+id/center_rate"
+                    android:gravity="center"
+                    android:text="1500"
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/right_rate_end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/right_rate"
+                    android:layout_toRightOf="@+id/right_rate"
+                    android:gravity="center"
+                    android:text=" тг."
+                    android:textColor="@color/grey_700"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:id="@+id/time_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="10dp">
 
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_gravity="bottom"
+                    android:id="@+id/time_image"
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="5dp"
                     android:src="@drawable/time" />
+
+                <TextView
+                    android:id="@+id/time_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/time_image"
+                    android:layout_toEndOf="@id/time_image"
+                    android:layout_toRightOf="@+id/time_image"
+                    android:text="Начало в "
+                    android:textColor="@color/grey_500"
+                    android:textSize="10sp" />
 
                 <TextView
                     android:id="@+id/spor_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:text="Начало в 06:35"
+                    android:layout_alignBaseline="@id/time_image"
+                    android:layout_toEndOf="@id/time_text"
+                    android:layout_toRightOf="@+id/time_text"
+                    android:text="06:35"
                     android:textColor="@color/grey_500"
-                    android:textSize="14sp" />
-            </LinearLayout>
+                    android:textSize="10sp" />
+            </RelativeLayout>
 
             <ProgressBar
                 android:id="@+id/progress_bar"
@@ -256,12 +301,11 @@
                 android:id="@+id/progress_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:text="Live"
                 android:textAlignment="center"
-                android:textColor="@color/grey_700"
+                android:textColor="@color/red"
                 android:textSize="16sp"
-                android:textStyle="bold"
                 android:visibility="gone" />
 
         </LinearLayout>

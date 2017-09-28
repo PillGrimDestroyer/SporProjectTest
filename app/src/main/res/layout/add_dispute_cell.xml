@@ -15,5 +15,5 @@
         android:layout_centerVertical="true"
         android:text="TextView"
         android:textColor="@color/red"
-        android:textSize="16sp" />
+        android:textSize="14sp" />
 </RelativeLayout>

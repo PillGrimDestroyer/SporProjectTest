@@ -14,6 +14,7 @@ public class Dispute {
     public int money;
     public String result;
     public boolean limit;
+    public boolean calculated;
     public String category;
     public String subcategory;
     public String date;

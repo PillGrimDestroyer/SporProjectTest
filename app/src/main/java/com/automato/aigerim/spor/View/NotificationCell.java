@@ -5,12 +5,15 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.Notification;
+
+import java.util.Random;
 
 /**
  * Created by HAOR on 30.08.2017.
@@ -59,7 +62,10 @@ public class NotificationCell extends RecyclerView.ViewHolder {
 
         switch (dispute.category){
             case "Футбол":
-                drawable = R.drawable.cat_foot;
+//                    drawable = R.drawable.cat_foot;
+                Random randomFoot = new Random();
+                int numberFoot = 1;//randomFoot.nextInt(3) + 1;
+                drawable = rootView.getResources().getIdentifier("foot" + numberFoot, "drawable", MainActivity.getActivity().getPackageName());
                 break;
 
             case "Баскетбол":
@@ -71,7 +77,10 @@ public class NotificationCell extends RecyclerView.ViewHolder {
                 break;
 
             case "Теннис":
-                drawable = R.drawable.cat_ten;
+//                    drawable = R.drawable.cat_ten;
+                Random randomTen = new Random();
+                int numberTen = 2;//randomTen.nextInt(3) + 1;
+                drawable = rootView.getResources().getIdentifier("ten" + numberTen, "drawable", MainActivity.getActivity().getPackageName());
                 break;
 
             case "Борьба":
