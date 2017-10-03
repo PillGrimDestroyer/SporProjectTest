@@ -111,4 +111,5 @@
     <string name="has_3d_secure">Моя карта защищена 3D Secure</string>
     <string name="smallAge">Вам должно быть не меньше 18 лет!</string>
     <string name="equal">Ничья</string>
+    <string name="dispute_stoped">Спор не состоялся из за отсутствия ставок на противоположную команду</string>
 </resources>

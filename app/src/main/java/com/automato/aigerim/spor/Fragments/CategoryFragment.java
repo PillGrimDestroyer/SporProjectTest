@@ -37,16 +37,19 @@ import java.util.Map;
 
 public class CategoryFragment extends Fragment {
 
-    private View rootview;
-    private Tools tools = new Tools();
+    private static View rootview;
+    private static CategoryFragment instance;
+    private static Tools tools = new Tools();
+    private static CategoryAdapter adapter;
 
     private FirebaseDatabase database;
-    private DatabaseReference reference;
-    private HashMap<String, Integer> hashMapCategory;
+    private static DatabaseReference reference;
+    private static HashMap<String, Integer> hashMapCategory;
 
-    private RecyclerView sporList;
-    private EditText searchField;
+    private static RecyclerView sporList;
+    private static EditText searchField;
     private ImageView close;
+    private static LinearLayoutManager llm;
 
     private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order) {
         List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
@@ -73,15 +76,32 @@ public class CategoryFragment extends Fragment {
         return sortedMap;
     }
 
+    public static CategoryFragment getInstance() {
+        if (instance == null){
+            instance = new CategoryFragment();
+        }else {
+            MainActivity.showLoader();
+            adapter = null;
+            fillData(false);
+        }
+        MainActivity.setCurentFragment(instance);
+        return instance;
+    }
+
+    protected void finalize() throws Throwable {
+        adapter = null;
+        super.finalize();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_category, container, false);
 
-        this.sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
+        sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
 
-        LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
+        llm = new LinearLayoutManager(this.getActivity());
         sporList.setLayoutManager(llm);
 
         database = FirebaseDatabase.getInstance();
@@ -131,8 +151,8 @@ public class CategoryFragment extends Fragment {
         return rootview;
     }
 
-    private void fillData(final boolean isSorted) {
-        ValueEventListener postListener = new ValueEventListener() {
+    private static void fillData(final boolean isSorted) {
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String[] array = rootview.getResources().getStringArray(R.array.category);
@@ -145,6 +165,7 @@ public class CategoryFragment extends Fragment {
                     if (catCounter == null && !isSorted)
                         hashMapCategory.put(array[i], 0);
                 }
+                array = null;
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     for (DataSnapshot part : ds.getChildren()) {
@@ -170,11 +191,10 @@ public class CategoryFragment extends Fragment {
                 Map<String, Integer> sortedMapAsc = sortByComparator(hashMapCategory, false);
 
                 //ставим адаптер на RecyclerView
-                CategoryAdapter adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext(), MainActivity.getFragmetManeger(), rootview);
+                adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext(), MainActivity.getFragmetManeger(), rootview);
                 sporList.setAdapter(adapter);
 
-                LinearLayoutManager layoutManager = new LinearLayoutManager(rootview.getContext());
-                sporList.setLayoutManager(layoutManager);
+                sporList.setLayoutManager(llm);
 
                 MainActivity.dismissWithAnimationLoader();
             }
@@ -182,8 +202,28 @@ public class CategoryFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
-        };
-        reference.addListenerForSingleValueEvent(postListener);
+        });
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        clearAllData();
+    }
+
+    private void clearAllData() {
+        rootview = null;
+        instance = null;
+        adapter = null;
+
+        database = null;
+        reference = null;
+        hashMapCategory = null;
+
+        sporList = null;
+        searchField = null;
+        close = null;
+        llm = null;
     }
 
     @Override

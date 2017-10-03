@@ -1,5 +1,6 @@
 package com.automato.aigerim.spor.Other.TimerTask;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.View.DisputeCell;
 
@@ -24,8 +25,13 @@ public class MySingleTimerTask extends TimerTask {
         s = s.replace("/", ".");
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         try {
-            Date date = format.parse(s);
-            disputeCell.setProgress(date.getTime(), dispute);
+            final Date date = format.parse(s);
+            MainActivity.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    disputeCell.setProgress(date.getTime(), dispute);
+                }
+            });
         } catch (ParseException e) {
             e.printStackTrace();
         }

@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.R;
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,6 +24,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -37,12 +43,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private boolean mainLogin = false;
+    private FirebaseDatabase database;
+    private DatabaseReference reference;
+    private User client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         Firebase.setAndroidContext(this);
         FirebaseApp.initializeApp(this);
+        database = FirebaseDatabase.getInstance();
+        reference = database.getReference("users");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
@@ -68,49 +79,60 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 if (user != null) {
                     if (!mainLogin) {
                         showProgressDialog();
-                        if (user.isEmailVerified()) {
-                            user.reload().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    if (user.isEmailVerified()) {
-                                        Intent t = new Intent(LoginActivity.this, MainActivity.class);
-                                        t.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        reference.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                client = dataSnapshot.getValue(User.class);
+                                if (client.confirmed) {
+                                    user.reload().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            if (user.isEmailVerified()) {
+                                                Intent t = new Intent(LoginActivity.this, MainActivity.class);
+                                                t.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                                        hideProgressDialog();
+                                                hideProgressDialog();
 
-                                        boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
-                                        MainActivity.setAdmin(isAdmin);
-                                        startActivity(t);
+                                                boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
+                                                MainActivity.setAdmin(isAdmin);
+                                                startActivity(t);
 
-                                        Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                                    }
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    String message = e.getMessage();
-                                    if (e instanceof FirebaseAuthInvalidUserException) {
-                                        message = "Данный пользователь отсутсвует в системе";
-                                    }
+                                                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                                            }
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            String message = e.getMessage();
+                                            if (e instanceof FirebaseAuthInvalidUserException) {
+                                                message = "Данный пользователь отсутсвует в системе";
+                                            }
+                                            hideProgressDialog();
+                                            new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+                                                    .setTitleText("Ошибка")
+                                                    .setContentText(message)
+                                                    .setConfirmText("Ок")
+                                                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                                        @Override
+                                                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                            sweetAlertDialog.dismissWithAnimation();
+                                                            firebaseAuth.signOut();
+                                                        }
+                                                    }).show();
+                                            Log.d(TAG, "authError:" + e.getMessage());
+                                        }
+                                    });
+                                } else {
                                     hideProgressDialog();
-                                    new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
-                                            .setTitleText("Ошибка")
-                                            .setContentText(message)
-                                            .setConfirmText("Ок")
-                                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                                @Override
-                                                public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                                    sweetAlertDialog.dismissWithAnimation();
-                                                    firebaseAuth.signOut();
-                                                }
-                                            }).show();
-                                    Log.d(TAG, "authError:" + e.getMessage());
+                                    Toast.makeText(LoginActivity.this, "Для автоматического входа требуется верификация аккаунта", Toast.LENGTH_LONG).show();
                                 }
-                            });
-                        } else {
-                            hideProgressDialog();
-                            Toast.makeText(LoginActivity.this, "Для автоматического входа требуется верификация аккаунта", Toast.LENGTH_LONG).show();
-                        }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                     }
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -154,19 +176,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
-    private boolean checkIfEmailVerified() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user.isEmailVerified()) {
-            //finish();
-            return true;
-        } else {
-            //FirebaseAuth.getInstance().signOut();
-            return true; //false
-        }
-
-    }
-
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
@@ -180,20 +189,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            if (checkIfEmailVerified()) {
-                                Log.d(TAG, "signInWithEmail:success");
+                            Log.d(TAG, "signInWithEmail:success");
 
-                                boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
-                                MainActivity.setAdmin(isAdmin);
+                            boolean isAdmin = mAuth.getCurrentUser().getEmail().equals("automato.android@yandex.ru");
+                            MainActivity.setAdmin(isAdmin);
 
-                                hideProgressDialog();
+                            hideProgressDialog();
 
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            } else {
-                                Toast.makeText(LoginActivity.this, "Вы не верифицировали свою почту", Toast.LENGTH_SHORT).show();
-                            }
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
                         } else {
 
                             Log.w(TAG, "signInWithEmail:failure", task.getException());

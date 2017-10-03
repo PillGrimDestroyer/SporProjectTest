@@ -111,6 +111,9 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         }else {
             text = rootView.getResources().getString(R.string.youLose, dispute.subject);
         }
+        if (oneOfChoiceIsZero()){
+            text = rootView.getResources().getString(R.string.dispute_stoped);
+        }
         setText(text);
         setNotifImage();
         setSporImage();
@@ -118,5 +121,13 @@ public class NotificationCell extends RecyclerView.ViewHolder {
 
         DatabaseReference sporLikes = myDatabase.getReference("users/" + userId + "/history/" + dispute.id + "/checked");
         sporLikes.setValue(notification.checked);
+    }
+
+    private boolean oneOfChoiceIsZero() {
+        boolean ret = false;
+        if (dispute.choices.get("rivor1").rate == 0 || dispute.choices.get("rivor2").rate == 0){
+            ret = true;
+        }
+        return ret;
     }
 }

@@ -13,6 +13,7 @@ public class User {
     public boolean hasImage;
     public String birthday;
     public String gender;
+    public boolean confirmed = false;
     public boolean receiveNotifications;
     public HashMap<String, Notification> history;
 

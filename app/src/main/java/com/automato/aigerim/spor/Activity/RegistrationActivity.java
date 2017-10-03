@@ -316,27 +316,8 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void sendEmailVerification() {
-
         final FirebaseUser user = mAuth.getCurrentUser();
-        user.sendEmailVerification()
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-
-                        if (task.isSuccessful()) {
-                            Toast.makeText(RegistrationActivity.this,
-                                    "Письмо с подтверждением аккаунта отправлено на " + user.getEmail(),
-                                    Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(RegistrationActivity.this, LoginActivity.class);
-                            startActivity(intent);
-                        } else {
-                            Log.e("info", "sendEmailVerification", task.getException());
-                            Toast.makeText(RegistrationActivity.this,
-                                    "Не удалось отправить письмо на электронную почту",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
+        Toast.makeText(RegistrationActivity.this, "Письмо с подтверждением аккаунта отправлено на " + user.getEmail(), Toast.LENGTH_LONG).show();
     }
 
     @Override

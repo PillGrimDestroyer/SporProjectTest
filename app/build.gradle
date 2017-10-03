@@ -8,8 +8,8 @@ android {
         applicationId "com.automato.aigerim.spor"
         minSdkVersion 18
         targetSdkVersion 24
-        versionCode 21
-        versionName '2.1'
+        versionCode 26
+        versionName '2.6'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         renderscriptTargetApi 19
         renderscriptSupportModeEnabled true

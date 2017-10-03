@@ -14,19 +14,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
-import com.automato.aigerim.spor.Fragments.AddDisputeFragment;
-import com.automato.aigerim.spor.Models.User;
-import com.google.firebase.auth.FirebaseAuth;
-
-import cn.pedant.SweetAlert.SweetAlertDialog;
-import ru.cloudpayments.sdk.PaymentWidget;
-import ru.cloudpayments.sdk.business.domain.model.BaseResponse;
-import ru.cloudpayments.sdk.view.PaymentTaskListener;
-
-import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.Fragments.AddDisputeCategoryFragment;
+import com.automato.aigerim.spor.Fragments.AddDisputeFragment;
 import com.automato.aigerim.spor.Fragments.AddDisputeSubCategoryFragment;
 import com.automato.aigerim.spor.Fragments.CabinetFragment;
 import com.automato.aigerim.spor.Fragments.CategoryDetailFragment;
@@ -34,6 +24,10 @@ import com.automato.aigerim.spor.Fragments.CategoryFragment;
 import com.automato.aigerim.spor.Fragments.DisputeDetailFragment;
 import com.automato.aigerim.spor.Fragments.MainFragment;
 import com.automato.aigerim.spor.Fragments.NotificationFragment;
+import com.automato.aigerim.spor.R;
+import com.google.firebase.auth.FirebaseAuth;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,12 +39,14 @@ public class MainActivity extends AppCompatActivity {
     private static boolean isAdmin = false;
     private static Context context;
     private FirebaseAuth mAuth;
+    private Spinner spinner;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            Spinner spinner = (Spinner) findViewById(R.id.spinner);
+            if (spinner == null)
+                spinner = (Spinner) findViewById(R.id.spinner);
             switch (item.getItemId()) {
                 case R.id.main:
                     changeFragment(0);
@@ -135,10 +131,6 @@ public class MainActivity extends AppCompatActivity {
         return myActivity;
     }
 
-    public static void setCurentFragment(Fragment fragment) {
-        curentFragment = fragment;
-    }
-
     public static boolean isAdmin() {
         return isAdmin;
     }
@@ -148,28 +140,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void showLoader() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new SweetAlertDialog(myActivity, SweetAlertDialog.PROGRESS_TYPE);
-            mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-            mProgressDialog.setTitleText("Загрузка");
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
-        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgressDialog == null) {
+                    mProgressDialog = new SweetAlertDialog(myActivity, SweetAlertDialog.PROGRESS_TYPE);
+                    mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+                    mProgressDialog.setTitleText("Загрузка");
+                    mProgressDialog.setCancelable(false);
+                    mProgressDialog.show();
+                }
+            }
+        });
     }
 
-    public static boolean isFerstOpened(){
+    public static boolean isFerstOpened() {
         return ferstOpened;
     }
 
-    public static void setFerstOpened(boolean bool){
+    public static void setFerstOpened(boolean bool) {
         ferstOpened = bool;
     }
 
     public static void dismissWithAnimationLoader() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismissWithAnimation();
-            mProgressDialog = null;
-        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismissWithAnimation();
+                    mProgressDialog = null;
+                }
+            }
+        });
     }
 
     public static Context getContext() {
@@ -178,6 +180,18 @@ public class MainActivity extends AppCompatActivity {
 
     public static Fragment getCurentFragment() {
         return curentFragment;
+    }
+
+    public static void setCurentFragment(Fragment fragment) {
+        curentFragment = fragment;
+    }
+
+    public static void CategoryDetailBackPress() {
+        MainActivity.getFragmetManeger()
+                .beginTransaction()
+                .replace(R.id.main_fragment, CategoryFragment.getInstance(), "fragment")
+                .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
     }
 
     @Override
@@ -215,11 +229,11 @@ public class MainActivity extends AppCompatActivity {
         Fragment newFragment = null;
         switch (position) {
             case 0:
-                newFragment = new MainFragment();
+                newFragment = MainFragment.getInstance(false, null, null);
                 ((MainFragment) newFragment).setCategory(null);
                 break;
             case 1:
-                newFragment = new CategoryFragment();
+                newFragment = CategoryFragment.getInstance();
                 break;
             case 2:
                 newFragment = new NotificationFragment();
@@ -286,18 +300,10 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    public static void CategoryDetailBackPress() {
-        MainActivity.getFragmetManeger()
-                .beginTransaction()
-                .replace(R.id.main_fragment, new CategoryFragment(), "fragment")
-                .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .commit();
-    }
-
     private void MainFragmentBackPress() {
         MainFragment fragment = (MainFragment) curentFragment;
         if (fragment.getCategory() != null && fragment.getCategory() != "") {
-            CategoryDetailFragment CatDF = new CategoryDetailFragment();
+            CategoryDetailFragment CatDF = CategoryDetailFragment.getInstance();
             CatDF.setCategory(fragment.getCategory());
             Fragment newFragment = CatDF;
 
@@ -314,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
     private void DisputDetailBackPress() {
         DisputeDetailFragment fragment = ((DisputeDetailFragment) curentFragment);
         if (fragment.isSorted() && !fragment.isSortedBySubCategory()) {
-            MainFragment newFragment = new MainFragment();
+            MainFragment newFragment = MainFragment.getInstance(true, null, null);
             newFragment.setSorted(true);
             newFragment.setSubCategory(null);
 
@@ -324,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
                     .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .commit();
         } else if (fragment.isSortedBySubCategory()) {
-            MainFragment newFragment = new MainFragment();
+            MainFragment newFragment = MainFragment.getInstance(true, fragment.getCategory(), fragment.getSubCategory());
             newFragment.setSorted(true);
             newFragment.setSubCategory(fragment.getSubCategory());
             newFragment.setCategory(fragment.getCategory());
@@ -337,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main_fragment, new MainFragment(), "fragment")
+                    .replace(R.id.main_fragment, MainFragment.getInstance(false, null, null), "fragment")
                     .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .commit();
         }

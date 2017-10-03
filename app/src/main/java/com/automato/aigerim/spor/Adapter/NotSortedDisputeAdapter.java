@@ -13,17 +13,15 @@ import com.automato.aigerim.spor.View.DisputeCell;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 
 /**
  * Created by HAOR on 25.08.2017.
  */
 
-public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
+public class NotSortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
 
     private ArrayList<Dispute> mData = new ArrayList<>();
-    private LayoutInflater mInflater;
-    private ItemClickListener mClickListener;
+    private NotSortedDisputeAdapter.ItemClickListener mClickListener;
     private String userID;
     private FirebaseDatabase database;
     private boolean isSorted;
@@ -31,9 +29,8 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
     private ArrayList<DisputeCell> viewHolders = new ArrayList<>();
 
     // data is passed into the constructor
-    public SortedDisputeAdapter(final Context context, ArrayList<Dispute> data, String userID,
-                                FirebaseDatabase database, boolean isSorted, boolean isSortedBySubCategory) {
-        this.mInflater = LayoutInflater.from(context);
+    public NotSortedDisputeAdapter(ArrayList<Dispute> data, String userID,
+                                   FirebaseDatabase database, boolean isSorted, boolean isSortedBySubCategory) {
         this.mData = data;
         this.userID = userID;
         this.database = database;
@@ -44,7 +41,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
     // inflates the cell layout from xml when needed
     @Override
     public DisputeCell onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.spor_cell_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.spor_cell_layout, parent, false);
         DisputeCell viewHolder = new DisputeCell(view);
         viewHolders.add(viewHolder);
         return viewHolder;
@@ -65,7 +62,6 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
         viewHolder.setSubCategory(model.subcategory);
         viewHolder.setSorted(isSorted);
         viewHolder.setSortedBySubCategory(isSortedBySubCategory);
-        viewHolder.setImage(model.photo);
         viewHolder.setRate(model);
 
         boolean isLiked = false;
@@ -75,26 +71,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
         viewHolder.setLiked(isLiked);
         viewHolder.setListener(model, database);
         viewHolder.runTimer(model);
-        /*if (myTimer == null) {
-            myTimer = new Timer();
-            task = new MyTimerTask();
-
-            task.disputes = new ArrayList<>();
-            task.disputeCells = new ArrayList<>();
-
-            task.disputeCells.add(viewHolder);
-            task.disputes.add(model);
-            myTimer.schedule(task, 0, task.time);
-        } else {
-            try{
-                task.disputes.remove(position);
-                task.disputeCells.remove(position);
-            }catch (Exception e){
-
-            }
-            task.disputes.add(position, model);
-            task.disputeCells.add(position, viewHolder);
-        }*/
+        viewHolder.setImage(model.photo);
     }
 
     // total number of cells
@@ -128,11 +105,11 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView myTextView;
+        public View view;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            myTextView = (TextView) itemView.findViewById(R.id.info_text);
+            this.view = itemView;
             itemView.setOnClickListener(this);
         }
 

@@ -37,8 +37,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     // Create new views (invoked by the layout manager)
     @Override
-    public CategoryAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                         int viewType) {
+    public CategoryAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         RelativeLayout cv = (RelativeLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.category_cell, parent, false);
@@ -99,7 +98,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         cv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CategoryDetailFragment CatDF = new CategoryDetailFragment();
+                CategoryDetailFragment CatDF = CategoryDetailFragment.getInstance();
                 String category = ((TextView) v.findViewById(R.id.cat_name)).getText().toString();
                 CatDF.setCategory(category);
                 android.support.v4.app.Fragment newFragment = CatDF;

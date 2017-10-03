@@ -216,7 +216,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public void setSporDate(String date) {
         sporDate = (TextView) view.findViewById(R.id.spor_date);
-        this.sporDate.setText(date);
+        sporDate.setText(date);
     }
 
     public boolean isLiked() {
@@ -276,7 +276,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public void setSporParticipantCount(int numberOfParticipant, Dispute dispute, String userId) {
         sporParticipantCount = (TextView) view.findViewById(R.id.viewers_count);
-        this.sporParticipantCount.setText(Integer.toString(numberOfParticipant));
+        sporParticipantCount.setText(Integer.toString(numberOfParticipant));
         if (dispute.participants != null) {
             if (dispute.participants.containsKey(userId)) {
                 ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
@@ -296,7 +296,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public void setSporLikeCount(int numberOfLikes) {
         this.sporLikeCount = (TextView) view.findViewById(R.id.like_count);
-        this.sporLikeCount.setText(Integer.toString(numberOfLikes));
+        sporLikeCount.setText(Integer.toString(numberOfLikes));
     }
 
     public void setSporSubject(String subject) {
@@ -306,7 +306,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public void setSporStartTime(String time) {
         startTime = (TextView) view.findViewById(R.id.spor_time);
-        this.startTime.setText(time);
+        startTime.setText(time);
     }
 
     public void setCategory(String category) {
@@ -396,60 +396,55 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         return (TextView) view.findViewById(R.id.progress_text);
     }
 
-    public void setProgress(final long unixTime, final Dispute dispute) {
-        MainActivity.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!MainActivity.isAdmin()) {
-                    setOnCardListener(dispute, FirebaseDatabase.getInstance());
-                }
-                ProgressBar progressBar = getProgressBar();
-                TextView progressText = getProgressText();
-                TextView status = getStatusTextView();
+    public void setProgress(long unixTime, Dispute dispute) {
+        if (!MainActivity.isAdmin()) {
+            setOnCardListener(dispute, FirebaseDatabase.getInstance());
+        }
+        ProgressBar progressBar = getProgressBar();
+        TextView progressText = getProgressText();
+        TextView status = getStatusTextView();
 
-                long curUnixTime = System.currentTimeMillis();
-                long progress = unixTime - curUnixTime;
-                if (progress < 0) {
-                    //progressBar.setProgress(100);
+        long curUnixTime = System.currentTimeMillis();
+        long progress = unixTime - curUnixTime;
+        if (progress < 0) {
+            //progressBar.setProgress(100);
 
-                    progressBar.setVisibility(View.GONE);
-                    progressText.setVisibility(View.VISIBLE);
-                    view.findViewById(R.id.time_layout).setVisibility(View.GONE);
-                    view.findViewById(R.id.spor_date).setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            progressText.setVisibility(View.VISIBLE);
+            view.findViewById(R.id.time_layout).setVisibility(View.GONE);
+            view.findViewById(R.id.spor_date).setVisibility(View.GONE);
 
-                    if (dispute.result.equals("")) {
-                        disputeLiveOnCardListener();
-                        progressText.setText(R.string.Live);
-                        status.setText(R.string.Live);
-                    } else {
-                        disputeEndOnCardListener();
-                        if (dispute.result.equals("equal")){
-                            progressText.setText(R.string.equal);
-                        }else {
-                            progressText.setText(view.getResources().getString(R.string.end, dispute.result));
-                        }
-                        status.setText(R.string.done);
-                    }
+            if (dispute.result.equals("")) {
+                disputeLiveOnCardListener();
+                progressText.setText(R.string.Live);
+                status.setText(R.string.Live);
+            } else {
+                disputeEndOnCardListener();
+                if (dispute.result.equals("equal")) {
+                    progressText.setText(R.string.equal);
                 } else {
-                    progressBar.setVisibility(View.VISIBLE);
-                    progressText.setVisibility(View.GONE);
-                    view.findViewById(R.id.time_layout).setVisibility(View.VISIBLE);
-                    view.findViewById(R.id.spor_date).setVisibility(View.VISIBLE);
-
-                    if (!MainActivity.isAdmin())
-                        setOnCardListener(dispute, FirebaseDatabase.getInstance());
-                    status.setText(R.string.wait);
-
-                    progressBar.setMax(99999999);
-                    int progressInt = 99999999 - (int) progress;
-                    if (Integer.signum(progressInt) == 1) {
-                        progressBar.setProgress(99999999 - (int) progress);
-                    } else {
-                        progressBar.setProgress(0);
-                    }
+                    progressText.setText(view.getResources().getString(R.string.end, dispute.result));
                 }
+                status.setText(R.string.done);
             }
-        });
+        } else {
+            progressBar.setVisibility(View.VISIBLE);
+            progressText.setVisibility(View.GONE);
+            view.findViewById(R.id.time_layout).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.spor_date).setVisibility(View.VISIBLE);
+
+            if (!MainActivity.isAdmin())
+                setOnCardListener(dispute, FirebaseDatabase.getInstance());
+            status.setText(R.string.wait);
+
+            progressBar.setMax(99999999);
+            int progressInt = 99999999 - (int) progress;
+            if (Integer.signum(progressInt) == 1) {
+                progressBar.setProgress(99999999 - (int) progress);
+            } else {
+                progressBar.setProgress(0);
+            }
+        }
     }
 
     public TextView getStatusTextView() {
@@ -473,9 +468,20 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         RightRateTextView.setText(Integer.toString(arlist.get(1).rate));
     }
 
-    public void runTimer(Dispute model) {
+    protected void finalize() throws Throwable {
         if (myTimer != null) {
             task.cancel();
+            myTimer.cancel();
+            myTimer.purge();
+        }
+        super.finalize();
+    }
+
+    public void runTimer(final Dispute model) {
+        if (myTimer != null) {
+            task.cancel();
+            myTimer.cancel();
+            myTimer.purge();
         }
         myTimer = new Timer();
         task = new MySingleTimerTask();
@@ -483,5 +489,13 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         task.dispute = model;
         task.disputeCell = DisputeCell.this;
         myTimer.schedule(task, 0, task.time);
+    }
+
+    public void removeTimer() {
+        if (myTimer != null) {
+            task.cancel();
+            myTimer.cancel();
+            myTimer.purge();
+        }
     }
 }

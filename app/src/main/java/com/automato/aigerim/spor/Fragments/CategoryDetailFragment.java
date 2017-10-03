@@ -1,8 +1,8 @@
 package com.automato.aigerim.spor.Fragments;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +13,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Adapter.CategoryDetailAdapter;
+import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,35 +25,43 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
-import com.automato.aigerim.spor.Adapter.CategoryDetailAdapter;
-import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.R;
-import com.automato.aigerim.spor.Models.Dispute;
-
 /**
  * Created by HAOR on 25.08.2017.
  */
 
 public class CategoryDetailFragment extends Fragment implements CategoryDetailAdapter.ItemClickListener {
 
+    private static CategoryDetailFragment instance;
+    private static CategoryDetailAdapter adapter;
+    private static View rootView;
+    private static String category;
+    private static RecyclerView recyclerView;
+    private static HashMap<Integer, Dispute> mData = new HashMap<>();
+    private static DatabaseReference reference;
+    private static Toolbar myToolbar;
+    private static TextView title;
     private FirebaseDatabase database;
 
-    private CategoryDetailAdapter adapter;
-    private View rootView;
-    private String category;
-    private RecyclerView recyclerView;
-    private HashMap<Integer, Dispute> mData = new HashMap<>();
+    public static CategoryDetailFragment getInstance() {
+        if (instance == null) {
+            instance = new CategoryDetailFragment();
+        } else {
+            adapter = null;
+            setImage();
+            myToolbar.setTitle(category);
+            title.setText(category);
+            loadData();
+        }
 
-    public void setCategory(String category) {
-        this.category = category;
+        return instance;
     }
 
-    public void setImage(){
-        FrameLayout sporImage = (FrameLayout)rootView.findViewById(R.id.imageLayout);
+    public static void setImage() {
+        FrameLayout sporImage = (FrameLayout) rootView.findViewById(R.id.imageLayout);
 
         int drawable;
 
-        switch (category){
+        switch (category) {
             case "Футбол":
                 drawable = R.drawable.football_header;
                 break;
@@ -82,10 +94,47 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
         sporImage.setBackgroundResource(drawable);
     }
 
+    private static void loadData() {
+        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int i = 0;
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    boolean hasSubCat = ds.hasChild("subcategory");
+                    boolean hasCat = ds.hasChild("category");
+                    Dispute d = ds.getValue(Dispute.class);
+                    if (hasSubCat && hasCat) {
+                        boolean alreadyHave = false;
+                        for (int j = 0; j < mData.size(); j++) {
+                            if (mData.get(j).subcategory.equals(d.subcategory))
+                                alreadyHave = true;
+                        }
+                        if (!alreadyHave && category.equals(d.category)) {
+                            mData.put(i, d);
+                            i++;
+                        }
+                    }
+                }
+                adapter = new CategoryDetailAdapter(rootView.getContext(), category, mData);
+                adapter.setClickListener(instance);
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_category_detail,container,false);
+        rootView = inflater.inflate(R.layout.fragment_category_detail, container, false);
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.spor_list);
         recyclerView.setHasFixedSize(true);
@@ -94,13 +143,13 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
         recyclerView.setLayoutManager(new GridLayoutManager(rootView.getContext(), numberOfColumns));
 
         database = FirebaseDatabase.getInstance();
-        DatabaseReference reference = database.getReference("spor");
+        reference = database.getReference("spor");
         setImage();
 
         getActivity().findViewById(R.id.my_toolbar).setVisibility(View.GONE);
         getActivity().findViewById(R.id.shadow).setVisibility(View.GONE);
 
-        Toolbar myToolbar = (Toolbar) rootView.findViewById(R.id.my_transparent_toolbar);
+        myToolbar = (Toolbar) rootView.findViewById(R.id.my_transparent_toolbar);
         myToolbar.setTitle(category);
         myToolbar.setTitleTextColor(getResources().getColor(R.color.white));
         MainActivity.getActivity().setSupportActionBar(myToolbar);
@@ -113,39 +162,10 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
             }
         });
 
-        TextView title = (TextView) getActivity().findViewById(R.id.title);
+        title = (TextView) getActivity().findViewById(R.id.title);
         title.setText(category);
 
-        reference.orderByKey().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                int i = 0;
-                for (DataSnapshot ds:dataSnapshot.getChildren()) {
-                    boolean hasSubCat = ds.hasChild("subcategory");
-                    boolean hasCat = ds.hasChild("category");
-                    Dispute d = ds.getValue(Dispute.class);
-                    if(hasSubCat && hasCat){
-                        boolean alreadyHave = false;
-                        for (int j = 0; j < mData.size(); j++) {
-                            if (mData.get(j).subcategory.equals(d.subcategory))
-                                alreadyHave = true;
-                        }
-                        if(!alreadyHave && category.equals(d.category)) {
-                            mData.put(i, d);
-                            i++;
-                        }
-                    }
-                }
-                adapter = new CategoryDetailAdapter(rootView.getContext(), category, mData);
-                adapter.setClickListener(CategoryDetailFragment.this);
-                recyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        loadData();
 
         MainActivity.setCurentFragment(this);
         return rootView;
@@ -160,7 +180,9 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
 
     @Override
     public void onItemClick(View view, int position) {
-        MainFragment ddf = new MainFragment();
+        String category = adapter.getItem(position).category;
+        String subCategory = adapter.getItem(position).subcategory;
+        MainFragment ddf = MainFragment.getInstance(true, category, subCategory);
 
         ddf.setCategory(adapter.getItem(position).category);
         ddf.setSubCategory(adapter.getItem(position).subcategory);
