@@ -1,35 +1,24 @@
 package com.automato.aigerim.spor.View;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.support.annotation.NonNull;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Fragments.DisputeDetailFragment;
 import com.automato.aigerim.spor.Models.Choice;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
-import com.automato.aigerim.spor.Other.TimerTask.MySingleTimerTask;
-import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.MySingleTimerTask;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +31,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 public class DisputeCell extends RecyclerView.ViewHolder {
 
     View view;
+    Api api;
 
     TextView sporDate;
     TextView sporParticipantCount;
@@ -54,21 +44,18 @@ public class DisputeCell extends RecyclerView.ViewHolder {
     private boolean isLiked;
     private boolean isSorted;
     private boolean isSortedBySubCategory;
-    private User client;
     private String category;
 
-    private StorageReference storageReference;
-    private Tools tools = new Tools();
     private Timer myTimer;
     private MySingleTimerTask task;
 
     public DisputeCell(View itemView) {
         super(itemView);
         this.view = itemView;
-        storageReference = FirebaseStorage.getInstance().getReference();
+        api = new Api(view.getContext());
     }
 
-    private void setOnLikeListener(final Dispute model, final FirebaseDatabase myDatabase) {
+    private void setOnLikeListener(final Dispute model) {
         view.findViewById(R.id.imageLike).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -78,26 +65,29 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     likeCount++;
 
                     if (model.likes != null) {
-                        if (!model.likes.containsKey(client.id)) {
-                            model.likes.put(client.id, true);
+                        if (!model.likes.containsKey(User.id)) {
+                            model.likes.put(User.id, true);
                         }
                     } else {
                         HashMap<String, Boolean> likes = new HashMap<>();
-                        likes.put(client.id, true);
+                        likes.put(User.id, true);
                         model.likes = likes;
                     }
                 } else {
                     likeCount = Integer.parseInt(sporLikeCount.getText().toString());
                     likeCount--;
 
-                    model.likes.remove(client.id);
+                    model.likes.remove(User.id);
                 }
 
-                DatabaseReference sporLikeCountInDB = myDatabase.getReference("spor/" + model.id + "/likeCount");
+                model.likeCount = likeCount;
+                api.like(User.id, model.id);
+
+                /*DatabaseReference sporLikeCountInDB = myDatabase.getReference("spor/" + model.id + "/likeCount");
                 sporLikeCountInDB.setValue(likeCount);
 
                 DatabaseReference sporLikes = myDatabase.getReference("spor/" + model.id + "/likes");
-                sporLikes.setValue(model.likes);
+                sporLikes.setValue(model.likes);*/
 
                 ImageView like = (ImageView) view.findViewById(R.id.imageLike);
                 if (!isLiked()) {
@@ -112,25 +102,11 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         });
     }
 
-    public void setListener(final Dispute model, final FirebaseDatabase myDatabase) {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String userID = mAuth.getCurrentUser().getUid();
-        DatabaseReference reference = myDatabase.getReference();
-        reference.child("users").child(userID).orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-                setOnLikeListener(model, myDatabase);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+    public void setListener(final Dispute model) {
+        setOnLikeListener(model);
     }
 
-    private void setOnCardListener(final Dispute model, final FirebaseDatabase myDatabase) {
+    private void setOnCardListener(final Dispute model) {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -158,8 +134,6 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                 ddf.setViewCount(viewsCountMessage);
                 ddf.setTotalDisputeMoney(money);
                 ddf.setDispute(model);
-                ddf.setClient(client);
-                ddf.setMyDatabase(myDatabase);
                 ddf.setLikedByCurentUser(isLiked());
                 ddf.setSorted(isSorted());
                 ddf.setSortedBySubCategory(isSortedBySubCategory());
@@ -274,11 +248,11 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         this.viewCount.setText(count + endOfMessage);
     }
 
-    public void setSporParticipantCount(int numberOfParticipant, Dispute dispute, String userId) {
+    public void setSporParticipantCount(int numberOfParticipant, Dispute dispute) {
         sporParticipantCount = (TextView) view.findViewById(R.id.viewers_count);
         sporParticipantCount.setText(Integer.toString(numberOfParticipant));
         if (dispute.participants != null) {
-            if (dispute.participants.containsKey(userId)) {
+            if (dispute.participants.containsKey(User.id)) {
                 ImageView participant = (ImageView) view.findViewById(R.id.imageParticCount);
                 participant.setImageResource(R.drawable.people_black);
                 ((TextView) view.findViewById(R.id.viewers_count)).setTextColor(view.getResources().getColor(R.color.grey_700));
@@ -313,13 +287,12 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         this.category = category;
     }
 
-    public void setImage(String photo) {
+    public void setImage(String photo, final String dispute_photo) {
         final ImageView sporImage = (ImageView) view.findViewById(R.id.spor_Image);
 
         if (photo == null) {
             sporImage.setBackground(null);
             int drawable;
-            boolean hasImage = true;
 
             switch (category) {
                 case "Футбол":
@@ -359,27 +332,26 @@ public class DisputeCell extends RecyclerView.ViewHolder {
                     break;
             }
 
-            if (hasImage)
-                sporImage.setImageResource(drawable);
+            sporImage.setImageResource(drawable);
         } else {
-            view.findViewById(R.id.client_image_progress_bar).setVisibility(View.VISIBLE);
-            storageReference.child("Photos").child(photo).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    sporImage.setImageBitmap(image);
-                    view.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
-                    sporImage.setBackground(null);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(MainActivity.getActivity(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
-                    Log.e("ImageLoadFailure", e.getMessage());
-                    view.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
-                    sporImage.setBackground(null);
+                public void run() {
+                    final Bitmap bitmap = Tools.downloadDisputePhoto(MainActivity.getContext(), dispute_photo);
+                    if (bitmap != null) {
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                sporImage.setImageBitmap(bitmap);
+                                view.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                                sporImage.setBackground(null);
+                            }
+                        });
+                    }
                 }
             });
+            thread.setDaemon(false);
+            thread.start();
         }
     }
 
@@ -398,7 +370,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
 
     public void setProgress(long unixTime, Dispute dispute) {
         if (!MainActivity.isAdmin()) {
-            setOnCardListener(dispute, FirebaseDatabase.getInstance());
+            setOnCardListener(dispute);
         }
         ProgressBar progressBar = getProgressBar();
         TextView progressText = getProgressText();
@@ -434,7 +406,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
             view.findViewById(R.id.spor_date).setVisibility(View.VISIBLE);
 
             if (!MainActivity.isAdmin())
-                setOnCardListener(dispute, FirebaseDatabase.getInstance());
+                setOnCardListener(dispute);
             status.setText(R.string.wait);
 
             progressBar.setMax(99999999);
@@ -458,7 +430,7 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         TextView RightRateTextView = (TextView) view.findViewById(R.id.right_rate);
         TextView subjectTextView = (TextView) view.findViewById(R.id.spor_subject);
 
-        String fTeam = tools.regex("(.*?)([ ]*?)(-)", subjectTextView.getText().toString(), 1);
+        String fTeam = Tools.regex("(.*?)([ ]*?)(-)", subjectTextView.getText().toString(), 1);
         if (!fTeam.equals(arlist.get(0).choice)) {
             RightRateTextView = (TextView) view.findViewById(R.id.left_rate);
             leftRateTextView = (TextView) view.findViewById(R.id.right_rate);

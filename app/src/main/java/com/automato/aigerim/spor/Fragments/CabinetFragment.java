@@ -3,9 +3,9 @@ package com.automato.aigerim.spor.Fragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -27,26 +27,17 @@ import android.widget.Toast;
 
 import com.automato.aigerim.spor.Activity.EditingProfilePageActivity;
 import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.Activity.SettingsActivity;
 import com.automato.aigerim.spor.Adapter.UsersDisputeAdapter;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
-import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
 import com.firebase.client.annotations.Nullable;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.soundcloud.android.crop.Crop;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -76,6 +67,8 @@ import static ru.cloudpayments.sdk.utils.Logger.log;
 
 public class CabinetFragment extends Fragment implements View.OnClickListener {
 
+    Api api;
+
     ImageView userProfileImage;
     TextView userName;
     TextView userEmail;
@@ -88,24 +81,17 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     FloatingActionButton wait;
     ProgressBar progressBar;
     RecyclerView userDisputesList;
-    FirebaseStorage storage;
     EditText cardNumber;
     EditText expMonth;
     EditText expYear;
     EditText cvv;
     EditText cardHolder;
     EditText payment;
-    StorageReference storageReference;
-    FirebaseDatabase myDatabase;
-    DatabaseReference reference;
-    FirebaseAuth mAuth;
     CheckBox has3DSecure;
-    User client;
     ArrayList<Dispute> userDisputes = new ArrayList<>();
     private View rootView;
     private String publickKey = "pk_d1f87a40424414e08730cadea80a1";
     private Pattern CODE_PATTERN = Pattern.compile("([0-9]{0,4})|([0-9]{4}-)+|([0-9]{4}-[0-9]{0,4})+");
-    private Tools tools = new Tools();
 
     private PaymentTaskListener paymentTaskListener = new PaymentTaskListener() {
         @Override
@@ -116,7 +102,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             else if (response instanceof CardsAuthResponse)
                 showSuccessResult(((CardsAuthResponse) response).auth.cardHolderMessage);
             else {
-                if (!tools.isNullOrWhitespace(response.message)) {
+                if (!Tools.isNullOrWhitespace(response.message)) {
                     showSuccessResult(response.message);
                 } else {
                     if (response instanceof CardsChargeResponse) {
@@ -137,7 +123,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             else if (response instanceof CardsAuthResponse)
                 showErrorResult(((CardsAuthResponse) response).auth.cardHolderMessage);
             else {
-                if (!tools.isNullOrWhitespace(response.message)) {
+                if (!Tools.isNullOrWhitespace(response.message)) {
                     if (!response.message.equals("Авторизация не пройдена")) {
                         showErrorResult(response.message);
                     } else { //Если такой вариант не подойдёт то надо стереть "} else {" и всё его содержимое а на лэйауте включить CheckBox
@@ -156,7 +142,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
                                 String currency = "KZT";
                                 String description = "Поплнение счёта на Dispute";
                                 paymentAuth = PaymentFactory.charge(getActivity(),
-                                        publickKey, client.id, message,
+                                        publickKey, User.id, message,
                                         criptogram, cardHolderName, money, currency, description, "");
                                 paymentAuth.run(paymentTaskListener);
                             } catch (UnsupportedEncodingException | NoSuchPaddingException | NoSuchProviderException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
@@ -211,11 +197,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_cabinet, container, false);
 
-        storage = FirebaseStorage.getInstance();
-        storageReference = storage.getReference();
-        myDatabase = FirebaseDatabase.getInstance();
-        reference = myDatabase.getReference();
-        mAuth = FirebaseAuth.getInstance();
+        api = new Api(getActivity());
 
         getActivity().findViewById(R.id.shadow).setVisibility(View.GONE);
 
@@ -231,105 +213,53 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     public void loadAllMyDisputes() {
         userDisputes.clear();
         sporLabel.setText(R.string.allDisputes);
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("spor");
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Dispute dispute = snapshot.getValue(Dispute.class);
-                    if (dispute.participants != null) {
-                        if (dispute.participants.containsKey(client.id)) {
-                            userDisputes.add(dispute);
-                        }
+            public void run() {
+                userDisputes = api.getUserDisputes(userDisputesList);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        userDisputesList.setAdapter(new UsersDisputeAdapter(userDisputes));
                     }
-                }
-                userDisputesList.setAdapter(new UsersDisputeAdapter(userDisputes));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                });
             }
         });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     public void loadMyActivDisputes() {
-        userDisputes.clear();
         sporLabel.setText(R.string.activDisputes);
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("spor");
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Dispute dispute = snapshot.getValue(Dispute.class);
-                    if (dispute.participants != null) {
-                        if (dispute.participants.containsKey(client.id) && isActivDispute(dispute)) {
-                            userDisputes.add(dispute);
-                        }
-                    }
-                }
-                userDisputesList.setAdapter(new UsersDisputeAdapter(userDisputes));
+        ArrayList<Dispute> userActivDisputes = new ArrayList<>();
+        for (int i = 0; i < userDisputes.size(); i++) {
+            if (isActivDispute(userDisputes.get(i))) {
+                userActivDisputes.add(userDisputes.get(i));
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        }
+        userDisputesList.setAdapter(new UsersDisputeAdapter(userActivDisputes));
     }
 
     public void loadMyWaitDisputes() {
-        userDisputes.clear();
         sporLabel.setText(R.string.waitDisputes);
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("spor");
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Dispute dispute = snapshot.getValue(Dispute.class);
-                    if (dispute.participants != null) {
-                        if (dispute.participants.containsKey(client.id) && isWaitDispute(dispute)) {
-                            userDisputes.add(dispute);
-                        }
-                    }
-                }
-                userDisputesList.setAdapter(new UsersDisputeAdapter(userDisputes));
+        ArrayList<Dispute> userWaitDisputes = new ArrayList<>();
+        for (int i = 0; i < userDisputes.size(); i++) {
+            if (isWaitDispute(userDisputes.get(i))) {
+                userWaitDisputes.add(userDisputes.get(i));
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        }
+        userDisputesList.setAdapter(new UsersDisputeAdapter(userWaitDisputes));
     }
 
     public void loadMyFinishedDisputes() {
-        userDisputes.clear();
         sporLabel.setText(R.string.finishedDisputes);
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("spor");
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Dispute dispute = snapshot.getValue(Dispute.class);
-                    if (dispute.participants != null) {
-                        if (dispute.participants.containsKey(client.id) && isFinishedDispute(dispute)) {
-                            userDisputes.add(dispute);
-                        }
-                    }
-                }
-                userDisputesList.setAdapter(new UsersDisputeAdapter(userDisputes));
+        ArrayList<Dispute> userFinishedDisputes = new ArrayList<>();
+        for (int i = 0; i < userDisputes.size(); i++) {
+            if (isFinishedDispute(userDisputes.get(i))) {
+                userFinishedDisputes.add(userDisputes.get(i));
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        }
+        userDisputesList.setAdapter(new UsersDisputeAdapter(userFinishedDisputes));
     }
 
     private boolean isActivDispute(Dispute dispute) {
@@ -385,68 +315,58 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     }
 
     public void loadUserData() {
-        String userID = mAuth.getCurrentUser().getUid();
-        reference.child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-                userName.setText(client.name);
-                userEmail.setText(client.email);
+        userName.setText(User.name);
+        userEmail.setText(User.email);
 
-                try {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/mm/yyyy");
-                    Date date = simpleDateFormat.parse(client.birthday);
-                    int count = new Date().getYear() - date.getYear();
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/mm/yyyy");
+            Date date = simpleDateFormat.parse(User.birthday);
+            int count = new Date().getYear() - date.getYear();
 
-                    String endOfMessage = " лет";
-                    int lastNumber = count % 10;
-                    if (lastNumber == 2 || lastNumber == 3 || lastNumber == 4) {
-                        endOfMessage = " года";
-                    } else if (lastNumber == 1) {
-                        endOfMessage = " год";
-                    }
-                    if (Integer.toString(count).length() >= 2) {
-                        int lastTwoNumbers = count % 100;
-                        if (lastTwoNumbers == 11 || lastTwoNumbers == 12 || lastTwoNumbers == 13 || lastTwoNumbers == 14) {
-                            endOfMessage = " лет";
-                        }
-                    }
-
-                    userAge.setText(count + endOfMessage);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    userAge.setText(client.birthday);
+            String endOfMessage = " лет";
+            int lastNumber = count % 10;
+            if (lastNumber == 2 || lastNumber == 3 || lastNumber == 4) {
+                endOfMessage = " года";
+            } else if (lastNumber == 1) {
+                endOfMessage = " год";
+            }
+            if (Integer.toString(count).length() >= 2) {
+                int lastTwoNumbers = count % 100;
+                if (lastTwoNumbers == 11 || lastTwoNumbers == 12 || lastTwoNumbers == 13 || lastTwoNumbers == 14) {
+                    endOfMessage = " лет";
                 }
-
-                userMoney.setText(client.money + " тенге");
-                loadingClientProfile(client.id);
-                loadAllMyDisputes();
             }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+            userAge.setText(count + endOfMessage);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            userAge.setText(User.birthday);
+        }
 
-            }
-        });
+        userMoney.setText(User.money + " тенге");
+        loadingClientProfile();
+        loadAllMyDisputes();
     }
 
-    public void loadingClientProfile(String userID) {
-        if (client.hasImage) {
-            storageReference.child("Photos").child(userID).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+    public void loadingClientProfile() {
+        if (User.hasImage) {
+            progressBar.setVisibility(View.VISIBLE);
+            Thread thread = new Thread(new Runnable() {
                 @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    userProfileImage.setImageBitmap(image);
-                    progressBar.setVisibility(View.GONE);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(rootView.getContext(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
-                    Log.e("ImageLoadFailure", e.getMessage());
+                public void run() {
+                    final Bitmap bitmap = Tools.downloadUserPhoto(getActivity());
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (bitmap != null)
+                                userProfileImage.setImageBitmap(bitmap);
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
                 }
             });
+            thread.setDaemon(false);
+            thread.start();
         } else
             progressBar.setVisibility(View.GONE);
     }
@@ -473,6 +393,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             rootView.findViewById(R.id.client_money).setVisibility(View.GONE);
             rootView.findViewById(R.id.sort_buttons).setVisibility(View.GONE);
             rootView.findViewById(R.id.clientSpors).setVisibility(View.GONE);
+            rootView.findViewById(R.id.change_profile).setVisibility(View.GONE);
             rootView.findViewById(R.id.client_spors_label).setVisibility(View.GONE);
             topUpTheBalance.setVisibility(View.GONE);
         }
@@ -592,11 +513,11 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
                             String description = "Поплнение счёта на Dispute";
                             if (has3DSecure.isChecked()) {
                                 paymentAuth = PaymentFactory.charge(getActivity(),
-                                        publickKey, client.id, message,
+                                        publickKey, User.id, message,
                                         criptogram, cardHolderName, money, currency, description, "");
                             } else {
                                 paymentAuth = PaymentFactory.auth(getActivity(),
-                                        publickKey, client.id, message,
+                                        publickKey, User.id, message,
                                         criptogram, cardHolderName, money, currency, description, "");
                             }
                             paymentAuth.run(paymentTaskListener);
@@ -616,14 +537,14 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
     private boolean check(String cardNumberString, String cvvCode, String cardHolderName, EditText cardNumber, EditText expMonth, EditText expYear, EditText cvv, EditText cardHolder, EditText payment) {
         boolean checked = true;
 
-        if (tools.isNullOrWhitespace(cardNumberString)) {
+        if (Tools.isNullOrWhitespace(cardNumberString)) {
             checked = false;
             cardNumber.setError("Обязательно");
         } else {
             cardNumber.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(expMonth.getText().toString())) {
+        if (Tools.isNullOrWhitespace(expMonth.getText().toString())) {
             checked = false;
             expMonth.setError("Обязательно");
         } else {
@@ -635,28 +556,28 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
             }
         }
 
-        if (tools.isNullOrWhitespace(expYear.getText().toString())) {
+        if (Tools.isNullOrWhitespace(expYear.getText().toString())) {
             checked = false;
             expYear.setError("Обязательно");
         } else {
             expYear.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(cvvCode)) {
+        if (Tools.isNullOrWhitespace(cvvCode)) {
             checked = false;
             cvv.setError("Обязательно");
         } else {
             cvv.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(cardHolderName)) {
+        if (Tools.isNullOrWhitespace(cardHolderName)) {
             checked = false;
             cardHolder.setError("Обязательно");
         } else {
             cardHolder.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(payment.getText().toString())) {
+        if (Tools.isNullOrWhitespace(payment.getText().toString())) {
             checked = false;
             payment.setError("Обязательно");
         } else {

@@ -6,7 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -20,49 +21,34 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.FTP;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 public class EditingProfilePageActivity extends AppCompatActivity implements View.OnClickListener {
 
     static final int GALLERY_REQUEST = 1;
+    Api api;
 
     private RelativeLayout changePhoto;
     private ProgressBar progressBar;
-    private FirebaseStorage storage;
-    private StorageReference storageReference;
-    private FirebaseDatabase myDatabase;
-    private DatabaseReference reference;
-    private FirebaseAuth mAuth;
     private ImageView userProfileImage;
-    private String userID;
-    private User client;
-    private String userName;
     private EditText userNameEditText;
     private EditText userEmail;
     private RelativeLayout ChangePass;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editing_profile_page);
 
-        storage = FirebaseStorage.getInstance();
-        storageReference = storage.getReference();
-        myDatabase = FirebaseDatabase.getInstance();
-        reference = myDatabase.getReference();
-        mAuth = FirebaseAuth.getInstance();
-        userID = mAuth.getCurrentUser().getUid();
+        api = new Api(this);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Редактирование");
@@ -99,7 +85,7 @@ public class EditingProfilePageActivity extends AppCompatActivity implements Vie
 
             @Override
             public void afterTextChanged(Editable editable) {
-                userName = userNameEditText.getText().toString();
+                User.name = userNameEditText.getText().toString();
             }
         });
 
@@ -108,39 +94,28 @@ public class EditingProfilePageActivity extends AppCompatActivity implements Vie
     }
 
     public void loadingClientProfile() {
-        reference.child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-                userNameEditText.setText(client.name);
-                userEmail.setText(client.email);
-                setClientImage();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        userNameEditText.setText(User.name);
+        userEmail.setText(User.email);
+        setClientImage();
     }
 
     private void setClientImage() {
-        if (client.hasImage) {
-            storageReference.child("Photos").child(userID).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+        if (User.hasImage) {
+            Thread thread = new Thread(new Runnable() {
                 @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    userProfileImage.setImageBitmap(image);
-                    progressBar.setVisibility(View.GONE);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(EditingProfilePageActivity.this, "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
-                    Log.e("ImageLoadFailure", e.getMessage());
+                public void run() {
+                    final Bitmap bitmap = Tools.downloadUserPhoto(EditingProfilePageActivity.this);
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            userProfileImage.setImageBitmap(bitmap);
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
                 }
             });
+            thread.setDaemon(false);
+            thread.start();
         } else
             progressBar.setVisibility(View.GONE);
     }
@@ -181,8 +156,7 @@ public class EditingProfilePageActivity extends AppCompatActivity implements Vie
 
     @Override
     public void onBackPressed() {
-        DatabaseReference name = myDatabase.getReference("users/" + userID + "/name");
-        name.setValue(userName);
+        api.updateUser();
         super.onBackPressed();
     }
 
@@ -206,28 +180,14 @@ public class EditingProfilePageActivity extends AppCompatActivity implements Vie
     }
 
     private void galleryResponse(final Uri selectedImage) {
-        storageReference.child("Photos").child(userID).putFile(selectedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                try {
-                    DatabaseReference hasImage = myDatabase.getReference("users/" + userID + "/hasImage");
-                    hasImage.setValue(true);
-
-                    Toast.makeText(EditingProfilePageActivity.this, "Изображение успешно обновлено", Toast.LENGTH_SHORT).show();
-                    userProfileImage.setImageURI(selectedImage);
-                } catch (Exception e) {
-                    Toast.makeText(EditingProfilePageActivity.this, "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
-                    Log.e("ImageUploadFailure", e.getMessage());
-                }
-                progressBar.setVisibility(View.GONE);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(EditingProfilePageActivity.this, "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
-                Log.e("ImageUploadFailure", e.getMessage());
-            }
-        });
+        String selfile = Tools.getRealPathFromUri(EditingProfilePageActivity.this, selectedImage);
+        String filetype = selfile.substring(selfile.lastIndexOf(".") + 1);
+        if (!filetype.equals("jpg") && !filetype.equals("jpeg")){
+            Toast.makeText(EditingProfilePageActivity.this, "Изображение должно быть в формате jpg или jpeg", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+        userProfileImage.setImageURI(selectedImage);
+        Tools.uploadUserPhoto(selectedImage, EditingProfilePageActivity.this, progressBar);
     }
 }

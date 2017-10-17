@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.View.DisputeCell;
 import com.google.firebase.database.FirebaseDatabase;
@@ -24,19 +25,14 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
     private ArrayList<Dispute> mData = new ArrayList<>();
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
-    private String userID;
-    private FirebaseDatabase database;
     private boolean isSorted;
     private boolean isSortedBySubCategory;
     private ArrayList<DisputeCell> viewHolders = new ArrayList<>();
 
     // data is passed into the constructor
-    public SortedDisputeAdapter(final Context context, ArrayList<Dispute> data, String userID,
-                                FirebaseDatabase database, boolean isSorted, boolean isSortedBySubCategory) {
+    public SortedDisputeAdapter(final Context context, ArrayList<Dispute> data, boolean isSorted, boolean isSortedBySubCategory) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
-        this.userID = userID;
-        this.database = database;
         this.isSorted = isSorted;
         this.isSortedBySubCategory = isSortedBySubCategory;
     }
@@ -57,7 +53,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
 
         viewHolder.setSporDate(model.date);
         viewHolder.setSporLikeCount(model.likeCount);
-        viewHolder.setSporParticipantCount(model.participantCount, model, userID);
+        viewHolder.setSporParticipantCount(model.participantCount, model);
         viewHolder.setSporStartTime(model.time);
         viewHolder.setSporSubject(model.subject);
         viewHolder.setViewCount(model.viewCount);
@@ -65,36 +61,16 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
         viewHolder.setSubCategory(model.subcategory);
         viewHolder.setSorted(isSorted);
         viewHolder.setSortedBySubCategory(isSortedBySubCategory);
-        viewHolder.setImage(model.photo);
+        viewHolder.setImage(model.photo, model.photo);
         viewHolder.setRate(model);
 
         boolean isLiked = false;
         if (model.likes != null) {
-            isLiked = model.likes.containsKey(userID);
+            isLiked = model.likes.containsKey(User.id);
         }
         viewHolder.setLiked(isLiked);
-        viewHolder.setListener(model, database);
+        viewHolder.setListener(model);
         viewHolder.runTimer(model);
-        /*if (myTimer == null) {
-            myTimer = new Timer();
-            task = new MyTimerTask();
-
-            task.disputes = new ArrayList<>();
-            task.disputeCells = new ArrayList<>();
-
-            task.disputeCells.add(viewHolder);
-            task.disputes.add(model);
-            myTimer.schedule(task, 0, task.time);
-        } else {
-            try{
-                task.disputes.remove(position);
-                task.disputeCells.remove(position);
-            }catch (Exception e){
-
-            }
-            task.disputes.add(position, model);
-            task.disputeCells.add(position, viewHolder);
-        }*/
     }
 
     // total number of cells

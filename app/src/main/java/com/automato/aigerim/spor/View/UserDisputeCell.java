@@ -2,6 +2,8 @@ package com.automato.aigerim.spor.View;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.widget.Toast;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -82,24 +85,23 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
 
             sporImage.setImageResource(drawable);
         } else {
-            rootView.findViewById(R.id.image_progress_bar).setVisibility(View.VISIBLE);
-
-            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-            storageReference.child("Photos").child(dispute.photo).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    sporImage.setImageBitmap(image);
-                    rootView.findViewById(R.id.image_progress_bar).setVisibility(View.GONE);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(MainActivity.getActivity(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
-                    Log.e("ImageLoadFailure", e.getMessage());
-                    rootView.findViewById(R.id.image_progress_bar).setVisibility(View.GONE);
+                public void run() {
+                    Bitmap bitmap = Tools.downloadDisputePhoto(MainActivity.getContext(), dispute.photo);
+                    if (bitmap != null){
+                        sporImage.setImageBitmap(bitmap);
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                rootView.findViewById(R.id.image_progress_bar).setVisibility(View.GONE);
+                            }
+                        });
+                    }
                 }
             });
+            thread.setDaemon(false);
+            thread.start();
         }
     }
 
@@ -114,12 +116,11 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
             Date date = format.parse(s);
             long curUnixTime = System.currentTimeMillis();
             long progress = date.getTime() - curUnixTime;
+            disputeName.setText(dispute.subject);
             if (progress < 0) {
                 if (dispute.result.equals("")) {
-                    disputeName.setText(R.string.Live);
-                    disputeTime.setText(null);
+                    disputeTime.setText(R.string.Live);
                 } else {
-                    disputeName.setText(R.string.done);
                     if (dispute.result.equals("equal")){
                         disputeTime.setText(R.string.equal);
                     }else {
@@ -127,8 +128,7 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
                     }
                 }
             } else {
-                disputeName.setText("Начало в");
-                disputeTime.setText(dispute.time);
+                disputeTime.setText("Начало в " + dispute.time);
             }
         } catch (ParseException e) {
             e.printStackTrace();

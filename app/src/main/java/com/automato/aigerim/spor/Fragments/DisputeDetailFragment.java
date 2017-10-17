@@ -2,9 +2,7 @@ package com.automato.aigerim.spor.Fragments;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -26,17 +24,9 @@ import com.automato.aigerim.spor.Models.Choice;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.Participant;
 import com.automato.aigerim.spor.Models.User;
-import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.ParseException;
@@ -55,6 +45,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 public class DisputeDetailFragment extends Fragment {
 
     View rootview;
+    Api api;
 
     private String date;
     private String subject;
@@ -71,11 +62,6 @@ public class DisputeDetailFragment extends Fragment {
     private boolean isSortedBySubCategory = false;
     private ProgressBar progressBar;
     private TextView title;
-
-    private User client;
-    private FirebaseDatabase myDatabase;
-    private String userID;
-    private FirebaseAuth mAuth;
 
     private RadioButton fTeam;
     private RadioButton sTeam;
@@ -186,10 +172,12 @@ public class DisputeDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_dispute_detail, container, false);
 
+        api = new Api(getActivity());
+
         initializeElements();
         initializeData();
         setDisputeStatus();
-        setListeners(mAuth, userID);
+        setListeners();
 
         MainActivity.setCurentFragment(this);
         return rootview;
@@ -197,7 +185,7 @@ public class DisputeDetailFragment extends Fragment {
 
     private void initializeData() {
         setSporDate(getDate());
-        setSporParticipantCount(getNumberOfParticipant(), dispute, userID);
+        setSporParticipantCount(getNumberOfParticipant(), dispute);
         setSporLikeCount(getNumberOfLikes());
         setSporSubject(getSubject());
         setSporSubCategory();
@@ -209,18 +197,16 @@ public class DisputeDetailFragment extends Fragment {
 
         dispute.viewCount += 1;
 
-        DatabaseReference viewCount = myDatabase.getReference("spor/" + dispute.id + "/viewCount");
-        viewCount.setValue(dispute.viewCount);
+        api.IncrementViewsCount(dispute.id);
+
+        /*DatabaseReference viewCount = myDatabase.getReference("spor/" + dispute.id + "/viewCount");
+        viewCount.setValue(dispute.viewCount);*/
 
         fTeam.setText(getFerstTeam());
         sTeam.setText(getSecondTeam());
     }
 
     private void initializeElements() {
-        mAuth = FirebaseAuth.getInstance();
-        storageReference = FirebaseStorage.getInstance().getReference();
-        userID = mAuth.getCurrentUser().getUid();
-
         submit = (Button) rootview.findViewById(R.id.submit);
         fTeam = (RadioButton) rootview.findViewById(R.id.ferstTeam);
         sTeam = (RadioButton) rootview.findViewById(R.id.secondTeam);
@@ -236,19 +222,6 @@ public class DisputeDetailFragment extends Fragment {
         title = (TextView) getActivity().findViewById(R.id.title);
         title.setText(dispute.category);
         title.setVisibility(View.VISIBLE);
-
-        DatabaseReference reference = myDatabase.getReference();
-        reference.child("users").child(userID).orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void setDisputeStatus() {
@@ -289,7 +262,7 @@ public class DisputeDetailFragment extends Fragment {
         }
     }
 
-    private void setListeners(final FirebaseAuth mAuth, final String userID) {
+    private void setListeners() {
         fTeam.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -316,16 +289,16 @@ public class DisputeDetailFragment extends Fragment {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onSubmitClick(view, mAuth, userID);
+                onSubmitClick(view);
             }
         });
     }
 
-    private void onSubmitClick(View view, FirebaseAuth mAuth, String userID) {
+    private void onSubmitClick(View view) {
         if (selectedChoice != null) {
             if (rate.getText() != null && !rate.getText().toString().equals("")) {
                 int rateValue = Integer.parseInt(rate.getText().toString());
-                if (rateValue <= (int) client.money) {
+                if (rateValue <= (int) User.money) {
                     if (dispute.participants == null) {
                         dispute.participants = new HashMap<>();
                     }
@@ -334,14 +307,20 @@ public class DisputeDetailFragment extends Fragment {
                     InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(rate.getWindowToken(), 0);
 
-                    if (!dispute.participants.containsKey(client.id)) {
-                        if (client.confirmed) {
+                    if (!dispute.participants.containsKey(User.id)) {
+                        if (User.confirmed) {
                             Participant participant = new Participant();
                             dispute.money += rateValue;
-                            client.money -= rateValue;
+                            User.money -= rateValue;
                             dispute.participantCount += 1;
 
-                            DatabaseReference participantCount = myDatabase.getReference("spor/" + dispute.id + "/participantCount");
+                            participant.choice = selectedChoice;
+                            participant.money = rateValue;
+                            participant.spor_id = dispute.id;
+                            participant.user_id = User.id;
+                            participant.winnings = 0;
+
+                            /*DatabaseReference participantCount = myDatabase.getReference("spor/" + dispute.id + "/participantCount");
                             participantCount.setValue(dispute.participantCount);
 
                             DatabaseReference sporMoney = myDatabase.getReference("spor/" + dispute.id + "/totalDisputeMoney");
@@ -350,14 +329,8 @@ public class DisputeDetailFragment extends Fragment {
                             DatabaseReference clientMoney = myDatabase.getReference("users/" + client.id + "/money");
                             clientMoney.setValue(client.money);
 
-                            participant.choice = selectedChoice;
-                            participant.money = rateValue;
-                            participant.spor_id = dispute.id;
-                            participant.user_id = client.id;
-                            participant.winnings = 0;
-
                             DatabaseReference refParticipant = myDatabase.getReference("spor/" + dispute.id + "/participants");
-                            refParticipant.child(client.id).setValue(participant);
+                            refParticipant.child(client.id).setValue(participant);*/
 
                             Choice choice = new Choice();
                             choice.choice = selectedChoice;
@@ -376,21 +349,27 @@ public class DisputeDetailFragment extends Fragment {
                                 selChoiceKey = keyList.get(1);
                             }
 
-                            dispute.choices.put(selChoiceKey, choice);
 
-                            DatabaseReference updateChoice = myDatabase.getReference("spor/" + dispute.id + "/choices/" + selChoiceKey);
-                            updateChoice.setValue(choice);
+                            /*DatabaseReference updateChoice = myDatabase.getReference("spor/" + dispute.id + "/choices/" + selChoiceKey);
+                            updateChoice.setValue(choice);*/
 
-                            dispute.participants.put(client.id, participant);
-                            setSporParticipantCount(dispute.participantCount, dispute, userID);
 
                             fTeam.setSelected(false);
                             sTeam.setSelected(false);
                             rate.setText("");
-                            setRate();
 
-                            Log.w("SPOR ID", dispute.id);
-                            Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_LONG).show();
+                            api.addParticipantToDispute(dispute.id, rateValue, selectedChoice, selChoiceKey);
+                            if (!api.error) {
+                                api.updateUser();
+                                if (!api.error) {
+                                    dispute.choices.put(selChoiceKey, choice);
+                                    dispute.participants.put(User.id, participant);
+                                    setSporParticipantCount(dispute.participantCount, dispute);
+                                    setRate();
+                                    Log.w("SPOR ID", dispute.id);
+                                    Toast.makeText(rootview.getContext(), R.string.stali_uchastnikom, Toast.LENGTH_LONG).show();
+                                }
+                            }
                         } else {
                             SweetAlertDialog mProgressDialog = new SweetAlertDialog(view.getContext(), SweetAlertDialog.ERROR_TYPE);
                             mProgressDialog.setTitleText("Ошибка");
@@ -425,26 +404,29 @@ public class DisputeDetailFragment extends Fragment {
             likeCount++;
 
             if (dispute.likes != null) {
-                if (!dispute.likes.containsKey(client.id)) {
-                    dispute.likes.put(client.id, true);
+                if (!dispute.likes.containsKey(User.id)) {
+                    dispute.likes.put(User.id, true);
                 }
             } else {
                 HashMap<String, Boolean> likes = new HashMap<>();
-                likes.put(client.id, true);
+                likes.put(User.id, true);
                 dispute.likes = likes;
             }
         } else {
             likeCount = Integer.parseInt(sporLikeCount.getText().toString());
             likeCount--;
 
-            dispute.likes.remove(client.id);
+            dispute.likes.remove(User.id);
         }
 
-        DatabaseReference sporLikeCountInDB = myDatabase.getReference("spor/" + dispute.id + "/likeCount");
+        dispute.likeCount = likeCount;
+        api.like(User.id, dispute.id);
+
+        /*DatabaseReference sporLikeCountInDB = myDatabase.getReference("spor/" + dispute.id + "/likeCount");
         sporLikeCountInDB.setValue(likeCount);
 
         DatabaseReference sporLikes = myDatabase.getReference("spor/" + dispute.id + "/likes");
-        sporLikes.setValue(dispute.likes);
+        sporLikes.setValue(dispute.likes);*/
 
         ImageView like = (ImageView) view.findViewById(R.id.imageLike);
         if (!isLikedByCurentUser()) {
@@ -496,12 +478,12 @@ public class DisputeDetailFragment extends Fragment {
         viewCount.setText(viewsCount);
     }
 
-    private void setSporParticipantCount(int numberOfParticipant, Dispute dispute, String userId) {
+    private void setSporParticipantCount(int numberOfParticipant, Dispute dispute) {
         TextView sporParticipantCount = (TextView) rootview.findViewById(R.id.viewers_count);
         ImageView participant = (ImageView) rootview.findViewById(R.id.imageParticCount);
         sporParticipantCount.setText(Integer.toString(numberOfParticipant));
         if (dispute.participants != null) {
-            if (dispute.participants.containsKey(userId)) {
+            if (dispute.participants.containsKey(User.id)) {
                 participant.setImageResource(R.drawable.people_black);
                 ((TextView) rootview.findViewById(R.id.viewers_count)).setTextColor(rootview.getResources().getColor(R.color.grey_700));
             } else {
@@ -582,24 +564,19 @@ public class DisputeDetailFragment extends Fragment {
             if (hasImage)
                 sporImage.setImageResource(drawable);
         } else {
-            rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.VISIBLE);
-            storageReference.child("Photos").child(dispute.photo).getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    sporImage.setImageBitmap(image);
-                    rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
-                    sporImage.setBackground(null);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(rootview.getContext(), "Не могу загрузить фотографию!", Toast.LENGTH_SHORT).show();
-                    Log.e("ImageLoadFailure", e.getMessage());
-                    rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
-                    sporImage.setBackground(null);
+                public void run() {
+                    Bitmap bitmap = Tools.downloadDisputePhoto(getActivity(),dispute.photo);
+                    if (bitmap != null){
+                        sporImage.setImageBitmap(bitmap);
+                        rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
+                        sporImage.setBackground(null);
+                    }
                 }
             });
+            thread.setDaemon(false);
+            thread.start();
         }
     }
 
@@ -619,14 +596,6 @@ public class DisputeDetailFragment extends Fragment {
 
     public void setDispute(Dispute dispute) {
         this.dispute = dispute;
-    }
-
-    public void setClient(User client) {
-        this.client = client;
-    }
-
-    public void setMyDatabase(FirebaseDatabase myDatabase) {
-        this.myDatabase = myDatabase;
     }
 
     public void setLikeImage(boolean likeImage) {

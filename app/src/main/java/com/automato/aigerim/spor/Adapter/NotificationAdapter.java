@@ -26,17 +26,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationCell> 
     private View view;
     private LayoutInflater mInflater;
     private ArrayList<Dispute> disputes;
-    private FirebaseDatabase myDatabase;
-    private String userId;
 
     // data is passed into the constructor
     public NotificationAdapter(final Context context, HashMap<String, Notification> data,
-                               ArrayList<Dispute> disputes, FirebaseDatabase myDatabase, String id) {
+                               ArrayList<Dispute> disputes) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
         this.disputes = disputes;
-        this.myDatabase = myDatabase;
-        this.userId = id;
     }
 
     // inflates the cell layout from xml when needed
@@ -55,8 +51,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationCell> 
         Notification notification = n.get(position);
         Dispute dispute = disputes.get(position);
 
-        holder.setDataBase(myDatabase);
-        holder.setUserId(userId);
         holder.setDispute(dispute);
         holder.setNotification(notification);
     }

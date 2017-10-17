@@ -6,8 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -18,22 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.automato.aigerim.spor.Fragments.DatePickerFragment;
-import com.automato.aigerim.spor.Models.User;
-import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.FileNotFoundException;
@@ -44,7 +31,9 @@ import java.util.Date;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-public class RegistrationActivity extends BaseActivity implements View.OnClickListener {
+public class RegistrationActivity extends AppCompatActivity implements View.OnClickListener {
+
+    Api api;
 
     ImageView imageCrop;
     Tools tools = new Tools();
@@ -53,20 +42,16 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
     private EditText mName;
     private EditText mPasswordRepeat;
     private String gender;
-    private FirebaseAuth mAuth;
-    private StorageReference mStorage;
-    private Uri imageUriCrop = null;
-    private Uri imageUriFull = null;
+    private Uri imageUri = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        mAuth = FirebaseAuth.getInstance();
-        mStorage = FirebaseStorage.getInstance().getReference();
+        api = new Api(this);
 
-        imageUriCrop = null;
+        imageUri = null;
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -243,81 +228,8 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
                                final String birthday, final String gender) {
 
         Log.d("info", "createAccount:" + email);
-        showProgressDialog();
 
-        mAuth.createUserWithEmailAndPassword(email, password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-            @Override
-            public void onSuccess(AuthResult authResult) {
-                Log.d("info", "createUserWithEmail:success");
-                final FirebaseUser user = mAuth.getCurrentUser();
-
-                DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
-                final String userId = user.getUid();
-                User p1 = new User(userId, name, user.getEmail(), birthday, gender);
-                mDatabase.child(userId).setValue(p1);
-
-                if (imageUriCrop != null) {
-                    final StorageReference filepath = mStorage.child("Photos").child(userId);
-                    filepath.putFile(imageUriCrop).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            final long ONE_MEGABYTE = 1024 * 1024;
-                            filepath.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                @Override
-                                public void onSuccess(byte[] bytes) {
-                                    DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
-                                    mDatabase.child(userId + "/hasImage").setValue(true);
-
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception exception) {
-                                }
-                            });
-
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(RegistrationActivity.this, "Не удалось загрузить изображение", Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                }
-                if (imageUriFull != null) {
-                    final StorageReference filepath = mStorage.child("Photos").child(userId + "-full");
-                    filepath.putFile(imageUriFull);
-                }
-                hideProgressDialog();
-                sendEmailVerification();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                String message = e.getMessage();
-                String title = "Ошибка";
-                SweetAlertDialog dialog = new SweetAlertDialog(RegistrationActivity.this, SweetAlertDialog.ERROR_TYPE);
-                dialog.setTitleText(title);
-                dialog.setConfirmText("Ок");
-                if (e instanceof FirebaseAuthUserCollisionException) {
-                    message = "Пользователь с данным email уже существует";
-                }
-                dialog.setContentText(message);
-                dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        sweetAlertDialog.dismissWithAnimation();
-                    }
-                });
-                hideProgressDialog();
-                dialog.show();
-            }
-        });
-    }
-
-    private void sendEmailVerification() {
-        final FirebaseUser user = mAuth.getCurrentUser();
-        Toast.makeText(RegistrationActivity.this, "Письмо с подтверждением аккаунта отправлено на " + user.getEmail(), Toast.LENGTH_LONG).show();
+        api.signUp(email, password, name, birthday, gender, imageUri);
     }
 
     @Override
@@ -325,8 +237,8 @@ public class RegistrationActivity extends BaseActivity implements View.OnClickLi
         super.onActivityResult(reqCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             try {
-                this.imageUriCrop = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUriCrop);
+                this.imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
                 imageCrop.setImageBitmap(selectedImage);
             } catch (FileNotFoundException e) {

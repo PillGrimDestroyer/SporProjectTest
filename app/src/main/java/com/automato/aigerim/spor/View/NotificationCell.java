@@ -6,6 +6,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Api;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -22,6 +24,7 @@ import java.util.Random;
 public class NotificationCell extends RecyclerView.ViewHolder {
 
     private View rootView;
+    Api api;
 
     private TextView notifMessage;
     private ImageView notifImage;
@@ -29,12 +32,12 @@ public class NotificationCell extends RecyclerView.ViewHolder {
 
     private Dispute dispute;
     private Notification notification;
-    private FirebaseDatabase myDatabase;
-    private String userId;
 
     public NotificationCell(View itemView) {
         super(itemView);
         rootView = itemView;
+
+        api = new Api(rootView.getContext());
 
         notifMessage = (TextView) itemView.findViewById(R.id.notif_message);
         notifImage = (ImageView) itemView.findViewById(R.id.notif_image);
@@ -95,14 +98,6 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         sporImage.setImageResource(drawable);
     }
 
-    public void setDataBase(FirebaseDatabase dataBase) {
-        this.myDatabase = dataBase;
-    }
-
-    public void setUserId(String userId){
-        this.userId = userId;
-    }
-
     public void setNotification(Notification notification) {
         this.notification = notification;
         String text;
@@ -119,8 +114,10 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         setSporImage();
         notification.checked = true;
 
-        DatabaseReference sporLikes = myDatabase.getReference("users/" + userId + "/history/" + dispute.id + "/checked");
-        sporLikes.setValue(notification.checked);
+        User.history.get(dispute.id).checked = true;
+        api.updateUser();
+        /*DatabaseReference sporLikes = myDatabase.getReference("users/" + userId + "/history/" + dispute.id + "/checked");
+        sporLikes.setValue(notification.checked);*/
     }
 
     private boolean oneOfChoiceIsZero() {

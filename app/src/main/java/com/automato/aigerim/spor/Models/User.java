@@ -6,29 +6,14 @@ import java.util.HashMap;
 
 @IgnoreExtraProperties
 public class User {
-    public String id;
-    public String name;
-    public String email;
-    public double money;
-    public boolean hasImage;
-    public String birthday;
-    public String gender;
-    public boolean confirmed = false;
-    public boolean receiveNotifications;
-    public HashMap<String, Notification> history;
-
-    public User() {
-
-    }
-
-    public User(String id, String name, String email, String birthday, String gender) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.money = 1000.0;
-        this.hasImage = false;
-        this.birthday = birthday;
-        this.gender = gender;
-        this.receiveNotifications = true;
-    }
+    public static String id;
+    public static String name;
+    public static String email;
+    public static double money;
+    public static boolean hasImage;
+    public static String birthday;
+    public static String gender;
+    public static boolean confirmed = false;
+    public static boolean receiveNotifications;
+    public static HashMap<String, Notification> history;
 }

@@ -2,6 +2,8 @@ package com.automato.aigerim.spor.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,14 +20,12 @@ import android.widget.TextView;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Adapter.CategoryAdapter;
-import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,19 +37,17 @@ import java.util.Map;
 
 public class CategoryFragment extends Fragment {
 
+    static Api api;
+
     private static View rootview;
     private static CategoryFragment instance;
-    private static Tools tools = new Tools();
     private static CategoryAdapter adapter;
-
-    private FirebaseDatabase database;
-    private static DatabaseReference reference;
     private static HashMap<String, Integer> hashMapCategory;
 
     private static RecyclerView sporList;
     private static EditText searchField;
-    private ImageView close;
     private static LinearLayoutManager llm;
+    private ImageView close;
 
     private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order) {
         List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
@@ -77,15 +75,67 @@ public class CategoryFragment extends Fragment {
     }
 
     public static CategoryFragment getInstance() {
-        if (instance == null){
+        if (instance == null) {
             instance = new CategoryFragment();
-        }else {
+        } else {
             MainActivity.showLoader();
             adapter = null;
             fillData(false);
         }
         MainActivity.setCurentFragment(instance);
         return instance;
+    }
+
+    private static void fillData(final boolean isSorted) {
+        String[] array = rootview.getResources().getStringArray(R.array.category);
+        int length = array.length;
+        hashMapCategory.clear();
+
+        //заполняем всеми видами спорта
+        for (int i = 0; i < length; i++) {
+            Integer catCounter = hashMapCategory.get(array[i]);
+            if (catCounter == null && !isSorted)
+                hashMapCategory.put(array[i], 0);
+        }
+        array = null;
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Dispute> allDisputes = api.getAllDisputes();
+
+                for (Dispute part : allDisputes) {
+                    if (isSorted) {
+                        if (Tools.regex(searchField.getText().toString().toLowerCase(), part.category.toLowerCase())) {
+                            //считаем сколько споров в каждой категории
+                            Integer catCounter = hashMapCategory.get(part.category);
+                            hashMapCategory.put(part.category, catCounter == null ? 1 : catCounter + 1);
+                        }
+                    } else {
+                        Integer catCounter = hashMapCategory.get(part.category);
+                        hashMapCategory.put(part.category, catCounter == null ? 1 : catCounter + 1);
+                    }
+                }
+                //сортировка
+                Map<String, Integer> sortedMapAsc = sortByComparator(hashMapCategory, false);
+
+                //ставим адаптер на RecyclerView
+                adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext(), MainActivity.getFragmetManeger(), rootview);
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        sporList.setAdapter(adapter);
+                    }
+                });
+
+                sporList.setLayoutManager(llm);
+
+                MainActivity.dismissWithAnimationLoader();
+            }
+        });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     protected void finalize() throws Throwable {
@@ -98,14 +148,13 @@ public class CategoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_category, container, false);
 
+        api = new Api(getActivity());
+
         sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
 
         llm = new LinearLayoutManager(this.getActivity());
         sporList.setLayoutManager(llm);
-
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("spor");
         hashMapCategory = new HashMap<>();
 
         getActivity().findViewById(R.id.my_toolbar).setVisibility(View.VISIBLE);
@@ -151,60 +200,6 @@ public class CategoryFragment extends Fragment {
         return rootview;
     }
 
-    private static void fillData(final boolean isSorted) {
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String[] array = rootview.getResources().getStringArray(R.array.category);
-                int length = array.length;
-                hashMapCategory.clear();
-
-                //заполняем всеми видами спорта
-                for (int i = 0; i < length; i++) {
-                    Integer catCounter = hashMapCategory.get(array[i]);
-                    if (catCounter == null && !isSorted)
-                        hashMapCategory.put(array[i], 0);
-                }
-                array = null;
-
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    for (DataSnapshot part : ds.getChildren()) {
-                        if (part.getKey().equals("category")) {
-                            String category = part.getValue().toString();
-
-                            if (isSorted) {
-                                if (tools.regex(searchField.getText().toString().toLowerCase(), category.toLowerCase())) {
-                                    //считаем сколько споров в каждой категории
-                                    Integer catCounter = hashMapCategory.get(category);
-                                    hashMapCategory.put(category, catCounter == null ? 1 : catCounter + 1);
-                                }
-                            } else {
-                                Integer catCounter = hashMapCategory.get(category);
-                                hashMapCategory.put(category, catCounter == null ? 1 : catCounter + 1);
-                            }
-
-                        }
-
-                    }
-                }
-                //сортировка
-                Map<String, Integer> sortedMapAsc = sortByComparator(hashMapCategory, false);
-
-                //ставим адаптер на RecyclerView
-                adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext(), MainActivity.getFragmetManeger(), rootview);
-                sporList.setAdapter(adapter);
-
-                sporList.setLayoutManager(llm);
-
-                MainActivity.dismissWithAnimationLoader();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
     @Override
     public void onDetach() {
         super.onDetach();
@@ -215,9 +210,6 @@ public class CategoryFragment extends Fragment {
         rootview = null;
         instance = null;
         adapter = null;
-
-        database = null;
-        reference = null;
         hashMapCategory = null;
 
         sporList = null;

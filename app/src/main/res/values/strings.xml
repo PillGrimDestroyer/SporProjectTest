@@ -3,7 +3,7 @@
 
     <string-array name="category_spor">
         <item>Все споры</item>
-        <item>Активные споры</item>
+        <item>Споры в прямом эфире</item>
         <item>Ожидаемые споры</item>
         <item>Завершённые споры</item>
     </string-array>
@@ -54,7 +54,7 @@
     <string name="Live">В прямом эфире</string>
     <string name="end" formatted="false">Выиграла команда: %s</string>
     <string name="allDisputes">Все споры</string>
-    <string name="activDisputes">Активные споры</string>
+    <string name="activDisputes">Споры в прямом эфире</string>
     <string name="waitDisputes">Ожидаемые споры</string>
     <string name="finishedDisputes">Завершенные споры</string>
     <string name="myMoney">Деньги</string>
@@ -112,4 +112,8 @@
     <string name="smallAge">Вам должно быть не меньше 18 лет!</string>
     <string name="equal">Ничья</string>
     <string name="dispute_stoped">Спор не состоялся из за отсутствия ставок на противоположную команду</string>
+    <string name="no_notifications">Уведомлений нет</string>
+    <string name="no_disputes_search">Поиск не дал никаких результатов</string>
+    <string name="no_disputes_type">Споры данного типа отсутствуют</string>
+    <string name="no_disputes">На данный момент нет ни одного спора</string>
 </resources>

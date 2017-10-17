@@ -1,6 +1,8 @@
 package com.automato.aigerim.spor.Fragments;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -16,13 +18,10 @@ import android.widget.TextView;
 import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Adapter.CategoryDetailAdapter;
 import com.automato.aigerim.spor.Models.Dispute;
+import com.automato.aigerim.spor.Other.Api;
 import com.automato.aigerim.spor.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -31,19 +30,22 @@ import java.util.HashMap;
 
 public class CategoryDetailFragment extends Fragment implements CategoryDetailAdapter.ItemClickListener {
 
+    static Api api;
+
     private static CategoryDetailFragment instance;
     private static CategoryDetailAdapter adapter;
     private static View rootView;
     private static String category;
     private static RecyclerView recyclerView;
-    private static HashMap<Integer, Dispute> mData = new HashMap<>();
-    private static DatabaseReference reference;
+    private static ArrayList<String> mData = new ArrayList<>();
+//    private static HashMap<Integer, Dispute> mData = new HashMap<>();
+    //    private static DatabaseReference reference;
     private static Toolbar myToolbar;
     private static TextView title;
-    private FirebaseDatabase database;
+//    private FirebaseDatabase database;
 
     public static CategoryDetailFragment getInstance() {
-        if (instance == null) {
+        /*if (instance == null) {
             instance = new CategoryDetailFragment();
         } else {
             adapter = null;
@@ -51,7 +53,8 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
             myToolbar.setTitle(category);
             title.setText(category);
             loadData();
-        }
+        }*/
+        instance = new CategoryDetailFragment();
 
         return instance;
     }
@@ -94,37 +97,27 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
         sporImage.setBackgroundResource(drawable);
     }
 
-    private static void loadData() {
-        reference.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+    private void loadData() {
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                int i = 0;
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    boolean hasSubCat = ds.hasChild("subcategory");
-                    boolean hasCat = ds.hasChild("category");
-                    Dispute d = ds.getValue(Dispute.class);
-                    if (hasSubCat && hasCat) {
-                        boolean alreadyHave = false;
-                        for (int j = 0; j < mData.size(); j++) {
-                            if (mData.get(j).subcategory.equals(d.subcategory))
-                                alreadyHave = true;
+            public void run() {
+                try {
+                    mData = api.getSortedByCategoryDisputes(category);
+                    adapter = new CategoryDetailAdapter(rootView.getContext(), category, mData);
+                    adapter.setClickListener(instance);
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            recyclerView.setAdapter(adapter);
                         }
-                        if (!alreadyHave && category.equals(d.category)) {
-                            mData.put(i, d);
-                            i++;
-                        }
-                    }
+                    });
+                }catch (Exception ex){
+                    ex.printStackTrace();
                 }
-                adapter = new CategoryDetailAdapter(rootView.getContext(), category, mData);
-                adapter.setClickListener(instance);
-                recyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
             }
         });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     public void setCategory(String category) {
@@ -136,14 +129,14 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_category_detail, container, false);
 
+        api = new Api(getActivity());
+
         recyclerView = (RecyclerView) rootView.findViewById(R.id.spor_list);
         recyclerView.setHasFixedSize(true);
 
         int numberOfColumns = 2;
         recyclerView.setLayoutManager(new GridLayoutManager(rootView.getContext(), numberOfColumns));
 
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("spor");
         setImage();
 
         getActivity().findViewById(R.id.my_toolbar).setVisibility(View.GONE);
@@ -180,12 +173,12 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
 
     @Override
     public void onItemClick(View view, int position) {
-        String category = adapter.getItem(position).category;
-        String subCategory = adapter.getItem(position).subcategory;
+        String category = CategoryDetailFragment.category;
+        String subCategory = adapter.getItem(position);
         MainFragment ddf = MainFragment.getInstance(true, category, subCategory);
 
-        ddf.setCategory(adapter.getItem(position).category);
-        ddf.setSubCategory(adapter.getItem(position).subcategory);
+        ddf.setCategory(category);
+        ddf.setSubCategory(subCategory);
         ddf.setSorted(true);
 
         android.support.v4.app.Fragment newFragment = ddf;

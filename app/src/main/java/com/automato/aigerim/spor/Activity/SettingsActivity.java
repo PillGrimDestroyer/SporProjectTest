@@ -2,6 +2,7 @@ package com.automato.aigerim.spor.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -10,28 +11,22 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Api;
 import com.automato.aigerim.spor.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 /**
  * Created by HAOR on 04.09.2017.
  */
 
 public class
-SettingsActivity extends BaseActivity {
+SettingsActivity extends AppCompatActivity {
+
+    Api api;
 
     TextView LogOutLayout;
     private RelativeLayout LanguageLayout;
     private RelativeLayout EditProfleLayout;
     private Switch notifSwitch;
-    private FirebaseAuth mAuth;
-    private FirebaseDatabase databese;
-    private User client;
     private RelativeLayout aboutDisputeLayout;
     private RelativeLayout privacyPolicyLayout;
     private RelativeLayout termsOfUseLayout;
@@ -41,28 +36,11 @@ SettingsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        api = new Api(this);
+
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Настройки");
         setSupportActionBar(myToolbar);
-
-        mAuth = FirebaseAuth.getInstance();
-        databese = FirebaseDatabase.getInstance();
-
-        databese.getReference("users").child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-
-                if (client.receiveNotifications) {
-                    notifSwitch.setChecked(true);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
         LogOutLayout = (TextView) findViewById(R.id.log_out);
         LanguageLayout = (RelativeLayout) findViewById(R.id.language_layout);
@@ -72,6 +50,7 @@ SettingsActivity extends BaseActivity {
         privacyPolicyLayout = (RelativeLayout) findViewById(R.id.privacy_policy_layout);
         termsOfUseLayout = (RelativeLayout) findViewById(R.id.terms_of_use_layout);
 
+        notifSwitch.setChecked(User.receiveNotifications);
         setOnclickListeners();
 
         if (MainActivity.isAdmin()) {
@@ -113,12 +92,8 @@ SettingsActivity extends BaseActivity {
         notifSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                DatabaseReference recNotif = databese.getReference("users/" + mAuth.getCurrentUser().getUid() + "/receiveNotifications");
-                if (b) {
-                    recNotif.setValue(true);
-                } else {
-                    recNotif.setValue(false);
-                }
+                User.receiveNotifications = b;
+                api.updateUser();
             }
         });
 
@@ -141,8 +116,8 @@ SettingsActivity extends BaseActivity {
         LogOutLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FirebaseAuth mAuth = FirebaseAuth.getInstance();
-                mAuth.signOut();
+//                FirebaseAuth mAuth = FirebaseAuth.getInstance();
+//                mAuth.signOut();
                 Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);

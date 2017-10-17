@@ -15,9 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
-import com.automato.aigerim.spor.Fragments.AddDisputeCategoryFragment;
 import com.automato.aigerim.spor.Fragments.AddDisputeFragment;
-import com.automato.aigerim.spor.Fragments.AddDisputeSubCategoryFragment;
 import com.automato.aigerim.spor.Fragments.CabinetFragment;
 import com.automato.aigerim.spor.Fragments.CategoryDetailFragment;
 import com.automato.aigerim.spor.Fragments.CategoryFragment;
@@ -25,7 +23,6 @@ import com.automato.aigerim.spor.Fragments.DisputeDetailFragment;
 import com.automato.aigerim.spor.Fragments.MainFragment;
 import com.automato.aigerim.spor.Fragments.NotificationFragment;
 import com.automato.aigerim.spor.R;
-import com.google.firebase.auth.FirebaseAuth;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -38,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private static SweetAlertDialog mProgressDialog;
     private static boolean isAdmin = false;
     private static Context context;
-    private FirebaseAuth mAuth;
     private Spinner spinner;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -200,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         myActivity = this;
         context = MainActivity.this;
+        ferstOpened = false;
 
         ImageView settings = (ImageView) getActivity().findViewById(R.id.settings_image);
         settings.setOnClickListener(new View.OnClickListener() {
@@ -217,8 +214,6 @@ public class MainActivity extends AppCompatActivity {
             navigation.inflateMenu(R.menu.navigation);
         }
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-        mAuth = FirebaseAuth.getInstance();
 
         m = getSupportFragmentManager();
 
@@ -264,9 +259,7 @@ public class MainActivity extends AppCompatActivity {
                 CategoryDetailBackPress();
             } else if (curentFragment.getClass().equals(MainFragment.class)) {
                 MainFragmentBackPress();
-            } else if (curentFragment.getClass().equals(AddDisputeSubCategoryFragment.class)) {
-                AddDisputeSubCategoryBackPress();
-            } else {
+            }  else {
                 exitApp();
             }
         }
@@ -290,14 +283,6 @@ public class MainActivity extends AppCompatActivity {
                 finishAffinity();
             }
         }).show();
-    }
-
-    private void AddDisputeSubCategoryBackPress() {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment, new AddDisputeCategoryFragment(), "fragment")
-                .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .commit();
     }
 
     private void MainFragmentBackPress() {

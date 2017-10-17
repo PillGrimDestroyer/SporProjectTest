@@ -24,7 +24,7 @@ public class Dispute {
     public int participantCount;
     public int viewCount;
 
-    public HashMap<String, Choice> choices;
-    public HashMap<String, Boolean> likes;
-    public HashMap<String, Participant> participants;
+    public HashMap<String, Choice> choices = new HashMap<>();
+    public HashMap<String, Boolean> likes = new HashMap<>();
+    public HashMap<String, Participant> participants = new HashMap<>();
 }

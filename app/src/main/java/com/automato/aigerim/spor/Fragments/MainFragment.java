@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,16 +29,11 @@ import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Adapter.NotSortedDisputeAdapter;
 import com.automato.aigerim.spor.Adapter.SortedDisputeAdapter;
 import com.automato.aigerim.spor.Models.Dispute;
-import com.automato.aigerim.spor.Models.User;
-import com.automato.aigerim.spor.Other.Tools.Tools;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,10 +43,9 @@ import java.util.Date;
 public class MainFragment extends Fragment {
 
     private static MainFragment instance;
-    private static FirebaseDatabase database;
-    private static DatabaseReference reference;
+    private static Api api;
+
     private static View rootView;
-    private static String userID;
     private static boolean isSorted = false;
     private static String category;
     private static String subCategory;
@@ -59,15 +55,13 @@ public class MainFragment extends Fragment {
     private static LinearLayoutManager llm;
     private static boolean isLoading = false;
     private static NotSortedDisputeAdapter notSortedAdapter;
-    private static FirebaseAuth mAuth;
-    private static User client;
     private static boolean fLoad = false;
     private static Spinner spinner;
     private static ImageView searchRight;
     private static ImageView searchLeft;
     private static EditText searchField;
     private static ImageView close;
-    private Tools tools = new Tools();
+    private static TextView no_disputes;
 
     public static MainFragment getInstance(boolean isSorted, String category, String subCategory) {
         MainFragment.category = category;
@@ -76,7 +70,7 @@ public class MainFragment extends Fragment {
         if (instance == null) {
             instance = new MainFragment();
         } else {
-            MainActivity.showLoader();
+//            MainActivity.showLoader();
             if (spinner.getSelectedItemPosition() != 0)
                 MainActivity.setFerstOpened(false);
             spinner.setSelection(0, false);
@@ -103,28 +97,37 @@ public class MainFragment extends Fragment {
             sporList.setOnScrollChangeListener(null);
         else
             sporList.setOnScrollListener(null);
-        reference.orderByChild("category").equalTo(category).addListenerForSingleValueEvent(new ValueEventListener() {
+
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mData.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Dispute d = ds.getValue(Dispute.class);
+            public void run() {
+                try {
+                    mData = api.getSortedBySubCategoryDisputes(category, subCategory);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+                /*mData.clear();
+                for (Dispute d : sortedDisputes) {
                     if (category != null && subCategory != null) {
                         if (category.equals(d.category) && subCategory.equals(d.subcategory)) {
                             mData.add(d);
                         }
                     }
-                }
-                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
-                sporList.swapAdapter(adapter, true);
-                MainActivity.dismissWithAnimationLoader();
-            }
+                }*/
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, isSorted(), subCategory != null);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        sporList.swapAdapter(adapter, true);
+                    }
+                });
+//                MainActivity.dismissWithAnimationLoader();
             }
         });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     private static void notSortedSetAdapter() {
@@ -132,24 +135,30 @@ public class MainFragment extends Fragment {
             sporList.setOnScrollChangeListener(null);
         else
             sporList.setOnScrollListener(null);
-        reference.orderByChild("date").limitToFirst(10).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mData.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Dispute d = ds.getValue(Dispute.class);
-                    mData.add(d);
-                }
-                notSortedAdapter = new NotSortedDisputeAdapter(mData, userID, database, isSorted(), subCategory != null);
-                sporList.swapAdapter(notSortedAdapter, true);
-                MainActivity.dismissWithAnimationLoader();
-            }
 
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void run() {
+                mData = api.getAllDisputes(10);
+                notSortedAdapter = new NotSortedDisputeAdapter(mData, isSorted(), subCategory != null);
 
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        sporList.swapAdapter(notSortedAdapter, true);
+                        if (mData.size() == 0){
+                            no_disputes.setText(MainActivity.getActivity().getString(R.string.no_disputes));
+                            no_disputes.setVisibility(View.VISIBLE);
+                        }else {
+                            no_disputes.setVisibility(View.GONE);
+                        }
+                    }
+                });
+//                MainActivity.dismissWithAnimationLoader();
             }
         });
+        thread.setDaemon(false);
+        thread.start();
 
         if (Build.VERSION.SDK_INT >= 23) {
             RecyclerView.OnScrollChangeListener scrollChangeListener = new RecyclerView.OnScrollChangeListener() {
@@ -202,38 +211,22 @@ public class MainFragment extends Fragment {
     }
 
     private static void notSortedLoadMoreItems(final int itemCount) {
-        MainActivity.showLoader();
-        reference.orderByChild("date").addListenerForSingleValueEvent(new ValueEventListener() {
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final long count = dataSnapshot.getChildrenCount();
-                reference.orderByChild("date").limitToFirst(10 + itemCount).addListenerForSingleValueEvent(new ValueEventListener() {
+            public void run() {
+                mData.addAll(api.getAllDisputes(10 + itemCount));
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        mData.clear();
-                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                            Dispute d = ds.getValue(Dispute.class);
-                            mData.add(d);
-                        }
+                    public void run() {
                         notSortedAdapter.notifyDataSetChanged();
-                        if (dataSnapshot.getChildrenCount() < count) {
-                            isLoading = false;
-                        }
-                        MainActivity.dismissWithAnimationLoader();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
                     }
                 });
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                isLoading = false;
             }
         });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     public String getCategory() {
@@ -266,15 +259,9 @@ public class MainFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (tools == null)
-            tools = new Tools();
         rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        MainActivity.showLoader();
 
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("spor");
-        mAuth = FirebaseAuth.getInstance();
-        userID = mAuth.getCurrentUser().getUid();
+        api = new Api(getActivity());
 
         sporList = (RecyclerView) rootView.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
@@ -296,6 +283,7 @@ public class MainFragment extends Fragment {
         searchLeft = (ImageView) getActivity().findViewById(R.id.search_left);
         searchField = (EditText) getActivity().findViewById(R.id.search_field);
         close = (ImageView) getActivity().findViewById(R.id.close);
+        no_disputes = (TextView) rootView.findViewById(R.id.no_disputes);
 
         if (!isSorted()) {
             spinner.setVisibility(View.VISIBLE);
@@ -311,7 +299,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (MainActivity.isFerstOpened()) {
-                    MainActivity.showLoader();
+//                    MainActivity.showLoader();
                     if (!spinner.getSelectedItem().toString().equals("Все споры"))
                         sortedByTypeSetAdapter(spinner.getSelectedItem().toString());
                     else
@@ -566,12 +554,14 @@ public class MainFragment extends Fragment {
             sporList.setOnScrollChangeListener(null);
         else
             sporList.setOnScrollListener(null);
-        reference.orderByChild("date").addListenerForSingleValueEvent(new ValueEventListener() {
+
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void run() {
+                ArrayList<Dispute> allDisputes = api.getAllDisputes();
                 mData.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Dispute d = ds.getValue(Dispute.class);
+
+                for (Dispute d : allDisputes) {
                     String s = d.date + " " + d.time;
                     s = s.replace("/", ".");
                     SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm");
@@ -582,7 +572,7 @@ public class MainFragment extends Fragment {
 
                         String type;
                         if (progress < 0 && d.result.equals("")) {
-                            type = "Активные споры";
+                            type = "Споры в прямом эфире";
                         } else if (progress < 0 && !d.result.equals("")) {
                             type = "Завершённые споры";
                         } else {
@@ -596,16 +586,25 @@ public class MainFragment extends Fragment {
                         e.printStackTrace();
                     }
                 }
-                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
-                sporList.swapAdapter(adapter, true);
-                MainActivity.dismissWithAnimationLoader();
-            }
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, isSorted(), subCategory != null);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        sporList.swapAdapter(adapter, true);
+                        if (mData.size() == 0){
+                            no_disputes.setText(getActivity().getString(R.string.no_disputes_type));
+                            no_disputes.setVisibility(View.VISIBLE);
+                        }else {
+                            no_disputes.setVisibility(View.GONE);
+                        }
+                    }
+                });
+//                MainActivity.dismissWithAnimationLoader();
             }
         });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     private void sortedBySearchSetAdapter() {
@@ -613,26 +612,36 @@ public class MainFragment extends Fragment {
             sporList.setOnScrollChangeListener(null);
         else
             sporList.setOnScrollListener(null);
-        MainActivity.showLoader();
-        reference.orderByChild("date").addListenerForSingleValueEvent(new ValueEventListener() {
+
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void run() {
+                ArrayList<Dispute> allDisputes = api.getAllDisputes();
+
                 mData.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Dispute d = ds.getValue(Dispute.class);
-                    if (tools.regex(searchField.getText().toString(), d.subject))
+                for (Dispute d : allDisputes) {
+                    if (Tools.regex(searchField.getText().toString(), d.subject))
                         mData.add(d);
                 }
-                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, userID, database, isSorted(), subCategory != null);
-                sporList.swapAdapter(adapter, true);
-                MainActivity.dismissWithAnimationLoader();
-            }
+                adapter = new SortedDisputeAdapter(rootView.getContext(), mData, isSorted(), subCategory != null);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        sporList.swapAdapter(adapter, true);
+                        if (mData.size() == 0){
+                            no_disputes.setText(getActivity().getString(R.string.no_disputes_search));
+                            no_disputes.setVisibility(View.VISIBLE);
+                        }else {
+                            no_disputes.setVisibility(View.GONE);
+                        }
+                    }
+                });
+//                MainActivity.dismissWithAnimationLoader();
             }
         });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     @Override

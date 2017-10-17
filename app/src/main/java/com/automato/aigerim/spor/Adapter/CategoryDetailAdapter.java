@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.automato.aigerim.spor.R;
@@ -20,13 +21,13 @@ import com.makeramen.roundedimageview.RoundedImageView;
 
 public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAdapter.ViewHolder> {
 
-    private HashMap<Integer, Dispute> mData = new HashMap<>();
+    private ArrayList<String> mData = new ArrayList<>();
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private String category;
 
     // data is passed into the constructor
-    public CategoryDetailAdapter(final Context context, final String category, HashMap<Integer, Dispute> data) {
+    public CategoryDetailAdapter(final Context context, final String category, ArrayList<String> data) {
         this.mInflater = LayoutInflater.from(context);
         this.category = category;
         this.mData = data;
@@ -43,7 +44,7 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
     // binds the data to the textview in each cell
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String animal = mData.get(position).subcategory;
+        String animal = mData.get(position);
         holder.myTextView.setText(animal);
     }
 
@@ -96,7 +97,7 @@ public class CategoryDetailAdapter extends RecyclerView.Adapter<CategoryDetailAd
     }
 
     // convenience method for getting data at click position
-    public Dispute getItem(int id) {
+    public String getItem(int id) {
         return mData.get(id);
     }
 

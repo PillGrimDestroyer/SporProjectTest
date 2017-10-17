@@ -1,6 +1,8 @@
 package com.automato.aigerim.spor.Fragments;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
@@ -15,13 +18,8 @@ import com.automato.aigerim.spor.Adapter.NotificationAdapter;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.Notification;
 import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Api;
 import com.automato.aigerim.spor.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,10 +29,7 @@ import java.util.LinkedHashMap;
 public class NotificationFragment extends Fragment {
 
     View rootview;
-
-    FirebaseDatabase myDatabase;
-    FirebaseAuth mAuth;
-    User client;
+    Api api;
 
     private RecyclerView notifList;
 
@@ -43,14 +38,13 @@ public class NotificationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_notification, container, false);
 
+        api = new Api(getActivity());
+
         notifList = (RecyclerView) rootview.findViewById(R.id.notif_list);
         notifList.setHasFixedSize(false);
 
         LinearLayoutManager llm = new LinearLayoutManager(this.getActivity());
         notifList.setLayoutManager(llm);
-
-        myDatabase = FirebaseDatabase.getInstance();
-        mAuth = FirebaseAuth.getInstance();
 
         TextView title = (TextView) getActivity().findViewById(R.id.title);
         title.setText("Уведомления");
@@ -62,72 +56,58 @@ public class NotificationFragment extends Fragment {
     }
 
     private void loadNotifications() {
-        MainActivity.showLoader();
-
-        myDatabase.getReference("users").child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        Thread thread = new Thread(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                client = dataSnapshot.getValue(User.class);
-                myDatabase.getReference("spor").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        ArrayList<Dispute> disputes = new ArrayList<>();
-                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            Dispute dispute = child.getValue(Dispute.class);
-                            if (!dispute.result.equals("") && dispute.participants != null && dispute.calculated) {
-                                if (dispute.participants.containsKey(client.id)) {
-                                    HashMap<String, Notification> notificationHashMap = client.history != null
-                                            ? client.history : new HashMap<String, Notification>();
-                                    Notification notification = new Notification();
-                                    notification.checked = false;
-                                    notification.money = dispute.participants.get(client.id).money;
-                                    notification.sporID = dispute.id;
-                                    notification.winnings = (int) dispute.participants.get(client.id).winnings;
+            public void run() {
+                ArrayList<Dispute> disputes = api.getAllDisputes();
 
-                                    if (!notificationHashMap.containsKey(dispute.id)) {
-                                        notificationHashMap.put(dispute.id, notification);
-                                        client.money += notification.winnings;
+                for (Dispute dispute : disputes) {
+                    if (!dispute.result.equals("") && dispute.participants != null && dispute.calculated) {
+                        if (dispute.participants.containsKey(User.id)) {
+                            HashMap<String, Notification> notificationHashMap = User.history != null
+                                    ? User.history : new HashMap<String, Notification>();
+                            Notification notification = new Notification();
+                            notification.checked = false;
+                            notification.money = dispute.participants.get(User.id).money;
+                            notification.sporID = dispute.id;
+                            notification.winnings = (int) dispute.participants.get(User.id).winnings;
 
-                                        LinkedHashMap<String, Notification> newMap = new LinkedHashMap <>();
-                                        ArrayList<String> arrayList = new ArrayList<>(notificationHashMap.keySet());
-                                        for (int i = arrayList.size() - 1; i >= 0; i--) {
-                                            String key = arrayList.get(i);
-                                            Notification value = notificationHashMap.get(key);
-                                            newMap.put(key, value);
-                                        }
-                                        notificationHashMap = newMap;
+                            if (!notificationHashMap.containsKey(dispute.id)) {
+                                notificationHashMap.put(dispute.id, notification);
+                                User.money += notification.winnings;
 
-                                        DatabaseReference userMoneyInDB = myDatabase.getReference("users/" + client.id + "/money");
-                                        userMoneyInDB.setValue(client.money);
-                                    }
-
-                                    DatabaseReference sporLikeCountInDB = myDatabase.getReference("users/" + client.id + "/history");
-                                    sporLikeCountInDB.setValue(notificationHashMap);
-
-                                    client.history = notificationHashMap;
-                                    disputes.add(dispute);
+                                LinkedHashMap<String, Notification> newMap = new LinkedHashMap<>();
+                                ArrayList<String> arrayList = new ArrayList<>(notificationHashMap.keySet());
+                                for (int i = arrayList.size() - 1; i >= 0; i--) {
+                                    String key = arrayList.get(i);
+                                    Notification value = notificationHashMap.get(key);
+                                    newMap.put(key, value);
                                 }
+                                notificationHashMap = newMap;
                             }
+                            User.history = notificationHashMap;
+                            disputes.add(dispute);
                         }
-                        if (client.history != null) {
-                            NotificationAdapter adapter = new NotificationAdapter(rootview.getContext(), client.history, disputes, myDatabase, client.id);
-                            notifList.setAdapter(adapter);
+                    }
+                }
+                if (User.history != null) {
+                    rootview.findViewById(R.id.no_notifications).setVisibility(View.GONE);
+                    api.updateUser();
+
+                    NotificationAdapter adapter = new NotificationAdapter(rootview.getContext(), User.history, disputes);
+                    notifList.setAdapter(adapter);
+                }else {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            rootview.findViewById(R.id.no_notifications).setVisibility(View.VISIBLE);
                         }
-                        MainActivity.dismissWithAnimationLoader();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                    });
+                }
             }
         });
+        thread.setDaemon(false);
+        thread.start();
     }
 
     @Override

@@ -12,6 +12,15 @@
         android:layout_marginTop="@dimen/fragment_margin"
         android:background="@drawable/notification_bg_white_rounded">
 
+        <TextView
+            android:id="@+id/no_notifications"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/no_notifications"
+            android:textSize="24sp"
+            android:visibility="gone"
+            android:layout_height="wrap_content" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/notif_list"
             android:layout_width="match_parent"

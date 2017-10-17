@@ -3,7 +3,6 @@ package com.automato.aigerim.spor.Fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
@@ -17,24 +16,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.automato.aigerim.spor.Activity.MainActivity;
+import com.automato.aigerim.spor.Models.DisputeFromOlimp;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.Other.Tools;
+import com.automato.aigerim.spor.R;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Random;
-
-import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.R;
-import com.automato.aigerim.spor.Models.Choice;
-import com.automato.aigerim.spor.Models.Dispute;
-import com.automato.aigerim.spor.Models.DisputeFromOlimp;
-import com.automato.aigerim.spor.Other.Tools.Tools;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -45,11 +34,9 @@ import static android.app.Activity.RESULT_OK;
 public class AddDisputeFragment extends Fragment {
 
     static final int GALLERY_REQUEST = 1;
+    Api api;
     private Tools tools = new Tools();
-
-    StorageReference storageReference;
     private View rootView;
-    private FirebaseDatabase database;
     private String patternForDate = "\\d{2}\\/\\d{2}\\/\\d{4}";
     private String patternForTime = "\\d{2}:\\d{2}";
     private String photo;
@@ -73,8 +60,7 @@ public class AddDisputeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_add_dispute, container, false);
         this.rootView = view;
 
-        database = FirebaseDatabase.getInstance();
-        storageReference = FirebaseStorage.getInstance().getReference();
+        api = new Api(getActivity());
 
         initializeElements();
 
@@ -100,37 +86,10 @@ public class AddDisputeFragment extends Fragment {
                             prepareData();
                         }
                         if (selectedImage != null) {
-                            storageReference.child("Photos").child(photo).putFile(selectedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    try {
-                                        writeDisputeInDB();
-                                        Toast.makeText(rootView.getContext(), "Спор успешно добавлен!", Toast.LENGTH_SHORT).show();
-
-                                        MainActivity.dismissWithAnimationLoader();
-                                        BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.navigation);
-                                        navigation.setSelectedItemId(R.id.main);
-                                    } catch (Exception e) {
-                                        MainActivity.dismissWithAnimationLoader();
-                                        Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
-                                        Log.e("ImageUploadFailure", e.getMessage());
-                                    }
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    MainActivity.dismissWithAnimationLoader();
-                                    Toast.makeText(rootView.getContext(), "Произошла ошибка при отправке фотографии", Toast.LENGTH_LONG).show();
-                                    Log.e("ImageUploadFailure", e.getMessage());
-                                }
-                            });
-                        }else {
+                            Tools.uploadDisputePhoto(getActivity(), selectedImage, photo);
                             writeDisputeInDB();
-                            Toast.makeText(rootView.getContext(), "Спор успешно добавлен!", Toast.LENGTH_SHORT).show();
-
-                            MainActivity.dismissWithAnimationLoader();
-                            BottomNavigationView navigation = (BottomNavigationView) getActivity().findViewById(R.id.navigation);
-                            navigation.setSelectedItemId(R.id.main);
+                        } else {
+                            writeDisputeInDB();
                         }
                     } catch (Exception e) {
                         MainActivity.dismissWithAnimationLoader();
@@ -160,39 +119,7 @@ public class AddDisputeFragment extends Fragment {
     }
 
     private void writeDisputeInDB() {
-        DatabaseReference spor = database.getReference("spor");
-        String sporID = spor.push().getKey();
-
-        Dispute dispute = new Dispute();
-        HashMap<String, Choice> choices = new HashMap<>();
-        Choice choice1 = new Choice();
-        Choice choice2 = new Choice();
-
-        choice1.choice = disputeFromOlimp.rivor1.trim();
-        choice1.spor_id = sporID;
-        choice1.id = disputeFromOlimp.rivor1.trim();
-        choice2.choice = disputeFromOlimp.rivor2.trim();
-        choice2.spor_id = sporID;
-        choice2.id = disputeFromOlimp.rivor2.trim();
-        choices.put(disputeFromOlimp.rivor1.trim(), choice1);
-        choices.put(disputeFromOlimp.rivor2.trim(), choice2);
-        dispute.choices = choices;
-
-        dispute.date = disputeFromOlimp.date;
-        dispute.time = disputeFromOlimp.time;
-        dispute.category = disputeFromOlimp.category;
-        dispute.id = sporID;
-        dispute.result = "";
-        dispute.choices = choices;
-        dispute.likeCount = 0;
-        dispute.participantCount = 0;
-        dispute.subcategory = disputeFromOlimp.subcategory;
-        dispute.subject = disputeFromOlimp.rivors;
-        dispute.viewCount = 0;
-        dispute.photo = photo;
-
-        spor = database.getReference("spor/" + sporID);
-        spor.setValue(dispute);
+        api.addNewDispute(disputeFromOlimp, photo, (BottomNavigationView) getActivity().findViewById(R.id.navigation));
     }
 
     private boolean validate(boolean alright) {
@@ -332,6 +259,10 @@ public class AddDisputeFragment extends Fragment {
         Random random = new Random();
 
         photo = new Date().getTime() + "_" + random.nextInt(9999);
+        String selfile = Tools.getRealPathFromUri(getActivity(), selectedImage);
+        String filetype = selfile.substring(selfile.lastIndexOf("."));
+        photo = photo + filetype;
+
         disputImage.setImageURI(selectedImage);
         this.selectedImage = selectedImage;
 
