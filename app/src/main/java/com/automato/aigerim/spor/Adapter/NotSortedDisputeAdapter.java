@@ -11,7 +11,6 @@ import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.View.DisputeCell;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
@@ -67,7 +66,7 @@ public class NotSortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
         viewHolder.setLiked(isLiked);
         viewHolder.setListener(model);
         viewHolder.runTimer(model);
-        viewHolder.setImage(model.photo, model.photo);
+        viewHolder.setImage(model.photo);
     }
 
     // total number of cells

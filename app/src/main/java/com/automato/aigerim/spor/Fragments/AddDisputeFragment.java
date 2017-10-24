@@ -124,7 +124,7 @@ public class AddDisputeFragment extends Fragment {
 
     private boolean validate(boolean alright) {
         if (!date.getText().toString().equals("")) {
-            if (!tools.regex(patternForDate, date.getText().toString()) && date.getText().toString().length() != 10) {
+            if (!Tools.regex(patternForDate, date.getText().toString()) && date.getText().toString().length() != 10) {
                 date.setError("Не верный формат");
                 alright = false;
             } else {
@@ -134,7 +134,7 @@ public class AddDisputeFragment extends Fragment {
             date.setError("Обязательно для заполнения");
         }
         if (!time.getText().toString().equals("")) {
-            if (!tools.regex(patternForTime, time.getText().toString()) && time.getText().toString().length() != 5) {
+            if (!Tools.regex(patternForTime, time.getText().toString()) && time.getText().toString().length() != 5) {
                 time.setError("Не верный формат");
                 alright = false;
             } else {

@@ -1,25 +1,17 @@
 package com.automato.aigerim.spor.View;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -89,7 +81,7 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
                 @Override
                 public void run() {
                     Bitmap bitmap = Tools.downloadDisputePhoto(MainActivity.getContext(), dispute.photo);
-                    if (bitmap != null){
+                    if (bitmap != null) {
                         sporImage.setImageBitmap(bitmap);
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
@@ -121,9 +113,9 @@ public class UserDisputeCell extends RecyclerView.ViewHolder {
                 if (dispute.result.equals("")) {
                     disputeTime.setText(R.string.Live);
                 } else {
-                    if (dispute.result.equals("equal")){
+                    if (dispute.result.equals("equal")) {
                         disputeTime.setText(R.string.equal);
-                    }else {
+                    } else {
                         disputeTime.setText(rootView.getResources().getString(R.string.end, dispute.result));
                     }
                 }

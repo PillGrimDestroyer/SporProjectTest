@@ -287,10 +287,10 @@ public class DisputeCell extends RecyclerView.ViewHolder {
         this.category = category;
     }
 
-    public void setImage(String photo, final String dispute_photo) {
+    public void setImage(final String dispute_photo) {
         final ImageView sporImage = (ImageView) view.findViewById(R.id.spor_Image);
 
-        if (photo == null) {
+        if (dispute_photo == null) {
             sporImage.setBackground(null);
             int drawable;
 

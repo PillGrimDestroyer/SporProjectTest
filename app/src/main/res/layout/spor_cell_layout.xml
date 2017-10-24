@@ -47,7 +47,6 @@
                 android:layout_marginRight="15dp">
 
                 <ImageView
-                    android:id="@+id/binoculars_image"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_alignParentBottom="true"
@@ -69,7 +68,6 @@
             </RelativeLayout>
 
             <ImageView
-                android:id="@+id/complait"
                 android:layout_width="28dp"
                 android:layout_height="16dp"
                 android:layout_gravity="top|right"
@@ -196,7 +194,6 @@
                 android:textSize="14sp" />
 
             <RelativeLayout
-                android:id="@+id/rate_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -236,7 +233,6 @@
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/right_rate_end"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toEndOf="@+id/right_rate"

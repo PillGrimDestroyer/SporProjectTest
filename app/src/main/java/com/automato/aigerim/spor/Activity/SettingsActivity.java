@@ -1,6 +1,7 @@
 package com.automato.aigerim.spor.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -116,9 +117,8 @@ SettingsActivity extends AppCompatActivity {
         LogOutLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                FirebaseAuth mAuth = FirebaseAuth.getInstance();
-//                mAuth.signOut();
                 Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
+                intent.putExtra("logOut", true);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }

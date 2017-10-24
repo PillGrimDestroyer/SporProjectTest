@@ -1,8 +1,6 @@
 package com.automato.aigerim.spor.Activity;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -10,15 +8,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.Other.Api;
 import com.automato.aigerim.spor.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-
-import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class ChangePassActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -96,7 +87,7 @@ public class ChangePassActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.done:
                 onDoneClick();
                 break;

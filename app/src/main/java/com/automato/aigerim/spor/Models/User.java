@@ -1,10 +1,7 @@
 package com.automato.aigerim.spor.Models;
 
-import com.google.firebase.database.IgnoreExtraProperties;
-
 import java.util.HashMap;
 
-@IgnoreExtraProperties
 public class User {
     public static String id;
     public static String name;

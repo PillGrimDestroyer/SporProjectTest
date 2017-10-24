@@ -230,15 +230,15 @@ public class MainFragment extends Fragment {
     }
 
     public String getCategory() {
-        return this.category;
+        return category;
     }
 
     public void setCategory(String category) {
-        this.category = category;
+        MainFragment.category = category;
     }
 
     public void setSubCategory(String subCategory) {
-        this.subCategory = subCategory;
+        MainFragment.subCategory = subCategory;
     }
 
     @Override
@@ -620,7 +620,7 @@ public class MainFragment extends Fragment {
 
                 mData.clear();
                 for (Dispute d : allDisputes) {
-                    if (Tools.regex(searchField.getText().toString(), d.subject))
+                    if (Tools.regex(searchField.getText().toString().toLowerCase(), d.subject.toLowerCase()))
                         mData.add(d);
                 }
                 adapter = new SortedDisputeAdapter(rootView.getContext(), mData, isSorted(), subCategory != null);

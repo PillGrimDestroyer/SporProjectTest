@@ -9,7 +9,6 @@
     tools:context="Activity.EditingProfilePageActivity">
 
     <FrameLayout
-        android:id="@+id/photo_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2.4">
@@ -41,7 +40,6 @@
             app:titleTextColor="#000" />
 
         <com.wonderkiln.blurkit.BlurLayout
-            android:id="@+id/blurLayout"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_gravity="bottom" />
@@ -60,7 +58,6 @@
                 android:src="@drawable/edit" />
 
             <TextView
-                android:id="@+id/text_change_photo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/image_change_photo"
@@ -75,7 +72,6 @@
     </FrameLayout>
 
     <RelativeLayout
-        android:id="@+id/data_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="4">
@@ -92,7 +88,6 @@
             android:textSize="20sp" />
 
         <RelativeLayout
-            android:id="@+id/person_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/title_data"
@@ -133,7 +128,6 @@
                 android:background="@color/grey_300" />
 
             <RelativeLayout
-                android:id="@+id/email_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/line1"
@@ -170,7 +164,6 @@
         android:layout_weight="5.3">
 
         <RelativeLayout
-            android:id="@+id/change_pass"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"

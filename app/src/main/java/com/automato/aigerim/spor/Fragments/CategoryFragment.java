@@ -46,6 +46,7 @@ public class CategoryFragment extends Fragment {
 
     private static RecyclerView sporList;
     private static EditText searchField;
+    private static TextView no_disputes;
     private static LinearLayoutManager llm;
     private ImageView close;
 
@@ -78,7 +79,7 @@ public class CategoryFragment extends Fragment {
         if (instance == null) {
             instance = new CategoryFragment();
         } else {
-            MainActivity.showLoader();
+//            MainActivity.showLoader();
             adapter = null;
             fillData(false);
         }
@@ -117,7 +118,7 @@ public class CategoryFragment extends Fragment {
                     }
                 }
                 //сортировка
-                Map<String, Integer> sortedMapAsc = sortByComparator(hashMapCategory, false);
+                final Map<String, Integer> sortedMapAsc = sortByComparator(hashMapCategory, false);
 
                 //ставим адаптер на RecyclerView
                 adapter = new CategoryAdapter(sortedMapAsc, rootview.getContext(), MainActivity.getFragmetManeger(), rootview);
@@ -126,12 +127,19 @@ public class CategoryFragment extends Fragment {
                     @Override
                     public void run() {
                         sporList.setAdapter(adapter);
+                        if (isSorted) {
+                            if (sortedMapAsc.size() == 0) {
+                                no_disputes.setVisibility(View.VISIBLE);
+                            } else {
+                                no_disputes.setVisibility(View.GONE);
+                            }
+                        }
                     }
                 });
 
                 sporList.setLayoutManager(llm);
 
-                MainActivity.dismissWithAnimationLoader();
+//                MainActivity.dismissWithAnimationLoader();
             }
         });
         thread.setDaemon(false);
@@ -153,6 +161,8 @@ public class CategoryFragment extends Fragment {
         sporList = (RecyclerView) rootview.findViewById(R.id.spor_list);
         sporList.setHasFixedSize(true);
 
+        no_disputes = (TextView) rootview.findViewById(R.id.no_disputes);
+
         llm = new LinearLayoutManager(this.getActivity());
         sporList.setLayoutManager(llm);
         hashMapCategory = new HashMap<>();
@@ -166,7 +176,7 @@ public class CategoryFragment extends Fragment {
 
         title.setText("Категории");
 
-        MainActivity.showLoader();
+//        MainActivity.showLoader();
 
         close.setOnClickListener(new View.OnClickListener() {
             @Override

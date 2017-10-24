@@ -188,6 +188,6 @@ public class EditingProfilePageActivity extends AppCompatActivity implements Vie
             return;
         }
         userProfileImage.setImageURI(selectedImage);
-        Tools.uploadUserPhoto(selectedImage, EditingProfilePageActivity.this, progressBar);
+        Tools.uploadUserPhoto(selectedImage, EditingProfilePageActivity.this, progressBar, false);
     }
 }

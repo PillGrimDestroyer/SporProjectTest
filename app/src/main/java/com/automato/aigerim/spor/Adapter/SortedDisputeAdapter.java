@@ -11,10 +11,8 @@ import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.View.DisputeCell;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 
 /**
  * Created by HAOR on 25.08.2017.
@@ -61,7 +59,7 @@ public class SortedDisputeAdapter extends RecyclerView.Adapter<DisputeCell> {
         viewHolder.setSubCategory(model.subcategory);
         viewHolder.setSorted(isSorted);
         viewHolder.setSortedBySubCategory(isSortedBySubCategory);
-        viewHolder.setImage(model.photo, model.photo);
+        viewHolder.setImage(model.photo);
         viewHolder.setRate(model);
 
         boolean isLiked = false;

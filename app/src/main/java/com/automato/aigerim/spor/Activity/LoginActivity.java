@@ -44,18 +44,24 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         });
 
         signInButton.setOnClickListener(this);
-        SharedPreferences sp = getPreferences(MODE_PRIVATE);
+        boolean logOut = getIntent().getBooleanExtra("logOut", false);
 
-        String login = sp.getString("MyStore_login", "");
-        String password = sp.getString("MyStore_password", "");
+        if (!logOut) {
+            SharedPreferences sp = getPreferences(MODE_PRIVATE);
 
-        Log.v("SharedPref_login", login);
-        Log.v("SharedPref_password", password);
+            String login = sp.getString("MyStore_login", "");
+            String password = sp.getString("MyStore_password", "");
 
-        if (!Tools.isNullOrWhitespace(login) && !Tools.isNullOrWhitespace(password)) {
-            mEmailField.setText(login);
-            mPasswordField.setText(password);
-            signInButton.performClick();
+            Log.v("SharedPref_login", login);
+            Log.v("SharedPref_password", password);
+
+            if (!Tools.isNullOrWhitespace(login) && !Tools.isNullOrWhitespace(password)) {
+                mEmailField.setText(login);
+                mPasswordField.setText(password);
+                signInButton.performClick();
+            }
+        }else {
+            sharedPref();
         }
     }
 
@@ -96,10 +102,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void signIn(final String email, final String password) {
         Log.d(TAG, "signIn:" + email);
         if (validateForm()) {
+            final Api api = new Api(this);
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Api api = new Api(LoginActivity.this);
                     if (api.logIn(email, password)) {
                         sharedPref();
 

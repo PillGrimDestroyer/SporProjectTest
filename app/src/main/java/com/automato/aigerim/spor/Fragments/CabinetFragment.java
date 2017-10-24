@@ -2,7 +2,6 @@ package com.automato.aigerim.spor.Fragments;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,11 +32,8 @@ import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.Other.Api;
 import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.firebase.client.annotations.Nullable;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -192,7 +188,6 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
         mProgressDialog.show();
     }
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_cabinet, container, false);
@@ -264,11 +259,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
 
     private boolean isActivDispute(Dispute dispute) {
         if (getProgress(dispute) < 0) {
-            if (dispute.result.equals("")) {
-                return true;
-            } else {
-                return false;
-            }
+            return dispute.result.equals("");
         } else {
             return false;
         }
@@ -288,11 +279,7 @@ public class CabinetFragment extends Fragment implements View.OnClickListener {
 
     private boolean isFinishedDispute(Dispute dispute) {
         if (getProgress(dispute) < 0) {
-            if (dispute.result.equals("")) {
-                return false;
-            } else {
-                return true;
-            }
+            return !dispute.result.equals("");
         } else {
             return false;
         }

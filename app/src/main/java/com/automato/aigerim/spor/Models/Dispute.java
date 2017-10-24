@@ -1,11 +1,6 @@
 package com.automato.aigerim.spor.Models;
 
-import com.google.firebase.database.IgnoreExtraProperties;
-
 import java.util.HashMap;
-
-@IgnoreExtraProperties
-
 
 public class Dispute {
 

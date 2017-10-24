@@ -27,7 +27,6 @@ import com.automato.aigerim.spor.Models.User;
 import com.automato.aigerim.spor.Other.Api;
 import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
-import com.google.firebase.storage.StorageReference;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,7 +67,6 @@ public class DisputeDetailFragment extends Fragment {
     private Button submit;
     private EditText rate;
     private String selectedChoice;
-    private StorageReference storageReference;
     private Tools tools = new Tools();
 
     public String getFerstTeam() {
@@ -446,7 +444,7 @@ public class DisputeDetailFragment extends Fragment {
         TextView RightRateTextView = (TextView) rootview.findViewById(R.id.right_rate);
         TextView subjectTextView = (TextView) rootview.findViewById(R.id.spor_subject);
 
-        String fTeam = tools.regex("(.*?)([ ]*?)(-)", subjectTextView.getText().toString(), 1);
+        String fTeam = Tools.regex("(.*?)([ ]*?)(-)", subjectTextView.getText().toString(), 1);
         if (!fTeam.equals(arlist.get(0).choice)) {
             RightRateTextView = (TextView) rootview.findViewById(R.id.left_rate);
             leftRateTextView = (TextView) rootview.findViewById(R.id.right_rate);
@@ -567,8 +565,8 @@ public class DisputeDetailFragment extends Fragment {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = Tools.downloadDisputePhoto(getActivity(),dispute.photo);
-                    if (bitmap != null){
+                    Bitmap bitmap = Tools.downloadDisputePhoto(getActivity(), dispute.photo);
+                    if (bitmap != null) {
                         sporImage.setImageBitmap(bitmap);
                         rootview.findViewById(R.id.client_image_progress_bar).setVisibility(View.GONE);
                         sporImage.setBackground(null);

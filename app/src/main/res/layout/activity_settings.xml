@@ -50,7 +50,6 @@
             android:visibility="gone">
 
             <TextView
-                android:id="@+id/language_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -61,7 +60,6 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/language_selected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -87,7 +85,6 @@
             android:background="@color/white">
 
             <TextView
-                android:id="@+id/notif_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -138,7 +135,6 @@
             android:clickable="true">
 
             <TextView
-                android:id="@+id/editing_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -149,7 +145,6 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/editing_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -187,7 +182,6 @@
             android:background="@color/white">
 
             <TextView
-                android:id="@+id/about_dispute_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -198,7 +192,6 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/about_dispute_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -217,7 +210,6 @@
             android:visibility="gone">
 
             <TextView
-                android:id="@+id/terms_of_use_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -228,7 +220,6 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/terms_of_use_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -244,7 +235,6 @@
             android:background="@color/white">
 
             <TextView
-                android:id="@+id/privacy_policy_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -255,7 +245,6 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/privacy_policy_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"

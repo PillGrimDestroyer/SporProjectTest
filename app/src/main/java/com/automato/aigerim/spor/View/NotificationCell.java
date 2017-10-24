@@ -6,14 +6,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.automato.aigerim.spor.Activity.MainActivity;
-import com.automato.aigerim.spor.Models.User;
-import com.automato.aigerim.spor.Other.Api;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import com.automato.aigerim.spor.R;
 import com.automato.aigerim.spor.Models.Dispute;
 import com.automato.aigerim.spor.Models.Notification;
+import com.automato.aigerim.spor.Models.User;
+import com.automato.aigerim.spor.Other.Api;
+import com.automato.aigerim.spor.R;
 
 import java.util.Random;
 
@@ -23,9 +20,8 @@ import java.util.Random;
 
 public class NotificationCell extends RecyclerView.ViewHolder {
 
-    private View rootView;
     Api api;
-
+    private View rootView;
     private TextView notifMessage;
     private ImageView notifImage;
     private ImageView sporImage;
@@ -44,26 +40,26 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         sporImage = (ImageView) itemView.findViewById(R.id.spor_Image);
     }
 
-    private void setText(String text){
+    private void setText(String text) {
         this.notifMessage.setText(text);
     }
 
-    public void setDispute(Dispute dispute){
+    public void setDispute(Dispute dispute) {
         this.dispute = dispute;
     }
 
-    private void setNotifImage(){
-        if (notification.winnings > 0){
+    private void setNotifImage() {
+        if (notification.winnings > 0) {
             this.notifImage.setImageResource(R.drawable.trophy);
-        }else {
+        } else {
             this.notifImage.setImageResource(R.drawable.sad);
         }
     }
 
-    private void setSporImage(){
+    private void setSporImage() {
         int drawable;
 
-        switch (dispute.category){
+        switch (dispute.category) {
             case "Футбол":
 //                    drawable = R.drawable.cat_foot;
                 Random randomFoot = new Random();
@@ -103,10 +99,10 @@ public class NotificationCell extends RecyclerView.ViewHolder {
         String text;
         if (notification.winnings > 0) {
             text = rootView.getResources().getString(R.string.youWin, dispute.subject, Double.toString(notification.winnings));
-        }else {
+        } else {
             text = rootView.getResources().getString(R.string.youLose, dispute.subject);
         }
-        if (oneOfChoiceIsZero()){
+        if (oneOfChoiceIsZero()) {
             text = rootView.getResources().getString(R.string.dispute_stoped);
         }
         setText(text);
@@ -122,7 +118,7 @@ public class NotificationCell extends RecyclerView.ViewHolder {
 
     private boolean oneOfChoiceIsZero() {
         boolean ret = false;
-        if (dispute.choices.get("rivor1").rate == 0 || dispute.choices.get("rivor2").rate == 0){
+        if (dispute.choices.get("rivor1").rate == 0 || dispute.choices.get("rivor2").rate == 0) {
             ret = true;
         }
         return ret;

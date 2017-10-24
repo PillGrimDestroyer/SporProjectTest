@@ -1,5 +1,6 @@
 package com.automato.aigerim.spor.Other;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -36,9 +37,9 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
  */
 
 public class Api {
-    private Context context;
     private final String url = "http://95.85.60.144:3000/api/";
     public boolean error = false;
+    private Context context;
     private SweetAlertDialog mProgressDialog;
 
     public Api(Context context) {
@@ -46,69 +47,77 @@ public class Api {
     }
 
     private void succesDialog(final String message) {
-        dismissWithAnimationLoader();
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                SweetAlertDialog dialog = new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE);
-                dialog.setTitleText("Успех!");
-                dialog.setContentText(message);
-                dialog.setConfirmText("Ок");
-                dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        sweetAlertDialog.dismissWithAnimation();
-                    }
-                });
-                dialog.show();
-            }
-        });
+        if (!((Activity) context).isFinishing()) {
+            dismissWithAnimationLoader();
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    SweetAlertDialog dialog = new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE);
+                    dialog.setTitleText("Успех!");
+                    dialog.setContentText(message);
+                    dialog.setConfirmText("Ок");
+                    dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            sweetAlertDialog.dismissWithAnimation();
+                        }
+                    });
+                    dialog.show();
+                }
+            });
+        }
     }
 
     private void errorDialog(final String message) {
-        dismissWithAnimationLoader();
-        error = true;
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                SweetAlertDialog dialog = new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE);
-                dialog.setTitleText("Ошибка");
-                dialog.setContentText(message);
-                dialog.setConfirmText("Ок");
-                dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        sweetAlertDialog.dismissWithAnimation();
-                    }
-                });
-                dialog.show();
-            }
-        });
+        if (!((Activity) context).isFinishing()) {
+            dismissWithAnimationLoader();
+            error = true;
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    SweetAlertDialog dialog = new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE);
+                    dialog.setTitleText("Ошибка");
+                    dialog.setContentText(message);
+                    dialog.setConfirmText("Ок");
+                    dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            sweetAlertDialog.dismissWithAnimation();
+                        }
+                    });
+                    dialog.show();
+                }
+            });
+        }
     }
 
     private void showLoader() {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                mProgressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
-                mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-                mProgressDialog.setTitleText("Загрузка");
-                mProgressDialog.setCancelable(false);
-                mProgressDialog.show();
-            }
-        });
+        if (!((Activity) context).isFinishing()) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    mProgressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+                    mProgressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+                    mProgressDialog.setTitleText("Загрузка");
+                    mProgressDialog.setCancelable(false);
+                    mProgressDialog.show();
+                }
+            });
+        }
     }
 
     private void dismissWithAnimationLoader() {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (mProgressDialog != null) {
-                    mProgressDialog.dismissWithAnimation();
-                    mProgressDialog = null;
+        if (!((Activity) context).isFinishing()) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mProgressDialog != null) {
+                        mProgressDialog.dismissWithAnimation();
+                        mProgressDialog = null;
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public void updateUser() {
@@ -297,6 +306,10 @@ public class Api {
                     reqjson.put("name", name);
                     reqjson.put("birthday", birthday);
                     reqjson.put("gender", gender);
+                    if (imageUri != null)
+                        reqjson.put("hasImage", true);
+                    else
+                        reqjson.put("hasImage", false);
 
                     params = reqjson.toString();
 
@@ -316,15 +329,16 @@ public class Api {
                         User.confirmed = false;
                         User.id = respjson.getString("user_id");
 
-                        if (imageUri != null)
-                            Tools.uploadUserPhoto(imageUri, context);
+                        if (imageUri != null) {
+                            Tools.uploadUserPhoto(imageUri, context, true);
+                        }
                         dismissWithAnimationLoader();
 
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
                                 SweetAlertDialog dialog = new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE);
-                                dialog.setTitleText("Успех!");
+                                dialog.setTitleText("Поздравляю!");
                                 dialog.setContentText("Успешная регистрация!");
                                 dialog.setConfirmText("Ок");
                                 dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -424,7 +438,7 @@ public class Api {
     }
 
     public void addNewDispute(final DisputeFromOlimp disputeFromOlimp, final String photo, final BottomNavigationView navigation) {
-        showLoader();
+//        showLoader();
 
         final Requests requests = new Requests();
         final String dopurl = "newdispute";
@@ -809,7 +823,7 @@ public class Api {
                     reqjson.put("money", money);
                     reqjson.put("choice", Uri.encode(choice));
                     reqjson.put("dispute_id", dispute_id);
-//                    reqjson.put("choice_key",choiceKey);
+                    reqjson.put("choice_key", choiceKey);
 
                     params = reqjson.toString();
 

@@ -8,9 +8,11 @@
         android:id="@+id/no_disputes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:text=""
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:visibility="gone" />
 
     <android.support.v7.widget.RecyclerView

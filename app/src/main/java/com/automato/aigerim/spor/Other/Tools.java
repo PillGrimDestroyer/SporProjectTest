@@ -1,5 +1,6 @@
 package com.automato.aigerim.spor.Other;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -7,7 +8,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -17,7 +17,6 @@ import com.automato.aigerim.spor.Models.User;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +47,7 @@ public class Tools {
 
     }
 
-    public static void uploadUserPhoto(final Uri selectedImage, final Context context, final ProgressBar progressBar) {
+    public static void uploadUserPhoto(final Uri selectedImage, final Context context, final ProgressBar progressBar, final boolean join) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -81,30 +80,42 @@ public class Tools {
                         api.updateUser();
                     }
                 } catch (Exception e) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "Не удалось загрузить картинку на сервер", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    if (!((Activity) context).isFinishing()) {
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(context, "Не удалось загрузить картинку на сервер", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                     e.printStackTrace();
                 } finally {
                     try {
                         ftp.LogOut();
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setVisibility(View.GONE);
-                            }
-                        });
-                    } catch (IOException ex) {
+                        if (!((Activity) context).isFinishing()) {
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (progressBar != null)
+                                        progressBar.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                    } catch (IOException ignored) {
 
                     }
                 }
             }
         });
-        thread.setDaemon(false);
+        thread.setDaemon(join);
         thread.start();
+        if (join) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static String getRealPathFromUri(Context context, Uri selectedImage) {
@@ -123,7 +134,11 @@ public class Tools {
     }
 
     public static void uploadUserPhoto(final Uri selectedImage, final Context context) {
-        uploadUserPhoto(selectedImage, context, null);
+        uploadUserPhoto(selectedImage, context, null, false);
+    }
+
+    public static void uploadUserPhoto(final Uri selectedImage, final Context context, final boolean join) {
+        uploadUserPhoto(selectedImage, context, null, join);
     }
 
     public static Bitmap downloadDisputePhoto(final Context context, final String dispute_photo) {

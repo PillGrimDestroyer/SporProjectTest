@@ -121,7 +121,7 @@ public class CategoryDetailFragment extends Fragment implements CategoryDetailAd
     }
 
     public void setCategory(String category) {
-        this.category = category;
+        CategoryDetailFragment.category = category;
     }
 
     @Nullable

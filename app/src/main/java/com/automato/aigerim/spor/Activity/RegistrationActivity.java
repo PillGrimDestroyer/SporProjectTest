@@ -2,6 +2,7 @@ package com.automato.aigerim.spor.Activity;
 
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -21,6 +22,7 @@ import com.automato.aigerim.spor.Fragments.DatePickerFragment;
 import com.automato.aigerim.spor.Other.Api;
 import com.automato.aigerim.spor.Other.Tools;
 import com.automato.aigerim.spor.R;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.FileNotFoundException;
@@ -35,7 +37,7 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
     Api api;
 
-    ImageView imageCrop;
+    RoundedImageView imageCrop;
     Tools tools = new Tools();
     private EditText mEmailField;
     private EditText mPasswordField;
@@ -133,8 +135,11 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
                 break;
 
             case R.id.upload_photo_imageview:
-                imageCrop = (ImageView) findViewById(R.id.upload_photo_imageview);
-                Crop.pickImage(this);
+                imageCrop = (RoundedImageView) findViewById(R.id.upload_photo_imageview);
+//                Crop.pickImage(this);
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                startActivityForResult(photoPickerIntent, 555);
                 break;
         }
     }
@@ -142,40 +147,40 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
     private boolean checkValidate() {
         TextView birthday = (TextView) findViewById(R.id.datePicker);
         boolean valid = true;
-        if (tools.isNullOrWhitespace(mEmailField.getText().toString())) {
+        if (Tools.isNullOrWhitespace(mEmailField.getText().toString())) {
             mEmailField.setError(getString(R.string.required));
             valid = false;
         } else {
             mEmailField.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(mPasswordField.getText().toString())) {
+        if (Tools.isNullOrWhitespace(mPasswordField.getText().toString())) {
             mPasswordField.setError(getString(R.string.required));
             valid = false;
         } else {
             mPasswordField.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(mName.getText().toString())) {
+        if (Tools.isNullOrWhitespace(mName.getText().toString())) {
             mName.setError(getString(R.string.required));
             valid = false;
         } else {
             mName.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(mPasswordRepeat.getText().toString())) {
+        if (Tools.isNullOrWhitespace(mPasswordRepeat.getText().toString())) {
             mPasswordRepeat.setError(getString(R.string.required));
             valid = false;
         } else {
             mPasswordRepeat.setError(null);
         }
 
-        if (tools.isNullOrWhitespace(gender)) {
+        if (Tools.isNullOrWhitespace(gender)) {
             Toast.makeText(RegistrationActivity.this, R.string.required_gender, Toast.LENGTH_SHORT).show();
             valid = false;
         }
 
-        if (tools.isNullOrWhitespace(birthday.getText().toString()) || birthday.getText().toString().equals("ДД/MM/ГГ")) {
+        if (Tools.isNullOrWhitespace(birthday.getText().toString()) || birthday.getText().toString().equals("ДД/MM/ГГ")) {
             birthday.setError(getString(R.string.required_birthday));
             valid = false;
         } else if (checkAge(birthday.getText().toString())) {
@@ -191,10 +196,10 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
             valid = false;
         } else if (mPasswordField.getText().toString().length() < 6 || mPasswordRepeat.getText().toString().length() < 6) {
             if (mPasswordField.getText().toString().length() < 6) {
-                mPasswordField.setError(getString(R.string.mismatch));
+                mPasswordField.setError(getString(R.string.minpass));
             }
             if (mPasswordRepeat.getText().toString().length() < 6) {
-                mPasswordRepeat.setError(getString(R.string.mismatch));
+                mPasswordRepeat.setError(getString(R.string.minpass));
             }
             valid = false;
         } else {
@@ -237,6 +242,12 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         super.onActivityResult(reqCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             try {
+                String selfile = Tools.getRealPathFromUri(RegistrationActivity.this, data.getData());
+                String filetype = selfile.substring(selfile.lastIndexOf(".") + 1);
+                if (!filetype.equals("jpg") && !filetype.equals("jpeg")){
+                    Toast.makeText(RegistrationActivity.this, "Изображение должно быть в формате jpg или jpeg", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 this.imageUri = data.getData();
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
